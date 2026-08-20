@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 16 with pgvector extension
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: claq_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: claq_fiscal_alert
+      POSTGRES_USER: claq_admin
+      POSTGRES_PASSWORD: claq_secure_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./prisma/migrations/0_init/migration.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U claq_admin -d claq_fiscal_alert"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 7 Cache and BullMQ Queue
+  redis:
+    image: redis:7-alpine
+    container_name: claq_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API Server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claq_api
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://claq_admin:claq_secure_password_2026@db:5432/claq_fiscal_alert?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: claq_jwt_super_secret_production_key_2026
+      DIGITAL_SEAL_SECRET: claq_hmac_digital_seal_secret_2026
+      WHATSAPP_API_TOKEN: ${WHATSAPP_API_TOKEN:-mock_token}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-123456789}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-mock_key}
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Frontend Web Client
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claq_web
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:4000/api/v1
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  redisdata:

@@ -1,0 +1,378 @@
+// Production Prisma Schema for CLAQ Fiscal Alert
+// Multi-Tenant Mozambican Tax Compliance & Intelligence Platform
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector"), uuid_ossp(map: "uuid-ossp")]
+}
+
+enum Role {
+  SUPER_ADMIN
+  ACCOUNTING_ADMIN
+  SENIOR_ACCOUNTANT
+  CLIENT_VIEWER
+}
+
+enum PlanTier {
+  FREE_TRIAL
+  PME
+  CONTABILIDADE
+  ENTERPRISE
+}
+
+enum ObligationCategory {
+  IVA
+  INSS
+  IRPS
+  IRPC
+  TAE
+  ALVARA
+  IMPOSTO_SELO
+  OUTROS
+}
+
+enum ObligationStatus {
+  PENDING
+  UPCOMING
+  SETTLED
+  OVERDUE
+  RENEWAL_REQUIRED
+}
+
+enum TaxAuthority {
+  AT
+  INSS
+  MUNICIPIO
+  BAU
+  GERAL
+}
+
+enum SimulatorType {
+  NON_RESIDENT_SERVICES
+  IVA_OPERATIONS
+  IRPS_WITHHOLDING
+  IRPC_ESTIMATE
+  INSS_CONTRIBUTIONS
+  FINES_AND_INTEREST
+  SALARY_NET
+  EXTRA_HOURS
+  VACATIONS
+  SEVERANCE
+  STAMP_TAX
+}
+
+enum AlertSeverity {
+  CRITICAL
+  WARNING
+  INFO
+  SUCCESS
+}
+
+enum DispatchChannel {
+  WHATSAPP
+  EMAIL
+  SMS
+  IN_APP
+}
+
+enum DispatchStatus {
+  QUEUED
+  DELIVERED
+  FAILED
+}
+
+enum LegalDocType {
+  LEI
+  DECRETO
+  REGULAMENTO
+  DIPLOMA_MINISTERIAL
+  POSTURA_MUNICIPAL
+  CIRCULAR_AT
+  ACORDO_CDT
+}
+
+model Company {
+  id               String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  legalName        String      @map("legal_name") @db.VarChar(255)
+  tradeName        String?     @map("trade_name") @db.VarChar(255)
+  nuit             String      @unique @db.VarChar(9)
+  planTier         PlanTier    @default(PME) @map("plan_tier")
+  planStatus       String      @default("active") @map("plan_status") @db.VarChar(50)
+  planRenewsAt     DateTime?   @map("plan_renews_at")
+  province         String      @default("Maputo Cidade") @db.VarChar(100)
+  city             String      @default("Maputo") @db.VarChar(100)
+  fiscalAddress    String?     @map("fiscal_address") @db.Text
+  phone            String?     @db.VarChar(50)
+  email            String?     @db.VarChar(255)
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  users            User[]
+  clients          Client[]
+  obligations      FiscalObligation[]
+  simulations      TaxSimulation[]
+  alerts           Alert[]
+  auditLogs        AuditLog[]
+
+  @@map("companies")
+}
+
+model User {
+  id               String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId        String       @map("company_id") @db.Uuid
+  email            String       @unique @db.VarChar(255)
+  passwordHash     String       @map("password_hash") @db.VarChar(255)
+  fullName         String       @map("full_name") @db.VarChar(255)
+  phone            String?      @db.VarChar(50)
+  roleTitle        String?      @default("Contabilista") @map("role_title") @db.VarChar(100)
+  role             Role         @default(ACCOUNTING_ADMIN)
+  avatarUrl        String?      @map("avatar_url") @db.Text
+  isActive         Boolean      @default(true) @map("is_active")
+  lastLoginAt      DateTime?    @map("last_login_at")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  company          Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  simulations      TaxSimulation[]
+  preferences      NotificationPreference?
+  auditLogs        AuditLog[]
+
+  @@map("users")
+}
+
+model Client {
+  id               String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId        String       @map("company_id") @db.Uuid
+  name             String       @db.VarChar(255)
+  nuit             String       @db.VarChar(9)
+  plan             PlanTier     @default(PME)
+  status           String       @default("regular") @db.VarChar(50)
+  contactEmail     String       @map("contact_email") @db.VarChar(255)
+  contactPhone     String       @map("contact_phone") @db.VarChar(50)
+  activitySector   String?      @map("activity_sector") @db.VarChar(150)
+  city             String?      @default("Maputo") @db.VarChar(100)
+  healthScore      Int          @default(85) @map("health_score")
+  isActive         Boolean      @default(true) @map("is_active")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  company          Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  obligations      FiscalObligation[]
+  simulations      TaxSimulation[]
+
+  @@unique([companyId, nuit])
+  @@map("clients")
+}
+
+model FiscalObligation {
+  id               String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId        String             @map("company_id") @db.Uuid
+  clientId         String?            @map("client_id") @db.Uuid
+  title            String             @db.VarChar(255)
+  category         ObligationCategory
+  referencePeriod  String             @map("reference_period") @db.VarChar(50) // e.g. "Junho/2026"
+  dueDate          DateTime           @map("due_date") @db.Date
+  estimatedAmount  Decimal?           @map("estimated_amount") @db.Decimal(18, 2)
+  settledAmount    Decimal?           @map("settled_amount") @db.Decimal(18, 2)
+  status           ObligationStatus   @default(UPCOMING)
+  authority        TaxAuthority       @default(AT)
+  paymentReference String?            @map("payment_reference") @db.VarChar(100)
+  description      String?            @db.Text
+  penaltyRisk      String?            @map("penalty_risk") @db.Text
+  settledAt        DateTime?          @map("settled_at")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+
+  company          Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  client           Client?            @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  alerts           Alert[]
+
+  @@index([companyId, dueDate])
+  @@index([companyId, status])
+  @@map("fiscal_obligations")
+}
+
+model TaxSimulation {
+  id                 String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId          String         @map("company_id") @db.Uuid
+  userId             String         @map("user_id") @db.Uuid
+  clientId           String?        @map("client_id") @db.Uuid
+  simulatorType      SimulatorType  @map("simulator_type")
+  simulatorTitle     String         @map("simulator_title") @db.VarChar(255)
+  referenceDate      DateTime       @map("reference_date") @db.Date
+  counterpartyName   String         @map("counterparty_name") @db.VarChar(255)
+  counterpartyNuit   String?        @map("counterparty_nuit") @db.VarChar(9)
+  providerCountry    String?        @default("Estados Unidos") @map("provider_country") @db.VarChar(100)
+  currency           String         @default("USD") @db.VarChar(10)
+  originalAmount     Decimal        @map("original_amount") @db.Decimal(18, 2)
+  exchangeRate       Decimal        @map("exchange_rate") @db.Decimal(12, 4)
+  mznAmount          Decimal        @map("mzn_amount") @db.Decimal(18, 2)
+  grossUpFactor      Decimal        @default(1.25) @map("gross_up_factor") @db.Decimal(6, 4)
+  taxBase            Decimal        @map("tax_base") @db.Decimal(18, 2)
+  ivaRate            Decimal        @default(0.16) @map("iva_rate") @db.Decimal(5, 4)
+  ivaAmount          Decimal        @default(0) @map("iva_amount") @db.Decimal(18, 2)
+  irpcRate           Decimal        @default(0.20) @map("irpc_rate") @db.Decimal(5, 4)
+  irpcAmount         Decimal        @default(0) @map("irpc_amount") @db.Decimal(18, 2)
+  totalTax           Decimal        @map("total_tax") @db.Decimal(18, 2)
+  status             String         @default("concluido") @db.VarChar(50)
+  description        String?        @db.Text
+  digitalSealHash    String         @map("digital_seal_hash") @db.VarChar(64)
+  pdfUrl             String?        @map("pdf_url") @db.Text
+  responsibleName    String         @map("responsible_name") @db.VarChar(255)
+  createdAt          DateTime       @default(now()) @map("created_at")
+
+  company            Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client             Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@map("tax_simulations")
+}
+
+model Alert {
+  id                 String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId          String             @map("company_id") @db.Uuid
+  obligationId       String?            @map("obligation_id") @db.Uuid
+  title              String             @db.VarChar(255)
+  message            String             @db.Text
+  severity           AlertSeverity      @default(INFO)
+  category           ObligationCategory @default(IVA)
+  dueDate            DateTime           @map("due_date") @db.Date
+  daysRemaining      Int                @map("days_remaining")
+  isRead             Boolean            @default(false) @map("is_read")
+  readAt             DateTime?          @map("read_at")
+  actionUrl          String?            @map("action_url") @db.VarChar(255)
+  actionLabel        String?            @map("action_label") @db.VarChar(100)
+  createdAt          DateTime           @default(now()) @map("created_at")
+
+  company            Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  obligation         FiscalObligation?  @relation(fields: [obligationId], references: [id], onDelete: Cascade)
+  dispatches         NotificationDispatchLog[]
+
+  @@index([companyId, isRead])
+  @@map("alerts")
+}
+
+model NotificationPreference {
+  userId             String       @id @map("user_id") @db.Uuid
+  emailEnabled       Boolean      @default(true) @map("email_enabled")
+  whatsappEnabled    Boolean      @default(true) @map("whatsapp_enabled")
+  inAppEnabled       Boolean      @default(true) @map("in_app_enabled")
+  smsEnabled         Boolean      @default(false) @map("sms_enabled")
+  alertTimingDays    Int[]        @default([7, 3, 1, 0]) @map("alert_timing_days")
+  whatsappPhone      String       @default("+258841234567") @map("whatsapp_phone") @db.VarChar(50)
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+model NotificationDispatchLog {
+  id                 String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  alertId            String          @map("alert_id") @db.Uuid
+  channel            DispatchChannel
+  recipient          String          @db.VarChar(255)
+  status             DispatchStatus  @default(QUEUED)
+  providerMessageId  String?         @map("provider_message_id") @db.VarChar(255)
+  errorMessage       String?         @map("error_message") @db.Text
+  dispatchedAt       DateTime        @default(now()) @map("dispatched_at")
+
+  alert              Alert           @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@map("notification_dispatch_logs")
+}
+
+model LegalDocument {
+  id                 String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title              String          @db.VarChar(255)
+  docType            LegalDocType    @map("doc_type")
+  officialNumber     String          @map("official_number") @db.VarChar(100)
+  publicationDate    DateTime        @map("publication_date") @db.Date
+  officialGazette    String?         @map("official_gazette") @db.VarChar(100)
+  category           String          @db.VarChar(100)
+  summary            String          @db.Text
+  fullText           String?         @map("full_text") @db.Text
+  pdfUrl             String?         @map("pdf_url") @db.Text
+  articlesCount      Int             @default(0) @map("articles_count")
+  isActive           Boolean         @default(true) @map("is_active")
+  createdAt          DateTime        @default(now()) @map("created_at")
+
+  articles           LegalArticle[]
+
+  @@map("legal_documents")
+}
+
+model LegalArticle {
+  id                 String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  documentId         String          @map("document_id") @db.Uuid
+  articleNumber      String          @map("article_number") @db.VarChar(50)
+  title              String          @db.VarChar(255)
+  summary            String          @db.Text
+  fullText           String          @map("full_text") @db.Text
+
+  document           LegalDocument   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("legal_articles")
+}
+
+model ExchangeRateCache {
+  id                 String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  rateDate           DateTime        @map("rate_date") @db.Date
+  currency           String          @db.VarChar(10) // USD, EUR, ZAR, GBP
+  rateMzn            Decimal         @map("rate_mzn") @db.Decimal(12, 4)
+  source             String          @default("Banco de Moçambique") @db.VarChar(100)
+  fetchedAt          DateTime        @default(now()) @map("fetched_at")
+
+  @@unique([rateDate, currency])
+  @@map("exchange_rate_cache")
+}
+
+model NewsArticle {
+  id                 String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title              String          @db.VarChar(255)
+  slug               String          @unique @db.VarChar(255)
+  summary            String          @db.Text
+  content            String          @db.Text
+  category           String          @db.VarChar(50)
+  readTime           String          @default("3 min") @map("read_time") @db.VarChar(20)
+  source             String          @default("Boletim da República") @db.VarChar(150)
+  badgeType          String          @default("blue") @map("badge_type") @db.VarChar(20)
+  publishedAt        DateTime        @default(now()) @map("published_at")
+
+  @@map("news_articles")
+}
+
+model NewsletterSubscriber {
+  id                 String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email              String          @unique @db.VarChar(255)
+  isActive           Boolean         @default(true) @map("is_active")
+  subscribedAt       DateTime        @default(now()) @map("subscribed_at")
+
+  @@map("newsletter_subscribers")
+}
+
+model AuditLog {
+  id                 String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId          String          @map("company_id") @db.Uuid
+  userId             String?         @map("user_id") @db.Uuid
+  actionType         String          @map("action_type") @db.VarChar(100)
+  entityName         String          @map("entity_name") @db.VarChar(100)
+  entityId           String?         @map("entity_id") @db.VarChar(255)
+  ipAddress          String?         @map("ip_address") @db.VarChar(50)
+  userAgent          String?         @map("user_agent") @db.Text
+  details            Json?
+  createdAt          DateTime        @default(now()) @map("created_at")
+
+  company            Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user               User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@map("audit_logs")
+}

@@ -1,0 +1,24 @@
+{
+  "name": "claq-fiscal-alert-backend",
+  "version": "2.0.0",
+  "description": "Production Backend API & Tax Engine for CLAQ Fiscal Alert",
+  "main": "src/main.ts",
+  "scripts": {
+    "dev": "npx tsx watch src/main.ts",
+    "build": "npx tsc",
+    "start": "npx tsx src/main.ts",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
