@@ -3,7 +3,7 @@
 ---
 
 ## 1. Executive Overview & Role of the Frontend
-Welcome to the Frontend Engineering Team of **CLAQ Fiscal Alert**. Your primary role is to build, polish, and maintain a state-of-the-art, enterprise-grade, high-performance web and mobile application for Mozambican tax compliance, simulation, and legal intelligence.
+ **CLAQ Fiscal Alert**. idea to build, polish, and maintain a state-of-the-art, enterprise-grade, high-performance web and mobile application for Mozambican tax compliance, simulation, and legal intelligence.
 
 The application is built in **European Portuguese (`pt-PT`)** with strict adherence to Mozambican fiscal terminology, official currency notation (`286 875,00 MZN`), and date standards (`30/06/2026`).
 
