@@ -1,7 +1,7 @@
 # ⚙️ CLAQ Fiscal Alert – Backend Engineering Handbook
 
 ## 1. System Objective & Architecture Overview
-As the Backend Engineer, your role is to develop and operate the cloud-native API services, database models, mathematical calculation engines, payment gateways, and background cron schedulers powering the **CLAQ Fiscal Alert** platform in Mozambique.
+Backend Engineer idea to develop and operate the cloud-native API services, database models, mathematical calculation engines, payment gateways, and background cron schedulers powering the **CLAQ Fiscal Alert** platform in Mozambique.
 
 ---
 
