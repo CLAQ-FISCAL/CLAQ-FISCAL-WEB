@@ -3,7 +3,7 @@
 ---
 
 ## 1. Executive Summary & Core Mission
-Welcome to the Backend & Cloud Infrastructure Engineering Team of **CLAQ Fiscal Alert**. Your mission is to build, scale, and secure the central API layer, tax mathematical calculation microservice, multi-channel notification dispatcher, and AWS cloud persistence for Mozambique's premier tax compliance SaaS platform.
+**CLAQ Fiscal Alert**. Backend Idea for build, scale, and secure the central API layer, tax mathematical calculation microservice, multi-channel notification dispatcher, and AWS cloud persistence for Mozambique's premier tax compliance SaaS platform.
 
 ---
 
