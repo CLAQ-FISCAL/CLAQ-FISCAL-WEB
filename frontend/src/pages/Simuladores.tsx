@@ -1272,51 +1272,63 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
 
                 {/* 06 - Histórico de Simulações Tab */}
                 {activeTechnicalTab === 'history' && (
-                  <div className="table-responsive">
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>Data</th>
-                          <th>Simulador</th>
-                          <th>Cliente / Prestador</th>
-                          <th>Valor</th>
-                          <th>Total Impostos</th>
-                          <th style={{ textAlign: 'right' }}>Ações</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {simulations.map(sim => (
-                          <tr key={sim.id}>
-                            <td style={{ fontWeight: 600 }}>{formatDate(sim.date)}</td>
-                            <td>
-                              <span className="badge badge-slate">{sim.simulatorTitle}</span>
-                            </td>
-                            <td style={{ fontWeight: 700, color: 'var(--slate-900)' }}>{sim.clientName}</td>
-                            <td>{formatCurrency(sim.originalAmount, sim.currency)}</td>
-                            <td style={{ fontWeight: 800, color: '#1E40AF' }}>{formatMZN(sim.totalTax)}</td>
-                            <td style={{ textAlign: 'right' }}>
-                              <div style={{ display: 'inline-flex', gap: '6px' }}>
-                                <button
-                                  onClick={() => openPDFPreview(sim)}
-                                  className="btn btn-ghost btn-sm"
-                                  title="Ver Relatório PDF"
-                                >
-                                  <Eye size={16} />
-                                </button>
-                                <button
-                                  onClick={() => deleteSimulation(sim.id)}
-                                  className="btn btn-ghost btn-sm"
-                                  title="Eliminar Registo"
-                                  style={{ color: 'var(--red-500)' }}
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div>
+                    {simulations.length === 0 ? (
+                      <div style={{ padding: '40px 16px', textAlign: 'center', backgroundColor: 'var(--slate-50)', borderRadius: '10px' }}>
+                        <Calculator size={36} color="var(--slate-400)" style={{ margin: '0 auto 10px' }} />
+                        <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>Nenhuma Simulação Guardada Ainda</h4>
+                        <p style={{ fontSize: '12.5px', color: 'var(--slate-500)', marginTop: '4px' }}>
+                          Clique no botão "Guardar" ou "Imprimir / PDF" no topo para arquivar este cálculo no seu histórico de conformidade.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="table-responsive">
+                        <table className="data-table">
+                          <thead>
+                            <tr>
+                              <th>Data</th>
+                              <th>Simulador</th>
+                              <th>Cliente / Prestador</th>
+                              <th>Valor</th>
+                              <th>Total Impostos</th>
+                              <th style={{ textAlign: 'right' }}>Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {simulations.map(sim => (
+                              <tr key={sim.id}>
+                                <td style={{ fontWeight: 600 }}>{formatDate(sim.date)}</td>
+                                <td>
+                                  <span className="badge badge-slate">{sim.simulatorTitle}</span>
+                                </td>
+                                <td style={{ fontWeight: 700, color: 'var(--slate-900)' }}>{sim.clientName}</td>
+                                <td>{formatCurrency(sim.originalAmount, sim.currency)}</td>
+                                <td style={{ fontWeight: 800, color: '#1E40AF' }}>{formatMZN(sim.totalTax)}</td>
+                                <td style={{ textAlign: 'right' }}>
+                                  <div style={{ display: 'inline-flex', gap: '6px' }}>
+                                    <button
+                                      onClick={() => openPDFPreview(sim)}
+                                      className="btn btn-ghost btn-sm"
+                                      title="Ver Relatório PDF"
+                                    >
+                                      <Eye size={16} />
+                                    </button>
+                                    <button
+                                      onClick={() => deleteSimulation(sim.id)}
+                                      className="btn btn-ghost btn-sm"
+                                      title="Eliminar Registo"
+                                      style={{ color: 'var(--red-500)' }}
+                                    >
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
