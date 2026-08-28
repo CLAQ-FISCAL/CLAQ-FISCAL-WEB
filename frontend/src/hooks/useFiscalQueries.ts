@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApiClient } from '../api/client';
 import { FiscalObligation, SimulationRecord, Client, AlertItem } from '../types';
-import { INITIAL_OBLIGATIONS, INITIAL_SIMULATIONS, INITIAL_CLIENTS, INITIAL_ALERTS } from '../data/initialData';
 
 export const QUERY_KEYS = {
   OBLIGATIONS: ['obligations'],
@@ -20,7 +19,7 @@ export function useObligations() {
         return res.data;
       } catch {
         const saved = localStorage.getItem('claq_obligations');
-        return saved ? JSON.parse(saved) : INITIAL_OBLIGATIONS;
+        return saved ? JSON.parse(saved) : [];
       }
     },
     staleTime: 1000 * 60 * 5 // 5 minutes
@@ -54,7 +53,7 @@ export function useSimulations() {
         return res.data;
       } catch {
         const saved = localStorage.getItem('claq_simulations');
-        return saved ? JSON.parse(saved) : INITIAL_SIMULATIONS;
+        return saved ? JSON.parse(saved) : [];
       }
     }
   });
@@ -69,7 +68,7 @@ export function useClients() {
         return res.data;
       } catch {
         const saved = localStorage.getItem('claq_clients');
-        return saved ? JSON.parse(saved) : INITIAL_CLIENTS;
+        return saved ? JSON.parse(saved) : [];
       }
     }
   });
@@ -84,7 +83,7 @@ export function useAlerts() {
         return res.data;
       } catch {
         const saved = localStorage.getItem('claq_alerts');
-        return saved ? JSON.parse(saved) : INITIAL_ALERTS;
+        return saved ? JSON.parse(saved) : [];
       }
     }
   });

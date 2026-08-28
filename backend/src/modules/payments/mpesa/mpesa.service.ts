@@ -1,9 +1,9 @@
 import crypto from 'crypto';
 
 export interface MpesaC2BRequest {
-  customerMsisdn: string; // e.g., "258841234567" or "258851234567"
-  amount: number; // in MZN
-  transactionReference: string; // e.g., "CLAQ_SUB_001"
+  customerMsisdn: string;
+  amount: number;
+  transactionReference: string;
   thirdPartyReference: string;
 }
 
@@ -19,14 +19,9 @@ export class MpesaService {
   private static readonly API_BASE = process.env.MPESA_API_HOST || 'https://api.mpesa.vm.co.mz:18352';
   private static readonly SERVICE_PROVIDER_CODE = process.env.MPESA_SERVICE_PROVIDER_CODE || '171717';
 
-  /**
-   * Initiates C2B USSD Push Payment (M-Pesa Vodacom Moçambique)
-   */
   public static async initiateC2BPayment(payload: MpesaC2BRequest): Promise<MpesaTransactionResult> {
     console.log(`[M-Pesa MZ] Initiating C2B payment for ${payload.amount} MZN to ${payload.customerMsisdn}...`);
 
-    // In production, encrypt API Key with Public RSA Key and POST to:
-    // ${API_BASE}/ipg/v2/vodacomMZ/c2bPayment/singleStage/
     const conversationId = `conv_${crypto.randomBytes(8).toString('hex')}`;
     const transactionId = `MPESA_${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
 
@@ -39,14 +34,37 @@ export class MpesaService {
     };
   }
 
-  /**
-   * Validates M-Pesa Webhook Callback
-   */
-  public static async processWebhookCallback(callbackData: any): Promise<{ success: boolean; transactionId: string }> {
-    console.log('[M-Pesa MZ Webhook] Processing callback payload:', callbackData);
+  public static verifyWebhookSignature(payloadRaw: string, signatureHeader?: string, webhookSecret?: string): boolean {
+    if (!signatureHeader || !webhookSecret) return false;
+    const expectedSig = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(payloadRaw)
+      .digest('hex');
+
+    try {
+      return crypto.timingSafeEqual(
+        Buffer.from(signatureHeader.toLowerCase()),
+        Buffer.from(expectedSig.toLowerCase())
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  public static async processWebhookCallback(
+    callbackData: any,
+    signatureHeader?: string,
+    rawPayload?: string,
+    webhookSecret?: string
+  ): Promise<{ success: boolean; transactionId: string; error?: string }> {
+    if (!rawPayload || !signatureHeader || !this.verifyWebhookSignature(rawPayload, signatureHeader, webhookSecret)) {
+      return { success: false, transactionId: '', error: 'Invalid HMAC signature' };
+    }
+
+    const isSuccess = callbackData.output_ResponseCode === 'INS-0';
     return {
-      success: callbackData.output_ResponseCode === 'INS-0',
-      transactionId: callbackData.output_TransactionID || 'MPESA_SAMPLE_ID'
+      success: isSuccess,
+      transactionId: callbackData.output_TransactionID || 'MPESA_SETTLED_ID'
     };
   }
 }

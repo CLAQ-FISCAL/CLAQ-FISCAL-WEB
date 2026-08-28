@@ -31,13 +31,13 @@ export const Configuracoes: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'alerts' | 'security' | 'plan' | 'integrations'>('preferences');
 
   // Profile fields state
-  const [name, setName] = useState(user?.name || 'Carlos Apollo');
-  const [email, setEmail] = useState(user?.email || 'carlos.apollo@claq.co.mz');
-  const [phone, setPhone] = useState(user?.phone || '+258 84 123 4567');
-  const [role, setRole] = useState(user?.role || 'Contabilista / Administrador');
-  const [companyName, setCompanyName] = useState(user?.companyName || 'CLAQ Consultores, Lda.');
-  const [companyNuit, setCompanyNuit] = useState(user?.companyNuit || '400889900');
-  const [companyAddress, setCompanyAddress] = useState(user?.companyAddress || 'Av. 24 de Julho, Maputo');
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [role, setRole] = useState(user?.role || 'Administrador');
+  const [companyName, setCompanyName] = useState(user?.companyName || '');
+  const [companyNuit, setCompanyNuit] = useState(user?.companyNuit || '');
+  const [companyAddress, setCompanyAddress] = useState(user?.companyAddress || '');
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();

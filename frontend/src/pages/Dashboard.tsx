@@ -20,11 +20,10 @@ import {
   Percent,
   Briefcase,
   Layers,
-  Plus,
-  RefreshCw
+  Plus
 } from 'lucide-react';
 import { useAppState } from '../context/AppStateContext';
-import { INITIAL_NEWS } from '../data/initialData';
+import { OFFICIAL_GAZETTE_FEED } from '../data/officialGazetteFeed';
 import { CalendarEngine } from '../utils/calendarEngine';
 import { formatMZN, formatDate } from '../utils/formatters';
 
@@ -40,8 +39,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     unreadAlertsCount,
     setIsWhatsAppModalOpen,
     setIsAIAssistantOpen,
-    openAIAssistantWithPrompt,
-    loadStandardMozambiqueTemplate
+    openAIAssistantWithPrompt
   } = useAppState();
 
   const now = new Date();
@@ -91,17 +89,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             Aqui está o resumo das suas obrigações fiscais, laborais e alertas para <strong>{currentMonthName}</strong>.
           </p>
         </div>
-
-        {obligations.length === 0 && (
-          <button
-            onClick={loadStandardMozambiqueTemplate}
-            className="btn btn-primary-gold"
-            style={{ padding: '9px 16px', fontSize: '13px' }}
-          >
-            <RefreshCw size={15} />
-            <span>Carregar Modelo Padrão de Moçambique</span>
-          </button>
-        )}
       </div>
 
       {/* 4 Metric KPI Cards */}
@@ -584,7 +571,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {INITIAL_NEWS.slice(0, 3).map(news => (
+            {OFFICIAL_GAZETTE_FEED.slice(0, 3).map(news => (
               <div
                 key={news.id}
                 onClick={() => onNavigate('/newsletter')}

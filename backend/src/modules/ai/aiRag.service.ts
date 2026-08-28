@@ -5,9 +5,6 @@ export interface AIChatPrompt {
 }
 
 export class AIRagService {
-  /**
-   * Performs Semantic Vector Search across Mozambican Tax Laws and calls LLM
-   */
   public static async queryTaxIntelligence(input: AIChatPrompt) {
     console.log(`[AI RAG Pipeline] Searching Mozambican Tax Codes for query: "${input.prompt}"...`);
 

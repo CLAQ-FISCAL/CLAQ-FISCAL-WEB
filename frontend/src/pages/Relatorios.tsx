@@ -47,6 +47,14 @@ export const Relatorios: React.FC<RelatoriosProps> = ({ onNavigate }) => {
 
   const totalPaid = taxesPaid + inssPaid + municipalPaid;
 
+  const sanitizeCsvCell = (val: string | number | undefined): string => {
+    const str = String(val ?? '');
+    if (/^[=+\-@\t\r]/.test(str)) {
+      return `"'${str.replace(/"/g, '""')}"`;
+    }
+    return `"${str.replace(/"/g, '""')}"`;
+  };
+
   const handleExportReport = () => {
     const csvRows = [
       ['RELATORIO DE CONFORMIDADE FISCAL - CLAQ FISCAL ALERT'],
@@ -60,7 +68,7 @@ export const Relatorios: React.FC<RelatoriosProps> = ({ onNavigate }) => {
       ['Taxas Municipais (MZN)', municipalPaid.toFixed(2)],
       ['Total Pago (MZN)', totalPaid.toFixed(2)]
     ];
-    const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(e => e.join(',')).join('\n');
+    const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(row => row.map(cell => sanitizeCsvCell(cell)).join(',')).join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);

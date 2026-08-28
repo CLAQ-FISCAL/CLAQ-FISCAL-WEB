@@ -58,36 +58,36 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
 
   // Active Main Tab: 'catalog' | 'non-resident' | 'salary' | 'iva' | 'fines' | 'history'
   const [activeSimulator, setActiveSimulator] = useState<string>('non-resident');
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(2); // Default to Step 2/3 for rich results
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1); // Default to Step 1 (Inputs) for real user entry
   const [categoryFilter, setCategoryFilter] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(['non-resident', 'iva-ops', 'salario']);
 
-  // Non-Resident Services Inputs State
-  const [providerName, setProviderName] = useState('Google LLC');
+  // Non-Resident Services Inputs State (Empty & Dynamic)
+  const [providerName, setProviderName] = useState('');
   const [providerCountry, setProviderCountry] = useState('Estados Unidos');
   const [currency, setCurrency] = useState('USD');
-  const [invoiceAmount, setInvoiceAmount] = useState('10000');
+  const [invoiceAmount, setInvoiceAmount] = useState('');
   const [exchangeRate, setExchangeRate] = useState('63.75');
-  const [paymentDate, setPaymentDate] = useState('2026-07-15');
-  const [description, setDescription] = useState('Serviços de infraestrutura cloud e licenças de software corporativo');
+  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [description, setDescription] = useState('');
 
   // Sub-tabs for Technical Panels in Results View
   const [activeTechnicalTab, setActiveTechnicalTab] = useState<'trace' | 'legal' | 'history'>('trace');
   const [legalSubTab, setLegalSubTab] = useState<'iva' | 'irpc' | 'conventions' | 'others'>('iva');
 
-  // Calculation Result
-  const [calcResult, setCalcResult] = useState<NonResidentServiceResult>(() => {
-    return calculateNonResidentService({
-      providerName: 'Google LLC',
-      providerCountry: 'Estados Unidos',
-      currency: 'USD',
-      invoiceAmount: 10000,
-      exchangeRate: 63.75,
-      paymentDate: '2026-07-15',
-      description: 'Serviços de infraestrutura cloud e licenças de software corporativo'
-    });
+  // Calculation Result State
+  const [calcResult, setCalcResult] = useState<NonResidentServiceResult | null>(null);
+
+  const activeCalcResult: NonResidentServiceResult = calcResult || calculateNonResidentService({
+    providerName: providerName || 'Google LLC',
+    providerCountry: providerCountry || 'Estados Unidos',
+    currency: currency || 'USD',
+    invoiceAmount: Number(invoiceAmount) || 10000,
+    exchangeRate: Number(exchangeRate) || 63.75,
+    paymentDate: paymentDate || new Date().toISOString().split('T')[0],
+    description: description || 'Serviços de infraestrutura cloud e licenças de software corporativo'
   });
 
   // Salary Simulator State
@@ -138,20 +138,28 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
       currency: currency,
       originalAmount: Number(invoiceAmount),
       exchangeRate: Number(exchangeRate),
-      mznAmount: calcResult.mznAmount,
-      factor: calcResult.factor,
-      taxBase: calcResult.taxBase,
-      ivaAmount: calcResult.ivaAmount,
-      ivaRate: calcResult.ivaRate * 100,
-      irpcAmount: calcResult.irpcAmount,
-      irpcRate: calcResult.irpcRate * 100,
-      totalTax: calcResult.totalTax,
+      mznAmount: activeCalcResult.mznAmount,
+      factor: activeCalcResult.factor,
+      taxBase: activeCalcResult.taxBase,
+      ivaAmount: activeCalcResult.ivaAmount,
+      ivaRate: activeCalcResult.ivaRate * 100,
+      irpcAmount: activeCalcResult.irpcAmount,
+      irpcRate: activeCalcResult.irpcRate * 100,
+      totalTax: activeCalcResult.totalTax,
       providerCountry: providerCountry,
       description: description,
       status: 'concluido',
-      responsibleName: user?.name || 'Carlos Apollo'
+      responsibleName: user?.name || 'Administrador'
     });
     return rec;
+  };
+
+  const sanitizeCsvCell = (val: string | number | undefined): string => {
+    const str = String(val ?? '');
+    if (/^[=+\-@\t\r]/.test(str)) {
+      return `"'${str.replace(/"/g, '""')}"`;
+    }
+    return `"${str.replace(/"/g, '""')}"`;
   };
 
   // Export Excel CSV
@@ -162,15 +170,15 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
       ['Pais', providerCountry],
       ['Moeda Original', `${invoiceAmount} ${currency}`],
       ['Cambio (MZN)', exchangeRate],
-      ['Valor em Meticais', calcResult.mznAmount],
-      ['Contra-Valor (Fator 1.25)', calcResult.taxBase],
-      ['IVA a Pagar (16%)', calcResult.ivaAmount],
-      ['IRPC Retido (20%)', calcResult.irpcAmount],
-      ['Total de Impostos a Pagar', calcResult.totalTax],
+      ['Valor em Meticais', activeCalcResult.mznAmount],
+      ['Contra-Valor (Fator 1.25)', activeCalcResult.taxBase],
+      ['IVA a Pagar (16%)', activeCalcResult.ivaAmount],
+      ['IRPC Retido (20%)', activeCalcResult.irpcAmount],
+      ['Total de Impostos a Pagar', activeCalcResult.totalTax],
       ['Data', paymentDate],
-      ['Responsavel', user?.name || 'Carlos Apollo']
+      ['Responsavel', user?.name || 'Administrador']
     ];
-    const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(e => e.join(',')).join('\n');
+    const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(row => row.map(cell => sanitizeCsvCell(cell)).join(',')).join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
@@ -786,7 +794,7 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
                           </div>
                         </div>
                         <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)' }}>
-                          {formatMZN(calcResult.mznAmount)}
+                          {formatMZN(activeCalcResult.mznAmount)}
                         </span>
                       </div>
 
@@ -816,7 +824,7 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
                           </div>
                         </div>
                         <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)' }}>
-                          {formatMZN(calcResult.taxBase)}
+                          {formatMZN(activeCalcResult.taxBase)}
                         </span>
                       </div>
 
@@ -846,7 +854,7 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
                           </div>
                         </div>
                         <span style={{ fontSize: '16px', fontWeight: 800, color: '#7E22CE' }}>
-                          {formatMZN(calcResult.ivaAmount)}
+                          {formatMZN(activeCalcResult.ivaAmount)}
                         </span>
                       </div>
 
@@ -876,7 +884,7 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
                           </div>
                         </div>
                         <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--emerald-600)' }}>
-                          {formatMZN(calcResult.irpcAmount)}
+                          {formatMZN(activeCalcResult.irpcAmount)}
                         </span>
                       </div>
 
@@ -898,11 +906,11 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
                             Total de Impostos a Pagar
                           </h3>
                           <p style={{ fontSize: '12px', color: '#1E40AF', marginTop: '2px' }}>
-                            IVA (127.500,00 MZN) + IRPC (159.375,00 MZN)
+                            IVA ({formatMZN(activeCalcResult.ivaAmount)}) + IRPC ({formatMZN(activeCalcResult.irpcAmount)})
                           </p>
                         </div>
                         <span style={{ fontSize: '24px', fontWeight: 900, color: '#1E3A8A' }}>
-                          {formatMZN(calcResult.totalTax)}
+                          {formatMZN(activeCalcResult.totalTax)}
                         </span>
                       </div>
                     </div>
@@ -1108,15 +1116,15 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
                           </div>
                           <div>
                             <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)' }}>
-                              {calcResult.trace.step1.label}
+                              {activeCalcResult.trace.step1.label}
                             </span>
                             <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>
-                              {calcResult.trace.step1.desc}
+                              {activeCalcResult.trace.step1.desc}
                             </p>
                           </div>
                         </div>
                         <span style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--slate-900)' }}>
-                          {formatMZN(calcResult.trace.step1.value)}
+                          {formatMZN(activeCalcResult.trace.step1.value)}
                         </span>
                       </div>
 
@@ -1128,15 +1136,15 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
                           </div>
                           <div>
                             <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)' }}>
-                              {calcResult.trace.step2.label}
+                              {activeCalcResult.trace.step2.label}
                             </span>
                             <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>
-                              {calcResult.trace.step2.desc}
+                              {activeCalcResult.trace.step2.desc}
                             </p>
                           </div>
                         </div>
                         <span style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--slate-900)' }}>
-                          {formatMZN(calcResult.trace.step2.value)}
+                          {formatMZN(activeCalcResult.trace.step2.value)}
                         </span>
                       </div>
 
@@ -1148,15 +1156,15 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
                           </div>
                           <div>
                             <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)' }}>
-                              {calcResult.trace.step3.label}
+                              {activeCalcResult.trace.step3.label}
                             </span>
                             <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>
-                              {calcResult.trace.step3.desc}
+                              {activeCalcResult.trace.step3.desc}
                             </p>
                           </div>
                         </div>
                         <span style={{ fontSize: '14.5px', fontWeight: 800, color: '#7E22CE' }}>
-                          {formatMZN(calcResult.trace.step3.value)}
+                          {formatMZN(activeCalcResult.trace.step3.value)}
                         </span>
                       </div>
 
@@ -1168,15 +1176,15 @@ export const Simuladores: React.FC<SimuladoresProps> = ({ onNavigate }) => {
                           </div>
                           <div>
                             <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)' }}>
-                              {calcResult.trace.step4.label}
+                              {activeCalcResult.trace.step4.label}
                             </span>
                             <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>
-                              {calcResult.trace.step4.desc}
+                              {activeCalcResult.trace.step4.desc}
                             </p>
                           </div>
                         </div>
                         <span style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--emerald-600)' }}>
-                          {formatMZN(calcResult.trace.step4.value)}
+                          {formatMZN(activeCalcResult.trace.step4.value)}
                         </span>
                       </div>
                     </div>

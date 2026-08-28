@@ -13,6 +13,7 @@ import { useAppState } from '../../context/AppStateContext';
 
 export const WhatsAppModal: React.FC = () => {
   const {
+    user,
     isWhatsAppModalOpen,
     setIsWhatsAppModalOpen,
     settings,
@@ -285,8 +286,8 @@ export const WhatsAppModal: React.FC = () => {
                   <p style={{ fontWeight: 700, color: '#FBBF24', marginBottom: '4px' }}>
                     🚨 [CLAQ Fiscal Alert] Lembrete de Obrigação Fiscal
                   </p>
-                  <p>Olá <b>Carlos Apollo</b>,</p>
-                  <p>Lembramos que a sua obrigação <b>IVA – Junho/2026</b> vence em <b>3 dias (30/06/2026)</b>.</p>
+                  <p>Olá <b>{user?.name || 'Administrador'}</b>,</p>
+                  <p>Lembramos que a sua obrigação <b>IVA – Periódico</b> vence nos próximos dias.</p>
                   <p style={{ marginTop: '6px', color: '#94A3B8', fontSize: '11.5px' }}>
                     Valor estimado: 127.500,00 MZN<br />
                     Evite multas e juros de mora. Aceda ao simulador: https://claq.co.mz/sim

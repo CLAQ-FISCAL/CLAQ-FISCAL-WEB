@@ -34,7 +34,7 @@ export const AIAssistantDrawer: React.FC = () => {
     {
       id: 'msg-1',
       sender: 'ai',
-      text: 'Olá Carlos! Sou o seu Assistente Fiscal CLAQ AI especializado no sistema tributário moçambicano. Posso analisar memórias de cálculo, interpretar artigos do Código do IVA, IRPC, IRPS, verificar convenções de dupla tributação ou esclarecer prazos da Autoridade Tributária. Como posso ajudar hoje?',
+      text: 'Olá ! Sou o seu Assistente Fiscal CLAQ AI especializado no sistema tributário moçambicano. Posso analisar memórias de cálculo, interpretar artigos do Código do IVA, IRPC, IRPS, verificar convenções de dupla tributação ou esclarecer prazos da Autoridade Tributária. Como posso ajudar hoje?',
       time: 'Agora'
     }
   ]);

@@ -14,5 +14,5 @@ variable "db_password" {
   description = "Master password for PostgreSQL RDS"
   type        = string
   sensitive   = true
-  default     = "claq_secure_db_pass_2026_mz"
+  nullable    = false
 }

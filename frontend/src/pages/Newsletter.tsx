@@ -9,7 +9,7 @@ import {
   Sparkles,
   CheckCircle2
 } from 'lucide-react';
-import { INITIAL_NEWS } from '../data/initialData';
+import { OFFICIAL_GAZETTE_FEED } from '../data/officialGazetteFeed';
 import { useAppState } from '../context/AppStateContext';
 
 export const Newsletter: React.FC = () => {
@@ -86,7 +86,7 @@ export const Newsletter: React.FC = () => {
 
       {/* News Feed Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-        {INITIAL_NEWS.map(item => (
+        {OFFICIAL_GAZETTE_FEED.map(item => (
           <div
             key={item.id}
             onClick={() => setSelectedNews(item)}

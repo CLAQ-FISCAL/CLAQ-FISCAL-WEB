@@ -9,9 +9,6 @@ export interface CardPaymentRequest {
 }
 
 export class SimoCardService {
-  /**
-   * Processes Ponto24 / SIMO Rede / Visa / Mastercard transactions
-   */
   public static async processCardPayment(payload: CardPaymentRequest) {
     console.log(`[SIMO Rede / Ponto24] Processing card payment of ${payload.amount} ${payload.currency}...`);
 

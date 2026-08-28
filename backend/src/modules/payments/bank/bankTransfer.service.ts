@@ -5,8 +5,8 @@ export interface BankReferenceRequest {
 }
 
 export interface BankReferenceResponse {
-  entityCode: string; // e.g. "99001" (CLAQ Moçambique)
-  referenceNumber: string; // e.g. "400 889 900"
+  entityCode: string;
+  referenceNumber: string;
   amount: number;
   expiryDate: string;
   supportedBanks: {
@@ -18,9 +18,6 @@ export interface BankReferenceResponse {
 }
 
 export class BankTransferService {
-  /**
-   * Generates official ATM / Internet Banking payment references for Mozambican banks
-   */
   public static generatePaymentReference(payload: BankReferenceRequest): BankReferenceResponse {
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + 7);

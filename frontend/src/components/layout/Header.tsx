@@ -494,7 +494,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <img
               src={user?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
-              alt={user?.name || 'Carlos Apollo'}
+              alt={user?.name || 'Utilizador'}
               style={{
                 width: '38px',
                 height: '38px',
@@ -506,7 +506,7 @@ export const Header: React.FC<HeaderProps> = ({
             />
             <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', lineHeight: 1.2 }}>
               <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-900)' }}>
-                {user?.name || 'Carlos Apollo'}
+                {user?.name || 'Utilizador'}
               </span>
               <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 500 }}>
                 Plano {user?.plan || 'PME'}

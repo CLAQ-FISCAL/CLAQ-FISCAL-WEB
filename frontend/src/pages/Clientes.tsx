@@ -135,84 +135,93 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
 
       {/* Clients Data Table */}
       <div className="card" style={{ overflow: 'hidden' }}>
-        <div className="table-responsive">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>NUIT</th>
-                <th>Plano</th>
-                <th>Status</th>
-                <th>Próxima Obrigação</th>
-                <th style={{ textAlign: 'right' }}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredClients.map(cli => (
-                <tr key={cli.id}>
-                  <td>
-                    <div>
-                      <span style={{ fontWeight: 700, color: 'var(--slate-900)', display: 'block' }}>{cli.name}</span>
-                      <span style={{ fontSize: '11.5px', color: 'var(--slate-400)' }}>{cli.city} • {cli.activitySector}</span>
-                    </div>
-                  </td>
-                  <td style={{ fontWeight: 600, color: 'var(--slate-700)' }}>{cli.nuit}</td>
-                  <td>
-                    <span className="badge badge-slate" style={{ fontSize: '11px' }}>
-                      {cli.plan}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`badge ${
-                        cli.status === 'regular' ? 'badge-green' : cli.status === 'alerta' ? 'badge-amber' : 'badge-red'
-                      }`}
-                    >
-                      {cli.status === 'regular' ? 'Regular' : cli.status === 'alerta' ? 'Alerta' : 'Crítico'}
-                    </span>
-                  </td>
-                  <td style={{ fontWeight: 600, color: 'var(--slate-800)' }}>
-                    {cli.nextObligation}
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'inline-flex', gap: '6px' }}>
-                      <button
-                        onClick={() => {
-                          setActiveClient(cli);
-                          addToast('info', 'Contexto Alterado', `Agora a gerir obrigações de ${cli.name}.`);
-                          onNavigate('/calendario');
-                        }}
-                        className="btn btn-secondary btn-sm"
-                        title="Abrir Calendário Deste Cliente"
-                      >
-                        <Eye size={14} />
-                        <span>Abrir</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          addToast('success', 'Alerta WhatsApp Enviado', `Lembrete fiscal enviado para ${cli.contactPhone}`);
-                        }}
-                        className="btn btn-ghost btn-sm"
-                        title="Enviar Lembrete WhatsApp"
-                        style={{ color: 'var(--emerald-600)' }}
-                      >
-                        <MessageSquare size={16} />
-                      </button>
-                      <button
-                        onClick={() => deleteClient(cli.id)}
-                        className="btn btn-ghost btn-sm"
-                        title="Eliminar Cliente"
-                        style={{ color: 'var(--red-500)' }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
+        {filteredClients.length === 0 ? (
+          <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+            <Users size={40} color="var(--slate-300)" style={{ margin: '0 auto 12px' }} />
+            <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--slate-800)' }}>
+              Nenhum Cliente Registado
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--slate-500)', marginTop: '4px', maxWidth: '380px', margin: '4px auto 16px' }}>
+              Adicione os clientes do seu gabinete de contabilidade para acompanhar prazos fiscais e gerar relatórios consolidados.
+            </p>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="btn btn-primary-gold"
+              style={{ fontSize: '13px', padding: '9px 18px' }}
+            >
+              <Plus size={15} />
+              <span>+ Registar Primeiro Cliente</span>
+            </button>
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>NUIT</th>
+                  <th>Plano</th>
+                  <th>Status</th>
+                  <th>Próxima Obrigação</th>
+                  <th style={{ textAlign: 'right' }}>Ações</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredClients.map(cli => (
+                  <tr key={cli.id}>
+                    <td>
+                      <div>
+                        <span style={{ fontWeight: 700, color: 'var(--slate-900)', display: 'block' }}>{cli.name}</span>
+                        <span style={{ fontSize: '11.5px', color: 'var(--slate-400)' }}>{cli.city} • {cli.activitySector}</span>
+                      </div>
+                    </td>
+                    <td style={{ fontWeight: 600, color: 'var(--slate-700)' }}>{cli.nuit}</td>
+                    <td>
+                      <span className="badge badge-slate" style={{ fontSize: '11px' }}>
+                        {cli.plan}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`badge ${
+                          cli.status === 'regular' ? 'badge-green' : cli.status === 'alerta' ? 'badge-amber' : 'badge-red'
+                        }`}
+                      >
+                        {cli.status === 'regular' ? 'Regular' : cli.status === 'alerta' ? 'Alerta' : 'Crítico'}
+                      </span>
+                    </td>
+                    <td style={{ fontWeight: 600, color: 'var(--slate-800)' }}>
+                      {cli.nextObligation}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'inline-flex', gap: '6px' }}>
+                        <button
+                          onClick={() => {
+                            setActiveClient(cli);
+                            onNavigate('/dashboard');
+                            addToast('info', 'Cliente Seleccionado', `A visualizar painel de ${cli.name}.`);
+                          }}
+                          className="btn btn-ghost btn-sm"
+                          title="Ver Dashboard do Cliente"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          onClick={() => deleteClient(cli.id)}
+                          className="btn btn-ghost btn-sm"
+                          title="Eliminar Cliente"
+                          style={{ color: 'var(--red-500)' }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Footer pagination info */}
         <div style={{ padding: '14px 20px', borderTop: '1px solid var(--slate-100)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px', color: 'var(--slate-500)' }}>

@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   Bookmark
 } from 'lucide-react';
-import { INITIAL_LEGAL_DOCS } from '../data/initialData';
+import { STATUTORY_LEGISLATION } from '../data/statutoryLegislation';
 import { LegalDoc } from '../types';
 import { useAppState } from '../context/AppStateContext';
 
@@ -24,15 +24,15 @@ export const BibliotecaLegal: React.FC = () => {
   const [selectedDoc, setSelectedDoc] = useState<LegalDoc | null>(null);
 
   const categoryCounts = {
-    todos: 258,
-    lei: 34,
-    decreto: 58,
-    regulamento: 32,
-    diploma: 28,
-    outro: 106
+    todos: STATUTORY_LEGISLATION.length,
+    lei: STATUTORY_LEGISLATION.filter(d => d.type === 'lei').length,
+    decreto: STATUTORY_LEGISLATION.filter(d => d.type === 'decreto').length,
+    regulamento: STATUTORY_LEGISLATION.filter(d => d.type === 'regulamento').length,
+    diploma: STATUTORY_LEGISLATION.filter(d => d.type === 'diploma').length,
+    outro: STATUTORY_LEGISLATION.filter(d => d.type === 'outro').length
   };
 
-  const filteredDocs = INITIAL_LEGAL_DOCS.filter(doc => {
+  const filteredDocs = STATUTORY_LEGISLATION.filter(doc => {
     if (selectedType !== 'todos' && doc.type !== selectedType) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();

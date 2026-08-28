@@ -69,7 +69,7 @@ export const PDFPreviewModal: React.FC = () => {
       doc.text(`País do Prestador: ${data.providerCountry || 'Estados Unidos'}`, 26, 76);
 
       doc.text(`Data do Cálculo: ${formatDate(data.date)}`, 110, 64);
-      doc.text(`Responsável Técnico: ${data.responsibleName || user?.name || 'Carlos Apollo'}`, 110, 70);
+      doc.text(`Responsável Técnico: ${data.responsibleName || user?.name || 'Administrador Fiscal'}`, 110, 70);
       doc.text(`Moeda Original: ${data.originalAmount.toLocaleString('pt-MZ')} ${data.currency}`, 110, 76);
 
       // Calculation Breakdown Table
@@ -320,7 +320,7 @@ export const PDFPreviewModal: React.FC = () => {
                 <div>
                   <p style={{ color: '#64748B', fontSize: '11px', fontWeight: 600 }}>DETALHES DA SESSÃO</p>
                   <p style={{ fontWeight: 600, color: '#0F172A', marginTop: '2px' }}>Data: {formatDate(data.date)}</p>
-                  <p style={{ color: '#475569' }}>Responsável: {data.responsibleName || 'Carlos Apollo'}</p>
+                  <p style={{ color: '#475569' }}>Responsável: {data.responsibleName || user?.name || 'Administrador Fiscal'}</p>
                   <p style={{ color: '#475569' }}>Câmbio Utilizado: {data.exchangeRate.toFixed(2)} MZN</p>
                 </div>
               </div>

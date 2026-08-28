@@ -41,9 +41,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     setTimeout(() => {
       setIsProcessing(false);
-      setPaymentSuccess(true);
-      addToast('success', 'Pagamento Confirmado!', `O seu plano ${planName} foi renovado com sucesso.`);
-    }, 2000);
+      addToast('info', 'Pagamento pendente', 'O plano será actualizado apenas após a confirmação segura do fornecedor de pagamento.');
+    }, 600);
   };
 
   const copyToClipboard = (text: string, label: string) => {

@@ -32,8 +32,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
     markObligationPaid,
     addObligation,
     deleteObligation,
-    activeClient,
-    loadStandardMozambiqueTemplate
+    activeClient
   } = useAppState();
 
   const [monthOffset, setMonthOffset] = useState(0);
