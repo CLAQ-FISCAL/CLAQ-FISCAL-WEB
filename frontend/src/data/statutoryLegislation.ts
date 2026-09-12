@@ -1,70 +1,71 @@
 import { LegalDoc } from '../types';
+import type { TFunction } from 'i18next';
 
-export const STATUTORY_LEGISLATION: LegalDoc[] = [
+export const STATUTORY_LEGISLATION = (t: TFunction): LegalDoc[] => [
   {
     id: 'doc-civa',
-    title: 'Código do Imposto sobre o Valor Acrescentado (CIVA)',
+    title: t('data:legal1Title'),
     type: 'lei',
-    number: 'Lei n.º 32/2007 alterada pela Lei n.º 1/2018',
+    number: t('data:legal1Number'),
     date: '2018-01-12',
-    category: 'IVA',
-    summary: 'Aprova o Código do IVA. Incidência objectiva e subjectiva, taxas (16%), isenções, operações transfronteiriças e regras de apuramento.',
+    category: t('data:legal1Category'),
+    summary: t('data:legal1Summary'),
     articlesCount: 78,
-    fullText: 'Código do IVA anotado e comentado para Moçambique.'
+    fullText: t('data:legal1FullText')
   },
   {
     id: 'doc-reg-iva',
-    title: 'Regulamento do Imposto sobre o Valor Acrescentado',
+    title: t('data:legal2Title'),
     type: 'decreto',
-    number: 'Decreto n.º 7/2020',
+    number: t('data:legal2Number'),
     date: '2020-03-10',
-    category: 'IVA',
-    summary: 'Regulamenta as disposições do CIVA, incluindo prazos de submissão do Modelo A, faturas eletrónicas e regras de retenção na fonte.',
+    category: t('data:legal2Category'),
+    summary: t('data:legal2Summary'),
     articlesCount: 45,
-    fullText: 'Regulamento do IVA aprovado pelo Conselho de Ministros.'
+    fullText: t('data:legal2FullText')
   },
   {
     id: 'doc-cirps',
-    title: 'Código do Imposto sobre o Rendimento das Pessoas Singulares (CIRPS)',
+    title: t('data:legal3Title'),
     type: 'lei',
-    number: 'Lei n.º 33/2007 alterada',
+    number: t('data:legal3Number'),
     date: '2007-12-31',
-    category: 'IRPS',
-    summary: 'Tributação de rendimentos de trabalho dependente (1ª Categoria), trabalho independente (2ª Categoria) e capitais. Tabela de retenção na fonte.',
+    category: t('data:legal3Category'),
+    summary: t('data:legal3Summary'),
     articlesCount: 92,
-    fullText: 'Código do IRPS e tabelas de retenção na fonte.'
+    fullText: t('data:legal3FullText')
   },
   {
     id: 'doc-cirpc',
-    title: 'Código do Imposto sobre o Rendimento das Pessoas Colectivas (CIRPC)',
+    title: t('data:legal4Title'),
     type: 'lei',
-    number: 'Lei n.º 34/2014',
+    number: t('data:legal4Number'),
     date: '2014-12-31',
-    category: 'IRPC',
-    summary: 'Incidência de IRPC (32%), pagamentos por conta, modelo 22 e retenções na fonte a não residentes (20%) e prestadores locais.',
+    category: t('data:legal4Category'),
+    summary: t('data:legal4Summary'),
     articlesCount: 110,
-    fullText: 'Código do IRPC para pessoas colectivas em Moçambique.'
+    fullText: t('data:legal4FullText')
   },
   {
     id: 'doc-lgt',
-    title: 'Lei Geral Tributária (LGT)',
+    title: t('data:legal5Title'),
     type: 'lei',
-    number: 'Lei n.º 15/2002',
+    number: t('data:legal5Number'),
     date: '2002-06-26',
-    category: 'Geral',
-    summary: 'Princípios gerais do direito tributário moçambicano, direitos e deveres dos contribuintes, regime de juros de mora e multas por atraso (Artigo 101).',
+    category: t('data:legal5Category'),
+    summary: t('data:legal5Summary'),
     articlesCount: 145,
-    fullText: 'Lei Geral Tributária da República de Moçambique.'
+    fullText: t('data:legal5FullText')
   },
   {
     id: 'doc-tae',
-    title: 'Postura Sobre a Taxa de Atividade Económica (TAE)',
+    title: t('data:legal6Title'),
     type: 'outro',
-    number: 'Postura Municipal n.º 12/2018',
+    number: t('data:legal6Number'),
     date: '2018-05-15',
-    category: 'Municipal',
-    summary: 'Regulamento das taxas de funcionamento comercial, industrial e prestação de serviços no Conselho Municipal de Maputo e Matola.',
+    category: t('data:legal6Category'),
+    summary: t('data:legal6Summary'),
     articlesCount: 32,
-    fullText: 'Postura sobre a TAE do Conselho Municipal.'
+    fullText: t('data:legal6FullText')
   }
 ];

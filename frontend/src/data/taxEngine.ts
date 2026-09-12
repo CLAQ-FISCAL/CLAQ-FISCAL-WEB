@@ -1,5 +1,10 @@
 // Tax Simulation Engine for Mozambique
 
+import i18n from '../i18n';
+
+const fmtNumber = (v: number) =>
+  v.toLocaleString(i18n.language === 'en' ? 'en-GB' : 'pt-MZ', { minimumFractionDigits: 2 });
+
 export interface NonResidentServiceInput {
   providerName: string;
   providerCountry: string;
@@ -89,57 +94,61 @@ export function calculateNonResidentService(input: NonResidentServiceInput): Non
     totalCompanyOutflow,
     trace: {
       step1: {
-        label: 'Valor Transferido para MZN',
-        desc: `${amount.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} ${input.currency} × ${rate.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} (câmbio)`,
-        formula: 'Valor Fatura × Câmbio Oficial BM',
+        label: i18n.t('simuladores:traceStep1Label'),
+        desc: i18n.t('simuladores:traceStep1Desc', {
+          amount: fmtNumber(amount),
+          currency: input.currency,
+          rate: fmtNumber(rate)
+        }),
+        formula: i18n.t('simuladores:traceStep1Formula'),
         value: mznAmount
       },
       step2: {
-        label: 'Contra Valor (Fator 1,25)',
-        desc: `${mznAmount.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × 1,25`,
-        formula: 'Valor em Meticais × 1,25 (Base de Incidência)',
+        label: i18n.t('simuladores:traceStep2Label'),
+        desc: i18n.t('simuladores:traceStep2Desc', { amount: fmtNumber(mznAmount) }),
+        formula: i18n.t('simuladores:traceStep2Formula'),
         value: taxBase
       },
       step3: {
-        label: 'IVA (16%)',
-        desc: `${taxBase.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × 16%`,
-        formula: 'Contra-Valor × Taxa IVA (16%)',
+        label: i18n.t('simuladores:traceStep3Label'),
+        desc: i18n.t('simuladores:traceStep3Desc', { base: fmtNumber(taxBase) }),
+        formula: i18n.t('simuladores:traceStep3Formula'),
         value: ivaAmount
       },
       step4: {
-        label: 'IRPC (20%)',
-        desc: `${taxBase.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × 20%`,
-        formula: 'Contra-Valor × Taxa Retenção IRPC (20%)',
+        label: i18n.t('simuladores:traceStep4Label'),
+        desc: i18n.t('simuladores:traceStep4Desc', { base: fmtNumber(taxBase) }),
+        formula: i18n.t('simuladores:traceStep4Formula'),
         value: irpcAmount
       },
       step5: {
-        label: 'Total de Impostos a Pagar',
-        desc: `IVA (${ivaAmount.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })}) + IRPC (${irpcAmount.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })})`,
-        formula: 'IVA a Pagar + IRPC Retido',
+        label: i18n.t('simuladores:traceStep5Label'),
+        desc: i18n.t('simuladores:traceStep5Desc', { iva: fmtNumber(ivaAmount), irpc: fmtNumber(irpcAmount) }),
+        formula: i18n.t('simuladores:traceStep5Formula'),
         value: totalTax
       }
     },
     legalBase: {
       iva: {
-        code: 'Código do IVA (Lei n.º 32/2007, alterada pela Lei n.º 13/2016 e Lei n.º 1/2018)',
+        code: i18n.t('simuladores:legalIvaCode'),
         articles: [
-          'Artigo 15 – Local das Prestações de Serviços (Regra geral e derrogações para serviços ao exterior)',
-          'Artigo 17 – Prestações de Serviços efetuadas por Não Residentes e obrigação de auto-liquidação'
+          i18n.t('simuladores:legalIvaArticle15'),
+          i18n.t('simuladores:legalIvaArticle17')
         ],
-        note: 'O adquirente residente é o sujeito passivo devedor do imposto nas operações com não residentes sem estabelecimento estável.'
+        note: i18n.t('simuladores:legalIvaNote')
       },
       irpc: {
-        code: 'Código do IRPC (Lei n.º 34/2014, de 31 de Dezembro)',
+        code: i18n.t('simuladores:legalIrpcCode'),
         articles: [
-          'Artigo 65 – Retenções na Fonte (Incidência sobre rendimentos pagos a entidades não residentes)',
-          'Artigo 66 – Taxas de Retenção a título definitivo (Taxa geral de 20% sobre prestações de serviços)'
+          i18n.t('simuladores:legalIrpcArticle65'),
+          i18n.t('simuladores:legalIrpcArticle66')
         ],
-        note: 'A retenção tem caráter liberatório e definitivo na esfera do prestador não residente.'
+        note: i18n.t('simuladores:legalIrpcNote')
       },
       diplomas: [
-        'Regulamento do IVA – Decreto n.º 7/2020, de 16 de Novembro',
-        'Ofício Circular n.º 3012/AT/2021 – Aplicação de Fator de Gross-up em pagamentos ao estrangeiro',
-        'Acordos de Dupla Tributação (DTA) – Se aplicável (Portugal, África do Sul, Itália, Emirados Árabes Unidos, etc.)'
+        i18n.t('simuladores:legalDiploma1'),
+        i18n.t('simuladores:legalDiploma2'),
+        i18n.t('simuladores:legalDiploma3')
       ]
     }
   };
@@ -287,7 +296,7 @@ export function calculateFines(input: FinesInput): FinesResult {
     interestRateAnnual: interestRateAnnual * 100,
     interestAmount,
     totalToPay,
-    legalArticle: 'Artigo 101 da Lei n.º 15/2002 (Lei Geral Tributária) e Código do Procedimento Tributário'
+    legalArticle: i18n.t('simuladores:finesLegalArticle')
   };
 }
 

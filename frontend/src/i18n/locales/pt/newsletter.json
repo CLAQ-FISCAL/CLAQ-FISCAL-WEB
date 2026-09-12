@@ -1,0 +1,13 @@
+{
+  "title": "Newsletter & Boletim Fiscal",
+  "subtitle": "Mantenha-se informado sobre alterações legislativas, novos decretos e prazos da Autoridade Tributária.",
+  "bannerLabel": "Boletim Semanal Gratuito",
+  "bannerTitle": "Receba actualizações tributárias no seu e-mail todas as segundas-feiras",
+  "bannerDescription": "Análise jurídica comentada por consultores da CLAQ com impacto prático no seu negócio em Moçambique.",
+  "emailPlaceholder": "o.seu.email@empresa.co.mz",
+  "subscribe": "Subscrever",
+  "sourceLabel": "Fonte: {{source}}",
+  "readMore": "Ler artigo completo →",
+  "toastSubscribeTitle": "Subscrição Concluída!",
+  "toastSubscribeMessage": "Enviaremos o resumo fiscal semanal para {{email}}."
+}

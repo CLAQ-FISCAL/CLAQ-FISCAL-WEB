@@ -22,6 +22,7 @@ import {
   Layers,
   Plus
 } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
 import { OFFICIAL_GAZETTE_FEED } from '../data/officialGazetteFeed';
 import { CalendarEngine } from '../utils/calendarEngine';
@@ -32,6 +33,7 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
+  const { t, i18n } = useTranslation();
   const {
     user,
     obligations,
@@ -45,10 +47,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonthIndex = now.getMonth();
-  const currentMonthName = CalendarEngine.getMonthNamePt(currentMonthIndex, currentYear);
+  const currentMonthName = CalendarEngine.getMonthName(currentMonthIndex, currentYear, i18n.language);
 
   const currentHour = now.getHours();
-  const greeting = currentHour < 12 ? 'Bom dia' : currentHour < 18 ? 'Boa tarde' : 'Boa noite';
+  const greeting = currentHour < 12
+    ? t('dashboard:greetingMorning')
+    : currentHour < 18
+    ? t('dashboard:greetingAfternoon')
+    : t('dashboard:greetingEvening');
+
+  const gazetteNews = OFFICIAL_GAZETTE_FEED(t);
 
   const [selectedCalDate, setSelectedCalDate] = useState<string>(CalendarEngine.formatDateYMD(now));
 
@@ -72,9 +80,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     { id: 'iva', label: 'IVA', color: '#9333EA', bg: '#FAF5FF', path: '/simuladores' },
     { id: 'irps', label: 'IRPS', color: '#059669', bg: '#ECFDF5', path: '/simuladores' },
     { id: 'inss', label: 'INSS', color: '#D97706', bg: '#FFFBEB', path: '/simuladores' },
-    { id: 'salario', label: 'Salário Líquido', color: '#2563EB', bg: '#EFF6FF', path: '/simuladores' },
-    { id: 'multas', label: 'Multas', color: '#DC2626', bg: '#FEF2F2', path: '/simuladores' },
-    { id: 'custo', label: 'Custo do Trabalhador', color: '#0D9488', bg: '#F0FDFA', path: '/simuladores' }
+    { id: 'salario', label: t('dashboard:simNetSalary'), color: '#2563EB', bg: '#EFF6FF', path: '/simuladores' },
+    { id: 'multas', label: t('dashboard:simFines'), color: '#DC2626', bg: '#FEF2F2', path: '/simuladores' },
+    { id: 'custo', label: t('dashboard:simEmployeeCost'), color: '#0D9488', bg: '#F0FDFA', path: '/simuladores' }
   ];
 
   return (
@@ -83,10 +91,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '26px', fontWeight: 800, color: 'var(--slate-900)' }}>
-            {greeting}, {user?.name || 'Utilizador'}! 👋
+            {greeting}, {user?.name || t('dashboard:userFallback')}! 👋
           </h1>
           <p style={{ fontSize: '14.5px', color: 'var(--slate-500)', marginTop: '4px' }}>
-            Aqui está o resumo das suas obrigações fiscais, laborais e alertas para <strong>{currentMonthName}</strong>.
+            <Trans i18nKey="dashboard:welcomeSubtitle" values={{ month: currentMonthName }}>
+              Aqui está o resumo das suas obrigações fiscais, laborais e alertas para <strong>{currentMonthName}</strong>.
+            </Trans>
           </p>
         </div>
       </div>
@@ -98,13 +108,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <p style={{ fontSize: '11.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--slate-400)' }}>
-                PRÓXIMA OBRIGAÇÃO
+                {t('dashboard:nextObligationTitle')}
               </p>
               <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)', marginTop: '4px' }}>
-                {nextObligation ? nextObligation.title : 'Nenhuma pendente'}
+                {nextObligation ? nextObligation.title : t('dashboard:nonePending')}
               </h4>
               <p style={{ fontSize: '22px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '8px' }}>
-                {nextObligation ? formatDate(nextObligation.dueDate) : 'Tudo em dia'}
+                {nextObligation ? formatDate(nextObligation.dueDate) : t('dashboard:allUpToDate')}
               </p>
               {nextObligation && (
                 <span
@@ -116,8 +126,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   }}
                 >
                   {CalendarEngine.getDaysRemaining(nextObligation.dueDate) < 0
-                    ? `Venceu há ${Math.abs(CalendarEngine.getDaysRemaining(nextObligation.dueDate))} dias`
-                    : `Vence em ${CalendarEngine.getDaysRemaining(nextObligation.dueDate)} dias`}
+                    ? t('dashboard:overdueXDays', { count: Math.abs(CalendarEngine.getDaysRemaining(nextObligation.dueDate)) })
+                    : t('dashboard:dueInXDays', { count: CalendarEngine.getDaysRemaining(nextObligation.dueDate) })}
                 </span>
               )}
             </div>
@@ -135,10 +145,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 INSS ({currentMonthName.split(' ')[0].toUpperCase()})
               </p>
               <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)', marginTop: '4px' }}>
-                {inssObligation ? `${formatMZN(inssObligation.amount)}` : 'Folha Mensal'}
+                {inssObligation ? `${formatMZN(inssObligation.amount)}` : t('dashboard:monthlyPayroll')}
               </h4>
               <p style={{ fontSize: '22px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '8px' }}>
-                {inssObligation ? formatDate(inssObligation.dueDate) : 'Regular'}
+                {inssObligation ? formatDate(inssObligation.dueDate) : t('common:statusRegular')}
               </p>
               <span
                 className="badge"
@@ -148,7 +158,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   color: inssObligation?.status === 'pago' ? '#059669' : '#D97706'
                 }}
               >
-                {inssObligation?.status === 'pago' ? 'Liquidado' : inssObligation ? `Vence em ${CalendarEngine.getDaysRemaining(inssObligation.dueDate)} dias` : 'Em Dia'}
+                {inssObligation?.status === 'pago' ? t('dashboard:settled') : inssObligation ? t('dashboard:dueInXDays', { count: CalendarEngine.getDaysRemaining(inssObligation.dueDate) }) : t('dashboard:onSchedule')}
               </span>
             </div>
             <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'var(--gold-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -162,16 +172,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <p style={{ fontSize: '11.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--slate-400)' }}>
-                LICENÇAS & TAXAS
+                {t('dashboard:licensesTaxes')}
               </p>
               <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)', marginTop: '4px' }}>
-                TAE / Alvará Comercial
+                {t('dashboard:taeAlvara')}
               </h4>
               <p style={{ fontSize: '22px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '8px' }}>
-                {licensesCount > 0 ? `${licensesCount} registadas` : 'Sem pendências'}
+                {licensesCount > 0 ? t('dashboard:licensesRegistered', { count: licensesCount }) : t('dashboard:noLicensesPending')}
               </p>
               <span className="badge" style={{ marginTop: '8px', backgroundColor: '#FAF5FF', color: '#7E22CE' }}>
-                Conformidade Municipal
+                {t('dashboard:municipalCompliance')}
               </span>
             </div>
             <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#FAF5FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -185,13 +195,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <p style={{ fontSize: '11.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--slate-400)' }}>
-                SITUAÇÃO FISCAL
+                {t('dashboard:fiscalSituation')}
               </p>
               <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)', marginTop: '4px' }}>
-                {user?.companyName || 'Empresa'}
+                {user?.companyName || t('dashboard:companyFallback')}
               </h4>
               <p style={{ fontSize: '22px', fontWeight: 800, color: isFiscalRegular ? '#059669' : '#DC2626', marginTop: '8px' }}>
-                {isFiscalRegular ? 'Regular' : 'Atenção'}
+                {isFiscalRegular ? t('common:statusRegular') : t('dashboard:fiscalAttention')}
               </p>
               <span
                 className="badge"
@@ -201,7 +211,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   color: isFiscalRegular ? '#059669' : '#DC2626'
                 }}
               >
-                {isFiscalRegular ? 'Sem multas ou atrasos' : `${overdueObligations.length} obrigações em atraso`}
+                {isFiscalRegular ? t('dashboard:noFinesOrDelays') : t('dashboard:overdueObligations', { count: overdueObligations.length })}
               </span>
             </div>
             <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: isFiscalRegular ? '#ECFDF5' : '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -219,7 +229,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <CalendarIcon size={20} color="var(--blue-600)" />
               <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)' }}>
-                Calendário Fiscal – {currentMonthName}
+                {t('dashboard:fiscalCalendar')} – {currentMonthName}
               </h3>
             </div>
 
@@ -228,20 +238,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               className="btn-text"
               style={{ fontSize: '13px', fontWeight: 700, color: 'var(--blue-600)', display: 'flex', alignItems: 'center', gap: '4px' }}
             >
-              <span>Ver calendário completo</span>
+              <span>{t('dashboard:viewFullCalendar')}</span>
               <ArrowRight size={14} />
             </button>
           </div>
 
           {/* Days of week header */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: '10px', fontSize: '11.5px', fontWeight: 700, color: 'var(--slate-400)' }}>
-            <div>SEG</div>
-            <div>TER</div>
-            <div>QUA</div>
-            <div>QUI</div>
-            <div>SEX</div>
-            <div>SÁB</div>
-            <div>DOM</div>
+            <div>{t('dashboard:daySeg')}</div>
+            <div>{t('dashboard:dayTer')}</div>
+            <div>{t('dashboard:dayQua')}</div>
+            <div>{t('dashboard:dayQui')}</div>
+            <div>{t('dashboard:daySex')}</div>
+            <div>{t('dashboard:daySab')}</div>
+            <div>{t('dashboard:dayDom')}</div>
           </div>
 
           {/* Calendar Grid Cells */}
@@ -316,11 +326,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#F59E0B' }}></span>
-                INSS (Segurança Social)
+                {t('dashboard:inssLegend')}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981' }}></span>
-                TAE (Municipal)
+                {t('dashboard:taeLegend')}
               </span>
             </div>
 
@@ -330,7 +340,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               style={{ padding: '6px 12px', fontSize: '12px' }}
             >
               <Plus size={14} />
-              <span>+ Nova Obrigação</span>
+              <span>+ {t('dashboard:newObligation')}</span>
             </button>
           </div>
         </div>
@@ -339,23 +349,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="card" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)' }}>
-              Alertas Importantes ({alerts.length})
+              {t('dashboard:importantAlerts')} ({alerts.length})
             </h3>
             <button
               onClick={() => onNavigate('/alertas')}
               className="btn-text"
               style={{ fontSize: '13px', fontWeight: 700, color: 'var(--blue-600)' }}
             >
-              Ver todos →
+              {t('common:viewAll')} →
             </button>
           </div>
 
           {alerts.length === 0 ? (
             <div style={{ padding: '32px 16px', textAlign: 'center' }}>
               <CheckCircle2 size={36} color="var(--emerald-500)" style={{ margin: '0 auto 10px' }} />
-              <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>Tudo em Dia!</h4>
+              <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>{t('dashboard:allUpToDate')}!</h4>
               <p style={{ fontSize: '12px', color: 'var(--slate-500)', marginTop: '4px' }}>
-                Não existem obrigações em atraso ou prazos a vencer nos próximos 7 dias.
+                {t('dashboard:noActiveAlerts')}
               </p>
             </div>
           ) : (
@@ -395,8 +405,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                       </h5>
                       <p style={{ fontSize: '11.5px', color: 'var(--slate-600)', marginTop: '2px' }}>
                         {alert.daysRemaining < 0
-                          ? `Venceu há ${Math.abs(alert.daysRemaining)} dias (${alert.dueDate})`
-                          : `Vence em ${alert.daysRemaining} dias (${alert.dueDate})`}
+                          ? t('dashboard:overdueByDays', { count: Math.abs(alert.daysRemaining), date: alert.dueDate })
+                          : t('dashboard:dueInDays', { count: alert.daysRemaining, date: alert.dueDate })}
                       </p>
                     </div>
                   </div>
@@ -424,10 +434,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <MessageSquare size={16} color="#059669" />
               <span style={{ fontSize: '12px', fontWeight: 700, color: '#065F46' }}>
-                Receber alertas fiscais directos no WhatsApp
+                {t('dashboard:whatsappCallout')}
               </span>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: '#059669' }}>Activar →</span>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: '#059669' }}>{t('dashboard:activate')} →</span>
           </div>
         </div>
       </div>
@@ -437,10 +447,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div>
             <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)' }}>
-              Simuladores Fiscais & Laborais Rápidos
+              {t('dashboard:quickSimulators')}
             </h3>
             <p style={{ fontSize: '12.5px', color: 'var(--slate-500)', marginTop: '2px' }}>
-              Calcule retenções, IVA, INSS e custos laborais com a legislação de Moçambique em vigor.
+              {t('dashboard:simulatorSubtitle')}
             </p>
           </div>
           <button
@@ -448,7 +458,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             className="btn btn-primary-gold"
             style={{ padding: '8px 16px', fontSize: '12.5px' }}
           >
-            <span>Abrir Centro Completo</span>
+            <span>{t('dashboard:openFullCenter')}</span>
             <ArrowRight size={14} />
           </button>
         </div>
@@ -484,7 +494,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <Calculator size={20} />
               </div>
               <h5 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--slate-900)' }}>{sim.label}</h5>
-              <p style={{ fontSize: '11px', color: 'var(--slate-500)', marginTop: '2px' }}>Simular Agora</p>
+              <p style={{ fontSize: '11px', color: 'var(--slate-500)', marginTop: '2px' }}>{t('dashboard:simulateNow')}</p>
             </div>
           ))}
         </div>
@@ -495,7 +505,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         {/* Compliance Gauge */}
         <div className="card" style={{ padding: '24px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '16px' }}>
-            Índice de Conformidade Fiscal
+            {t('dashboard:complianceIndex')}
           </h3>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
@@ -530,7 +540,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   {complianceRate}%
                 </span>
                 <span style={{ fontSize: '9px', fontWeight: 700, color: 'var(--slate-400)', textTransform: 'uppercase' }}>
-                  Conforme
+                  {t('dashboard:compliant')}
                 </span>
               </div>
             </div>
@@ -538,15 +548,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             {/* Metrics Breakdown */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12.5px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--slate-600)' }}>Obrigações Pagas:</span>
+                <span style={{ color: 'var(--slate-600)' }}>{t('dashboard:obligationsPaid')}:</span>
                 <strong style={{ color: '#059669' }}>{paidObligations.length}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--slate-600)' }}>A Vencer / Pendentes:</span>
+                <span style={{ color: 'var(--slate-600)' }}>{t('dashboard:dueAndPending')}:</span>
                 <strong style={{ color: '#D97706' }}>{activeObligations.length}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--slate-600)' }}>Vencidas (Multas):</span>
+                <span style={{ color: 'var(--slate-600)' }}>{t('dashboard:overdueWithFines')}:</span>
                 <strong style={{ color: overdueObligations.length > 0 ? '#DC2626' : '#059669' }}>
                   {overdueObligations.length}
                 </strong>
@@ -559,19 +569,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="card" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)' }}>
-              Últimas Notícias Fiscais
+              {t('dashboard:latestTaxNews')}
             </h3>
             <button
               onClick={() => onNavigate('/newsletter')}
               className="btn-text"
               style={{ fontSize: '13px', fontWeight: 700, color: 'var(--blue-600)' }}
             >
-              Ver todas →
+              {t('common:viewAll')} →
             </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {OFFICIAL_GAZETTE_FEED.slice(0, 3).map(news => (
+{gazetteNews.slice(0, 3).map(news => (
               <div
                 key={news.id}
                 onClick={() => onNavigate('/newsletter')}

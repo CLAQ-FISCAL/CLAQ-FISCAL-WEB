@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 import { ArrowRight, Info, CheckCircle2, DollarSign, TrendingUp, Percent, Briefcase } from 'lucide-react';
 import { useAppState } from '../../context/AppStateContext';
 import { SimulatorLayout } from '../../components/simulators/SimulatorLayout';
+import { getSimulatorBySlug } from '../../components/simulators/simulatorCatalog';
+import { calcLineLabel, calcLineFormula } from '../../components/simulators/calcLines';
 import { calculatePagamentoNaoResidentes, MOCK_EXCHANGE_RATES } from '../../lib/calculations/mocambique';
 import { formatMZN } from '../../utils/formatters';
 
@@ -10,6 +13,7 @@ interface Props {
 }
 
 export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
+  const { t } = useTranslation();
   const { user, saveSimulation, openPDFPreview, addToast } = useAppState();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
@@ -33,22 +37,35 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
     descricao,
   });
 
+  const s = getSimulatorBySlug('pagamento-nao-residentes', t);
+
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep(2);
-    addToast('success', 'Cálculo Concluído', 'Impostos calculados com base na legislação moçambicana.');
+    addToast(
+      'success',
+      t('simuladores:toastCalcDoneTitle'),
+      t('simuladores:toastCalcDoneMsg')
+    );
   };
 
   const handleFetchRate = () => {
     const rate = MOCK_EXCHANGE_RATES[moeda] || 63.75;
     setCambiaDia(rate.toFixed(2));
-    addToast('info', 'Câmbio Actualizado', `Câmbio oficial ${moeda}/MZN: ${rate.toFixed(2)}`);
+    addToast(
+      'info',
+      t('simuladores:toastExchangeUpdatedTitle'),
+      t('simuladores:toastExchangeUpdatedMsg', {
+        currency: moeda,
+        rate: rate.toFixed(2),
+      })
+    );
   };
 
   const handleSave = () => {
     saveSimulation({
       simulatorId: 'pagamento-nao-residentes',
-      simulatorTitle: 'Pagamento de Serviços a Não Residentes',
+      simulatorTitle: t('simuladores:simNonResidentTitle'),
       date: dataPagamento,
       clientName: prestador,
       currency: moeda,
@@ -65,15 +82,19 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
       providerCountry: pais,
       description: descricao,
       status: 'concluido',
-      responsibleName: user?.name || 'Administrador',
+      responsibleName: user?.name || t('simuladores:administrator'),
     });
-    addToast('success', 'Simulação Guardada', 'Registo adicionado ao histórico.');
+    addToast(
+      'success',
+      t('simuladores:toastSimSavedTitle'),
+      t('simuladores:toastSimSavedMsg')
+    );
   };
 
   const handlePrint = () => {
     const rec = saveSimulation({
       simulatorId: 'pagamento-nao-residentes',
-      simulatorTitle: 'Pagamento de Serviços a Não Residentes',
+      simulatorTitle: t('simuladores:simNonResidentTitle'),
       date: dataPagamento,
       clientName: prestador,
       currency: moeda,
@@ -90,7 +111,7 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
       providerCountry: pais,
       description: descricao,
       status: 'concluido',
-      responsibleName: user?.name || 'Administrador',
+      responsibleName: user?.name || t('simuladores:administrator'),
     });
     openPDFPreview(rec);
   };
@@ -99,7 +120,7 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
     <SimulatorLayout
       onNavigate={onNavigate}
       categoria="Fiscal"
-      nome="Pagamento ao Exterior"
+      nome={s?.title ?? ''}
       currentStep={currentStep}
       onStepChange={setCurrentStep}
       onSave={handleSave}
@@ -109,17 +130,17 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
       {currentStep === 1 && (
         <div className="card" style={{ padding: '32px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '20px' }}>
-            1. Informações do Pagamento
+            {t('simuladores:step1Title')}
           </h2>
 
           <form onSubmit={handleCalculate}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '18px', marginBottom: '20px' }}>
               <div className="form-group">
-                <label className="form-label">Prestador do Serviço</label>
+                <label className="form-label">{t('simuladores:providerLabel')}</label>
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Nome do prestador (Ex: Google LLC, Amazon AWS)"
+                  placeholder={t('simuladores:providerPlaceholder')}
                   value={prestador}
                   onChange={(e) => setPrestador(e.target.value)}
                   required
@@ -128,21 +149,21 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div className="form-group">
-                  <label className="form-label">País do Prestador</label>
+                  <label className="form-label">{t('simuladores:providerCountryLabel')}</label>
                   <select className="form-control" value={pais} onChange={(e) => setPais(e.target.value)}>
-                    <option value="Estados Unidos">Estados Unidos (EUA)</option>
-                    <option value="África do Sul">África do Sul</option>
-                    <option value="Portugal">Portugal</option>
-                    <option value="Reino Unido">Reino Unido</option>
-                    <option value="Brasil">Brasil</option>
-                    <option value="Emirados Árabes Unidos">Emirados Árabes Unidos</option>
-                    <option value="China">China</option>
-                    <option value="Outro">Outro País</option>
+                    <option value="Estados Unidos">{t('simuladores:countryOptionUS')}</option>
+                    <option value="África do Sul">{t('simuladores:countryOptionZA')}</option>
+                    <option value="Portugal">{t('simuladores:countryOptionPT')}</option>
+                    <option value="Reino Unido">{t('simuladores:countryOptionGB')}</option>
+                    <option value="Brasil">{t('simuladores:countryOptionBR')}</option>
+                    <option value="Emirados Árabes Unidos">{t('simuladores:countryOptionAE')}</option>
+                    <option value="China">{t('simuladores:countryOptionCN')}</option>
+                    <option value="Outro">{t('simuladores:countryOptionOTHER')}</option>
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Moeda da Fatura</label>
+                  <label className="form-label">{t('simuladores:invoiceCurrencyLabel')}</label>
                   <select
                     className="form-control"
                     value={moeda}
@@ -151,18 +172,18 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
                       setCambiaDia((MOCK_EXCHANGE_RATES[e.target.value] || 63.75).toFixed(2));
                     }}
                   >
-                    <option value="USD">USD – Dólar Americano</option>
-                    <option value="EUR">EUR – Euro</option>
-                    <option value="ZAR">ZAR – Rand Sul-Africano</option>
-                    <option value="GBP">GBP – Libra Esterlina</option>
-                    <option value="MZN">MZN – Metical Moçambicano</option>
+                    <option value="USD">{t('simuladores:currencyUSD')}</option>
+                    <option value="EUR">{t('simuladores:currencyEUR')}</option>
+                    <option value="ZAR">{t('simuladores:currencyZAR')}</option>
+                    <option value="GBP">{t('simuladores:currencyGBP')}</option>
+                    <option value="MZN">{t('simuladores:currencyMZN')}</option>
                   </select>
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div className="form-group">
-                  <label className="form-label">Valor da Fatura</label>
+                  <label className="form-label">{t('simuladores:invoiceAmountLabel')}</label>
                   <input
                     type="number"
                     step="any"
@@ -175,13 +196,13 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
 
                 <div className="form-group">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <label className="form-label">Câmbio do Dia (MZN)</label>
+                    <label className="form-label">{t('simuladores:exchangeRateLabel')}</label>
                     <button
                       type="button"
                       onClick={handleFetchRate}
                       style={{ border: 'none', background: 'none', color: 'var(--blue-600)', fontSize: '11.5px', fontWeight: 600, cursor: 'pointer' }}
                     >
-                      Obter câmbio
+                      {t('simuladores:fetchExchangeRate')}
                     </button>
                   </div>
                   <input
@@ -193,14 +214,14 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
                     required
                   />
                   <span style={{ fontSize: '11px', color: 'var(--slate-400)', marginTop: '2px' }}>
-                    Fonte: Banco de Moçambique
+                    {t('simuladores:exchangeRateSource')}
                   </span>
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div className="form-group">
-                  <label className="form-label">Data do Pagamento</label>
+                  <label className="form-label">{t('simuladores:paymentDateLabel')}</label>
                   <input
                     type="date"
                     className="form-control"
@@ -211,11 +232,11 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Descrição (opcional)</label>
+                  <label className="form-label">{t('simuladores:descriptionLabel')}</label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Ex: Consultoria técnica, licença cloud"
+                    placeholder={t('simuladores:descriptionPlaceholder')}
                     value={descricao}
                     onChange={(e) => setDescricao(e.target.value)}
                   />
@@ -238,18 +259,16 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
             >
               <Info size={20} color="var(--blue-600)" style={{ flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E3A8A' }}>Importante</h4>
+                <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E3A8A' }}>{t('simuladores:legalBannerTitle')}</h4>
                 <p style={{ fontSize: '12.5px', color: '#1E40AF', marginTop: '2px', lineHeight: 1.4 }}>
-                  Este simulador aplica as taxas padrão: <b>IVA (16%)</b> e <b>IRPC (20%)</b> sobre o{' '}
-                  <b>Contra-Valor (fator 1,25)</b> conforme a legislação tributária moçambicana vigente
-                  (Lei n.º 1/2018 e Lei n.º 34/2014).
+                  <Trans i18nKey="simuladores:legalBanner" components={[<b key="b1" />, <b key="b2" />, <b key="b3" />]} />
                 </p>
               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button type="submit" className="btn btn-primary-blue btn-lg">
-                <span>Calcular Impostos</span>
+                <span>{t('simuladores:calculateButton')}</span>
                 <ArrowRight size={18} />
               </button>
             </div>
@@ -263,20 +282,52 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
           <div className="card" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)' }}>
-                Resumo dos Cálculos
+                {t('simuladores:resultsSummaryTitle')}
               </h3>
               <span className="badge badge-green" style={{ fontSize: '11.5px' }}>
                 <CheckCircle2 size={13} />
-                <span>Cálculo concluído com sucesso</span>
+                <span>{t('simuladores:calcDoneBadge')}</span>
               </span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {[
-                { icon: DollarSign, label: 'Valor em Meticais', sub: `${valorFatura || 10000} ${moeda} × ${cambiaDia || 63.75}`, value: result.valorMZN, iconBg: 'var(--emerald-50)', iconColor: 'var(--emerald-600)' },
-                { icon: TrendingUp, label: 'Contra Valor (Fator 1,25)', sub: 'Base de incidência para cálculo dos impostos', value: result.contraValor, iconBg: 'var(--blue-50)', iconColor: 'var(--blue-600)' },
-                { icon: Percent, label: 'IVA a Pagar (16%)', sub: 'Imposto sobre o Valor Acrescentado', value: result.iva, iconBg: '#FAF5FF', iconColor: '#7E22CE' },
-                { icon: Briefcase, label: 'IRPC Retido na Fonte (20%)', sub: 'Imposto sobre o Rendimento das Pessoas Colectivas', value: result.irpcRetido, iconBg: 'var(--emerald-50)', iconColor: 'var(--emerald-600)' },
+                {
+                  icon: DollarSign,
+                  label: t('simuladores:resultsMznValueTitle'),
+                  sub: t('simuladores:resultsMznValueSubtitle', {
+                    amount: valorFatura || 10000,
+                    currency: moeda,
+                    rate: cambiaDia || 63.75,
+                  }),
+                  value: result.valorMZN,
+                  iconBg: 'var(--emerald-50)',
+                  iconColor: 'var(--emerald-600)',
+                },
+                {
+                  icon: TrendingUp,
+                  label: t('simuladores:resultsTaxBaseTitle'),
+                  sub: t('simuladores:resultsTaxBaseSubtitle'),
+                  value: result.contraValor,
+                  iconBg: 'var(--blue-50)',
+                  iconColor: 'var(--blue-600)',
+                },
+                {
+                  icon: Percent,
+                  label: t('simuladores:resultsIvaTitle'),
+                  sub: t('simuladores:resultsIvaSubtitle'),
+                  value: result.iva,
+                  iconBg: '#FAF5FF',
+                  iconColor: '#7E22CE',
+                },
+                {
+                  icon: Briefcase,
+                  label: t('simuladores:resultsIrpcTitle'),
+                  sub: t('simuladores:resultsIrpcSubtitle'),
+                  value: result.irpcRetido,
+                  iconBg: 'var(--emerald-50)',
+                  iconColor: 'var(--emerald-600)',
+                },
               ].map((item, i) => (
                 <div key={i} style={{ padding: '16px 18px', borderRadius: '12px', backgroundColor: 'var(--slate-50)', border: '1px solid var(--slate-200)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -295,9 +346,12 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
               {/* Total */}
               <div style={{ padding: '20px 24px', borderRadius: '14px', background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', border: '1.5px solid #2563EB', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px' }}>
                 <div>
-                  <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#1E3A8A' }}>Total de Impostos a Pagar</h3>
+                  <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#1E3A8A' }}>{t('simuladores:totalTaxTitle')}</h3>
                   <p style={{ fontSize: '12px', color: '#1E40AF', marginTop: '2px' }}>
-                    IVA ({formatMZN(result.iva)}) + IRPC ({formatMZN(result.irpcRetido)})
+                    {t('simuladores:traceStep5Desc', {
+                      iva: formatMZN(result.iva),
+                      irpc: formatMZN(result.irpcRetido),
+                    })}
                   </p>
                 </div>
                 <span style={{ fontSize: '24px', fontWeight: 900, color: '#1E3A8A' }}>{formatMZN(result.totalImposto)}</span>
@@ -308,7 +362,7 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
           {/* Memória de Cálculo */}
           <div className="card" style={{ padding: '24px' }}>
             <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '16px' }}>
-              Memória de Cálculo
+              {t('simuladores:calcMemoTitle')}
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {result.lines.map((line, i) => (
@@ -318,8 +372,8 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
                       {i + 1}
                     </div>
                     <div>
-                      <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)' }}>{line.label}</span>
-                      <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{line.formula}</p>
+                      <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)' }}>{calcLineLabel(t, line.label)}</span>
+                      <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{calcLineFormula(t, line.formula)}</p>
                     </div>
                   </div>
                   <span style={{ fontSize: '14.5px', fontWeight: 800, color: line.kind === 'total' ? 'var(--blue-600)' : line.kind === 'debit' ? '#7E22CE' : 'var(--slate-900)' }}>

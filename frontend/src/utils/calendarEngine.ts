@@ -94,8 +94,12 @@ export class CalendarEngine {
   }
 
   public static getMonthNamePt(monthIndex: number, year: number): string {
+    return CalendarEngine.getMonthName(monthIndex, year, 'pt');
+  }
+
+  public static getMonthName(monthIndex: number, year: number, locale: string = 'pt'): string {
     const date = new Date(year, monthIndex, 1);
-    const raw = new Intl.DateTimeFormat('pt-PT', { month: 'long', year: 'numeric' }).format(date);
+    const raw = new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en', { month: 'long', year: 'numeric' }).format(date);
     return raw.charAt(0).toUpperCase() + raw.slice(1);
   }
 }

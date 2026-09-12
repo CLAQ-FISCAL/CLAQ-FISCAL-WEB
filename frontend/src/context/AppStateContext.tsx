@@ -10,6 +10,7 @@ import {
 import { NonResidentServiceResult } from '../data/taxEngine';
 import { CalendarEngine } from '../utils/calendarEngine';
 import { ApiClient } from '../api/client';
+import i18n, { AppLanguage, isSupportedLanguage } from '../i18n';
 import '../config/cognito';
 import { signIn, signUp, signOut, fetchAuthSession, getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 
@@ -28,7 +29,7 @@ const DEFAULT_SETTINGS: SystemSettings = {
   },
   whatsappNumber: '',
   isWhatsAppConnected: false,
-  language: 'pt-PT',
+  language: 'pt',
   theme: 'light'
 };
 
@@ -86,6 +87,10 @@ interface AppStateContextType {
   toggleAlertTiming: (timing: keyof SystemSettings['alertTiming']) => void;
   connectWhatsApp: (phone: string) => void;
 
+  // Language
+  language: AppLanguage;
+  setLanguage: (lng: AppLanguage) => void;
+
   // Modals and Drawers
   isWhatsAppModalOpen: boolean;
   setIsWhatsAppModalOpen: (open: boolean) => void;
@@ -124,16 +129,16 @@ const buildUserFromCognito = async (): Promise<UserProfile | null> => {
     const savedUser: Partial<UserProfile> = saved ? JSON.parse(saved) : {};
     return {
       id: cognitoUser?.userId || payload.sub || savedUser.id || `usr_${Date.now()}`,
-      name: (attrs as any).name || payload.name || savedUser.name || 'Utilizador CLAQ',
+      name: (attrs as any).name || payload.name || savedUser.name || i18n.t('state:userFallback'),
       email: (attrs as any).email || payload.email || savedUser.email || '',
       phone: (attrs as any).phone_number || payload.phone_number || savedUser.phone || '+258 84 000 0000',
       role: (payload['cognito:groups']?.[0] as string) || savedUser.role || 'ACCOUNTING_ADMIN',
       avatarUrl: savedUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      companyName: (attrs as any)['custom:companyName'] || payload['custom:companyName'] || savedUser.companyName || 'Minha Empresa, Lda',
+      companyName: (attrs as any)['custom:companyName'] || payload['custom:companyName'] || savedUser.companyName || i18n.t('state:companyFallback'),
       companyNuit: (attrs as any)['custom:nuit'] || payload['custom:nuit'] || savedUser.companyNuit || '400000000',
-      companyAddress: savedUser.companyAddress || 'Moçambique',
-      companyCity: (attrs as any)['custom:city'] || savedUser.companyCity || 'Maputo',
-      companyProvince: (attrs as any)['custom:province'] || savedUser.companyProvince || 'Maputo Cidade',
+      companyAddress: savedUser.companyAddress || i18n.t('state:country'),
+      companyCity: (attrs as any)['custom:city'] || savedUser.companyCity || i18n.t('state:cityMaputo'),
+      companyProvince: (attrs as any)['custom:province'] || savedUser.companyProvince || i18n.t('state:cityMaputoCidade'),
       plan: (savedUser.plan as any) || 'PME',
       planStatus: (savedUser.planStatus as any) || 'active',
       renewalDate: savedUser.renewalDate || '31/12/2026',
@@ -226,41 +231,45 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (days < 0) {
         generatedAlerts.push({
           id: `alert-overdue-${obl.id}`,
-          title: `Obrigação Vencida: ${obl.title}`,
-          message: `A data limite era ${obl.dueDate}. Proceda à liquidação para evitar juros de mora agravados.`,
+          title: i18n.t('state:alertOverdueTitle', { title: obl.title }),
+          message: i18n.t('state:alertOverdueMsg', { dueDate: obl.dueDate }),
           severity: 'critical',
           category: obl.category,
           date: obl.dueDate,
           dueDate: obl.dueDate,
           daysRemaining: days,
           read: readAlertIds.includes(`alert-overdue-${obl.id}`),
-          actionLabel: 'Liquidar Agora'
+          actionLabel: i18n.t('state:payNow')
         });
       } else if (days <= 3) {
         generatedAlerts.push({
           id: `alert-imminent-${obl.id}`,
-          title: `Aviso Iminente: ${obl.title}`,
-          message: `Faltam apenas ${days === 0 ? 'poucas horas (Hoje)' : `${days} dia(s)`} para o encerramento do prazo legal.`,
+          title: i18n.t('state:alertImminentTitle', { title: obl.title }),
+          message: i18n.t('state:alertImminentMsg', {
+            daysLabel: days === 0
+              ? i18n.t('state:hoursToday')
+              : i18n.t('state:xDays', { count: days })
+          }),
           severity: 'critical',
           category: obl.category,
           date: obl.dueDate,
           dueDate: obl.dueDate,
           daysRemaining: days,
           read: readAlertIds.includes(`alert-imminent-${obl.id}`),
-          actionLabel: 'Ver Detalhes'
+          actionLabel: i18n.t('state:viewDetails')
         });
       } else if (days <= 7) {
         generatedAlerts.push({
           id: `alert-upcoming-${obl.id}`,
-          title: `Lembrete Preventivo: ${obl.title}`,
-          message: `O prazo vence em ${days} dias (${obl.dueDate}). Verifique os montantes a declarar.`,
+          title: i18n.t('state:alertUpcomingTitle', { title: obl.title }),
+          message: i18n.t('state:alertUpcomingMsg', { days, dueDate: obl.dueDate }),
           severity: 'warning',
           category: obl.category,
           date: obl.dueDate,
           dueDate: obl.dueDate,
           daysRemaining: days,
           read: readAlertIds.includes(`alert-upcoming-${obl.id}`),
-          actionLabel: 'Consultar Calendário'
+          actionLabel: i18n.t('state:consultCalendar')
         });
       }
     });
@@ -275,13 +284,49 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const saved = localStorage.getItem('claq_settings');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        parsed.language = parsed.language === 'pt-PT' ? 'pt' : parsed.language;
+        if (!isSupportedLanguage(parsed.language)) parsed.language = 'pt';
+        return parsed;
       } catch (e) {
         return DEFAULT_SETTINGS;
       }
     }
     return DEFAULT_SETTINGS;
   });
+
+  // 6b. Language (single source of truth = claq_language, fallback to settings)
+  const [language, setLanguageState] = useState<AppLanguage>(() => {
+    const stored = localStorage.getItem('claq_language');
+    if (isSupportedLanguage(stored)) return stored;
+    return isSupportedLanguage(settings.language) ? settings.language : 'pt';
+  });
+
+  useEffect(() => {
+    if (i18n.language !== language) i18n.changeLanguage(language);
+    document.documentElement.lang = language === 'pt' ? 'pt' : 'en';
+    localStorage.setItem('claq_language', language);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
+
+  useEffect(() => {
+    if (isSupportedLanguage(i18n.language)) {
+      setLanguageState(i18n.language);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i18n.language]);
+
+  const setLanguage = (lng: AppLanguage) => {
+    setLanguageState(lng);
+    localStorage.setItem('claq_language', lng);
+    setSettings(prev => {
+      const updated = { ...prev, language: lng };
+      localStorage.setItem('claq_settings', JSON.stringify(updated));
+      return updated;
+    });
+    i18n.changeLanguage(lng);
+    document.documentElement.lang = lng === 'pt' ? 'pt' : 'en';
+  };
 
   // UI State & Drawers
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
@@ -391,11 +436,11 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const result = await signIn({ username: email, password });
         // Handle next steps (e.g., NEW_PASSWORD_REQUIRED, CONFIRM_SIGN_UP)
         if (result.nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
-          addToast('warning', 'Confirmação Necessária', 'Verifique o seu email para confirmar o registo antes de iniciar sessão.');
+          addToast('warning', i18n.t('state:authConfirmTitle'), i18n.t('state:authConfirmMsg'));
           return false;
         }
         if (result.nextStep?.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
-          addToast('info', 'Nova Senha Necessária', 'Defina uma nova senha conforme exigido pela política de segurança.');
+          addToast('info', i18n.t('state:authNewPasswordTitle'), i18n.t('state:authNewPasswordMsg'));
           return false;
         }
         if (result.isSignedIn) {
@@ -409,7 +454,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setIsAuthenticated(true);
             localStorage.setItem('claq_user', JSON.stringify(cognitoUser));
             localStorage.setItem('claq_is_auth', 'true');
-            addToast('success', 'Sessão Iniciada', `Bem-vindo de volta, ${cognitoUser.name}!`);
+            addToast('success', i18n.t('state:sessionStartedTitle'), i18n.t('state:sessionStartedMsg', { name: cognitoUser.name }));
             await syncFromBackend();
             return true;
           }
@@ -421,11 +466,11 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             phone: '+258 84 000 0000',
             role: 'ACCOUNTING_ADMIN',
             avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-            companyName: 'Minha Empresa, Lda',
+            companyName: i18n.t('state:companyFallback'),
             companyNuit: '400000000',
-            companyAddress: 'Moçambique',
-            companyCity: 'Maputo',
-            companyProvince: 'Maputo Cidade',
+            companyAddress: i18n.t('state:country'),
+            companyCity: i18n.t('state:cityMaputo'),
+            companyProvince: i18n.t('state:cityMaputoCidade'),
             plan: 'PME',
             planStatus: 'active',
             renewalDate: '31/12/2026'
@@ -444,7 +489,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!isCognitoNotFound) {
         // For other Cognito errors (invalid password, etc.), show directly and don't fallback to avoid masking
         if (name.includes('NotAuthorizedException') || name.includes('UserNotConfirmed')) {
-          addToast('error', 'Falha na Autenticação', 'Credenciais inválidas ou utilizador não confirmado. Verifique o email e senha.');
+          addToast('error', i18n.t('state:authFailTitle'), i18n.t('state:authFailInvalidMsg'));
           return false;
         }
         // For network or other, fall through to legacy attempt
@@ -472,16 +517,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           localStorage.setItem('claq_token', res.token);
           localStorage.setItem('claq_cognito_idToken', res.token);
         }
-        addToast('success', 'Sessão Iniciada', `Bem-vindo de volta, ${res.user.name}!`);
+        addToast('success', i18n.t('state:sessionStartedTitle'), i18n.t('state:sessionStartedMsg', { name: res.user.name }));
         await syncFromBackend();
         return true;
       }
     } catch (e: any) {
       const msg = e?.message || '';
       if (msg.includes('401') || msg.includes('403')) {
-        addToast('error', 'Falha na Autenticação', 'Credenciais inválidas. Verifique o email/NUIT e a senha.');
+        addToast('error', i18n.t('state:authFailTitle'), i18n.t('state:authFailGenericMsg'));
       } else {
-        addToast('error', 'Falha na Autenticação', 'Credenciais inválidas ou erro de comunicação com o servidor.');
+        addToast('error', i18n.t('state:authFailTitle'), i18n.t('state:authFailServerMsg'));
       }
       setIsAuthenticated(false);
       setUser(null);
@@ -504,7 +549,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           options: {
             userAttributes: {
               email,
-              name: userData.name || 'Administrador Fiscal',
+              name: userData.name || i18n.t('state:adminFiscalDefault'),
               ...(userData.phone ? { phone_number: userData.phone } : {}),
               // Custom attributes must be pre-created in User Pool; we send what we can
             } as any,
@@ -512,21 +557,21 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
         // If autoConfirm or CONFIRM_SIGN_UP step
         if (signUpResult.nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
-          addToast('info', 'Confirme o seu Email', `Enviámos um código para ${email}. Introduza o código para ativar a conta.`);
+          addToast('info', i18n.t('state:confirmEmailTitle'), i18n.t('state:confirmEmailMsg', { email }));
           // Auto sign-in after confirmation would happen on next login; for now fallback to legacy if needed
           // Store pending user locally for UX
           const pendingUser: UserProfile = {
             id: `usr_${Date.now()}`,
-            name: userData.name || 'Administrador Fiscal',
+            name: userData.name || i18n.t('state:adminFiscalDefault'),
             email,
             phone: userData.phone || '+258 84 000 0000',
             role: 'ACCOUNTING_ADMIN',
             avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-            companyName: userData.companyName || 'Nova Empresa, Lda',
+            companyName: userData.companyName || i18n.t('state:companyNewFallback'),
             companyNuit: userData.companyNuit || '400000000',
-            companyAddress: (userData as any).companyAddress || 'Moçambique',
-            companyCity: userData.companyCity || 'Maputo',
-            companyProvince: userData.companyProvince || 'Maputo Cidade',
+            companyAddress: (userData as any).companyAddress || i18n.t('state:country'),
+            companyCity: userData.companyCity || i18n.t('state:cityMaputo'),
+            companyProvince: userData.companyProvince || i18n.t('state:cityMaputoCidade'),
             plan: (userData.plan as any) || 'PME',
             planStatus: 'active',
             renewalDate: '31/12/2026'
@@ -542,7 +587,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 setIsAuthenticated(true);
                 localStorage.setItem('claq_user', JSON.stringify(cognitoUser));
                 localStorage.setItem('claq_is_auth', 'true');
-                addToast('success', 'Conta Criada com Sucesso', `Empresa ${cognitoUser.companyName} configurada.`);
+                addToast('success', i18n.t('state:accountCreatedTitle'), i18n.t('state:accountCreatedMsg', { companyName: cognitoUser.companyName }));
                 return;
               }
             }
@@ -560,7 +605,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (e: any) {
       const name = e?.name || '';
       if (name.includes('UsernameExistsException')) {
-        addToast('error', 'Email já Registado', 'O email indicado já se encontra registado. Tente iniciar sessão.');
+        addToast('error', i18n.t('state:emailExistsTitle'), i18n.t('state:emailExistsMsg'));
         return;
       }
       console.warn('Cognito signUp failed, trying legacy backend:', e);
@@ -584,7 +629,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           localStorage.setItem('claq_token', res.token);
           localStorage.setItem('claq_cognito_idToken', res.token);
         }
-        addToast('success', 'Conta Criada com Sucesso', `Empresa ${res.user.companyName} configurada.`);
+        addToast('success', i18n.t('state:accountCreatedTitle'), i18n.t('state:accountCreatedMsg', { companyName: res.user.companyName }));
         setObligations([]);
         setClients([]);
         setSimulations([]);
@@ -596,9 +641,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (e: any) {
       const msg = e?.message || '';
       if (msg.includes('409')) {
-        addToast('error', 'Email já Registado', 'O email indicado já se encontra registado.');
+        addToast('error', i18n.t('state:emailExistsTitle'), i18n.t('state:emailExistsMsgShort'));
       } else {
-        addToast('error', 'Erro no Registo', 'Não foi possível criar a conta. Verifique os dados introduzidos ou confirme o email.');
+        addToast('error', i18n.t('state:registerErrorTitle'), i18n.t('state:registerErrorMsg'));
       }
       setIsAuthenticated(false);
       setUser(null);
@@ -625,7 +670,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.removeItem('claq_obligations');
     localStorage.removeItem('claq_clients');
     localStorage.removeItem('claq_simulations');
-    addToast('info', 'Sessão Terminada', 'Até breve!');
+    addToast('info', i18n.t('state:sessionEndedTitle'), i18n.t('state:sessionEndedMsg'));
   };
 
   const updateUser = (data: Partial<UserProfile>) => {
@@ -643,13 +688,13 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         updateUserAttributes({ userAttributes: attrs as any }).catch(() => {});
       }
     }).catch(() => {});
-    addToast('success', 'Perfil Actualizado', 'Os dados da empresa foram guardados.');
+    addToast('success', i18n.t('state:profileUpdatedTitle'), i18n.t('state:profileUpdatedMsg'));
   };
 
   // Obligations Actions
   const markObligationPaid = (id: string) => {
     ApiClient.patch(`/obligations/${id}/settle`).catch(() => {
-      addToast('error', 'Liquidação não confirmada', 'Não foi possível confirmar a operação no servidor.');
+      addToast('error', i18n.t('state:settleNotConfirmedTitle'), i18n.t('state:settleNotConfirmedMsg'));
       return null;
     });
     setObligations(prev => {
@@ -662,7 +707,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       localStorage.setItem('claq_obligations', JSON.stringify(updated));
       return updated;
     });
-    addToast('success', 'Obrigação Liquidada', 'Comprovativo de liquidação registado.');
+    addToast('success', i18n.t('state:obligationSettledTitle'), i18n.t('state:obligationSettledMsg'));
   };
 
   const addObligation = (obl: Omit<FiscalObligation, 'id'>) => {
@@ -670,23 +715,23 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       ...obl,
       id: `obl_${Date.now()}`
     };
-    ApiClient.post('/obligations', newObl).catch(() => addToast('error', 'Obrigação não guardada', 'Não foi possível confirmar a operação no servidor.'));
+    ApiClient.post('/obligations', newObl).catch(() => addToast('error', i18n.t('state:obligationNotSavedTitle'), i18n.t('state:settleNotConfirmedMsg')));
     setObligations(prev => {
       const updated = [newObl, ...prev];
       localStorage.setItem('claq_obligations', JSON.stringify(updated));
       return updated;
     });
-    addToast('success', 'Obrigação Adicionada', `${newObl.title} agendada para ${newObl.dueDate}.`);
+    addToast('success', i18n.t('state:obligationAddedTitle'), i18n.t('state:obligationAddedMsg', { title: newObl.title, dueDate: newObl.dueDate }));
   };
 
   const deleteObligation = (id: string) => {
-    ApiClient.delete(`/obligations/${id}`).catch(() => addToast('error', 'Eliminação não confirmada', 'Não foi possível confirmar a operação no servidor.'));
+    ApiClient.delete(`/obligations/${id}`).catch(() => addToast('error', i18n.t('state:obligationDeletedTitle'), i18n.t('state:settleNotConfirmedMsg')));
     setObligations(prev => {
       const updated = prev.filter(o => o.id !== id);
       localStorage.setItem('claq_obligations', JSON.stringify(updated));
       return updated;
     });
-    addToast('info', 'Obrigação Removida', 'Item eliminado do calendário fiscal.');
+    addToast('info', i18n.t('state:obligationRemovedTitle'), i18n.t('state:obligationRemovedMsg'));
   };
 
   const loadStandardMozambiqueTemplate = async () => {
@@ -695,7 +740,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (res && res.data) {
         setObligations(res.data);
         localStorage.setItem('claq_obligations', JSON.stringify(res.data));
-        addToast('success', 'Modelo Padrão Carregado', `${res.data.length} prazos fiscais oficiais de Moçambique inseridos.`);
+        addToast('success', i18n.t('state:templateLoadedTitle'), i18n.t('state:templateLoadedMsg', { count: res.data.length }));
         return;
       }
     } catch (e) {
@@ -703,68 +748,68 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth();
-      const monthLabel = CalendarEngine.getMonthNamePt(month, year);
+      const monthLabel = CalendarEngine.getMonthName(month, year, i18n.language);
       const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
       const monthStr = String(month + 1).padStart(2, '0');
 
       const template: FiscalObligation[] = [
         {
           id: `obl-iva-${year}-${monthStr}`,
-          title: 'IVA – Declaração Periódica e Pagamento',
+          title: i18n.t('data:templateIvaTitle'),
           category: 'IVA',
           period: monthLabel,
           dueDate: `${year}-${monthStr}-${String(lastDayOfMonth).padStart(2, '0')}`,
           status: 'a_vencer',
           amount: 125000,
           authority: 'AT',
-          description: 'Declaração periódica do Modelo A e guia de pagamento do IVA relativo às operações do mês.',
-          penaltyRisk: 'Multa de 25% a 100% mais juros de mora legais (Art. 101 LGT).',
+          description: i18n.t('data:templateIvaDesc'),
+          penaltyRisk: i18n.t('data:templateIvaPenalty'),
           daysRemaining: CalendarEngine.getDaysRemaining(`${year}-${monthStr}-${String(lastDayOfMonth).padStart(2, '0')}`)
         },
         {
           id: `obl-inss-${year}-${monthStr}`,
-          title: 'INSS – Contribuição Mensal Obrigatória',
+          title: i18n.t('data:templateInssTitle'),
           category: 'INSS',
           period: monthLabel,
           dueDate: `${year}-${monthStr}-10`,
           status: 'a_vencer',
           amount: 45000,
           authority: 'INSS',
-          description: 'Folha de salários e pagamento de 3% trabalhador + 4% patronal.',
-          penaltyRisk: 'Juros de mora mensais e certidão de quitação bloqueada.',
+          description: i18n.t('data:templateInssDesc'),
+          penaltyRisk: i18n.t('data:templateInssPenalty'),
           daysRemaining: CalendarEngine.getDaysRemaining(`${year}-${monthStr}-10`)
         },
         {
           id: `obl-irps-${year}-${monthStr}`,
-          title: 'IRPS – Retenção na Fonte sobre Salários',
+          title: i18n.t('data:templateIrpsTitle'),
           category: 'IRPS',
           period: monthLabel,
           dueDate: `${year}-${monthStr}-20`,
           status: 'a_vencer',
           amount: 68000,
           authority: 'AT',
-          description: 'Guia de entrega de retenções na fonte de 1ª e 2ª categorias.',
-          penaltyRisk: 'Multa por falta de entrega de imposto retido.',
+          description: i18n.t('data:templateIrpsDesc'),
+          penaltyRisk: i18n.t('data:templateIrpsPenalty'),
           daysRemaining: CalendarEngine.getDaysRemaining(`${year}-${monthStr}-20`)
         },
         {
           id: `obl-tae-${year}`,
-          title: 'TAE – Taxa de Atividade Económica',
+          title: i18n.t('data:templateTaeTitle'),
           category: 'TAE',
-          period: `Semestre/${year}`,
+          period: i18n.t('data:templateTaePeriod', { year }),
           dueDate: `${year}-${monthStr}-25`,
           status: 'a_vencer',
           amount: 12000,
           authority: 'Municipio',
-          description: 'Obrigação municipal. Conselho Municipal de Maputo.',
-          penaltyRisk: 'Agravamento de 50% por incumprimento do prazo municipal.',
+          description: i18n.t('data:templateTaeDesc'),
+          penaltyRisk: i18n.t('data:templateTaePenalty'),
           daysRemaining: CalendarEngine.getDaysRemaining(`${year}-${monthStr}-25`)
         }
       ];
 
       setObligations(template);
       localStorage.setItem('claq_obligations', JSON.stringify(template));
-      addToast('success', 'Modelo Padrão Carregado', `${template.length} prazos fiscais oficiais de Moçambique inseridos.`);
+      addToast('success', i18n.t('state:templateLoadedTitle'), i18n.t('state:templateLoadedMsg', { count: template.length }));
     }
   };
 
@@ -775,7 +820,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.removeItem('claq_obligations');
     localStorage.removeItem('claq_clients');
     localStorage.removeItem('claq_simulations');
-    addToast('info', 'Dados Limpos', 'O calendário e simulações foram redefinidos para estado limpo.');
+    addToast('info', i18n.t('state:dataClearedTitle'), i18n.t('state:dataClearedMsg'));
   };
 
   // Alerts Actions
@@ -793,18 +838,18 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const allIds = alerts.map(a => a.id);
     setReadAlertIds(allIds);
     localStorage.setItem('claq_read_alerts', JSON.stringify(allIds));
-    addToast('info', 'Alertas Lidos', 'Todos os avisos foram marcados como lidos.');
+    addToast('info', i18n.t('state:alertsReadTitle'), i18n.t('state:alertsReadMsg'));
   };
 
   const dispatchTestAlert = (channel: 'whatsapp' | 'email' | 'sms' | 'system') => {
     ApiClient.post('/alerts/test-dispatch', { channel }).catch(() => {});
     const channelNames = {
-      whatsapp: 'WhatsApp (+258 84...)',
-      email: 'Email Corporativo',
-      sms: 'SMS',
-      system: 'Painel do Sistema'
+      whatsapp: i18n.t('state:channelWhatsapp'),
+      email: i18n.t('state:channelEmail'),
+      sms: i18n.t('state:channelSms'),
+      system: i18n.t('state:channelPanel')
     };
-    addToast('success', 'Alerta Teste Disparado', `Mensagem de teste enviada com sucesso para ${channelNames[channel]}.`);
+    addToast('success', i18n.t('state:testAlertTitle'), i18n.t('state:testAlertMsg', { channel: channelNames[channel] }));
   };
 
   // Simulations Actions
@@ -820,7 +865,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       localStorage.setItem('claq_simulations', JSON.stringify(updated));
       return updated;
     });
-    addToast('success', 'Simulação Guardada', 'Cálculo certificado adicionado ao seu histórico.');
+    addToast('success', i18n.t('state:simSavedTitle'), i18n.t('state:simSavedMsg'));
     return newRecord;
   };
 
@@ -831,7 +876,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       localStorage.setItem('claq_simulations', JSON.stringify(updated));
       return updated;
     });
-    addToast('info', 'Simulação Eliminada', 'Registo removido do histórico.');
+    addToast('info', i18n.t('state:simDeletedTitle'), i18n.t('state:simDeletedMsg'));
   };
 
   // Clients Actions
@@ -846,7 +891,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       localStorage.setItem('claq_clients', JSON.stringify(updated));
       return updated;
     });
-    addToast('success', 'Cliente Adicionado', `${newClient.name} registado com sucesso.`);
+    addToast('success', i18n.t('state:clientAddedTitle'), i18n.t('state:clientAddedMsg', { name: newClient.name }));
   };
 
   const deleteClient = (id: string) => {
@@ -857,7 +902,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return updated;
     });
     if (activeClient?.id === id) setActiveClient(null);
-    addToast('info', 'Cliente Removido', 'Registo eliminado.');
+    addToast('info', i18n.t('state:clientRemovedTitle'), i18n.t('state:clientRemovedMsg'));
   };
 
   // Settings Actions
@@ -867,7 +912,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       localStorage.setItem('claq_settings', JSON.stringify(updated));
       return updated;
     });
-    addToast('success', 'Configurações Guardadas', 'As preferências foram actualizadas.');
+    addToast('success', i18n.t('state:settingsSavedTitle'), i18n.t('state:settingsSavedMsg'));
   };
 
   const toggleNotificationChannel = (channel: keyof SystemSettings['notifications']) => {
@@ -909,7 +954,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return updated;
     });
     setIsWhatsAppModalOpen(false);
-    addToast('success', 'WhatsApp Conectado', `Número ${phone} pronto para receber alertas.`);
+    addToast('success', i18n.t('state:whatsappConnectedTitle'), i18n.t('state:whatsappConnectedMsg', { phone }));
   };
 
   const openAIAssistantWithPrompt = (prompt: string) => {
@@ -959,6 +1004,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         toggleNotificationChannel,
         toggleAlertTiming,
         connectWhatsApp,
+        language,
+        setLanguage,
         isWhatsAppModalOpen,
         setIsWhatsAppModalOpen,
         isAIAssistantOpen,

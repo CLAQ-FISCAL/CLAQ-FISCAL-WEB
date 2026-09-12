@@ -9,9 +9,11 @@ import {
   QrCode,
   BellRing
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../context/AppStateContext';
 
 export const WhatsAppModal: React.FC = () => {
+  const { t } = useTranslation();
   const {
     user,
     isWhatsAppModalOpen,
@@ -58,10 +60,10 @@ export const WhatsAppModal: React.FC = () => {
             </div>
             <div>
               <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#FFFFFF' }}>
-                Integração WhatsApp Fiscal
+                {t('whatsapp:title')}
               </h3>
               <p style={{ fontSize: '12px', color: '#94A3B8' }}>
-                Receba lembretes automáticos de prazos directamente no seu telemóvel
+                {t('whatsapp:subtitle')}
               </p>
             </div>
           </div>
@@ -96,7 +98,7 @@ export const WhatsAppModal: React.FC = () => {
               cursor: 'pointer'
             }}
           >
-            Conectar Número
+            {t('whatsapp:tabConnect')}
           </button>
           <button
             onClick={() => setActiveTab('test')}
@@ -111,7 +113,7 @@ export const WhatsAppModal: React.FC = () => {
               cursor: 'pointer'
             }}
           >
-            Disparar Teste
+            {t('whatsapp:tabTest')}
           </button>
           <button
             onClick={() => setActiveTab('templates')}
@@ -126,7 +128,7 @@ export const WhatsAppModal: React.FC = () => {
               cursor: 'pointer'
             }}
           >
-            Modelos de Mensagem
+            {t('whatsapp:tabTemplates')}
           </button>
         </div>
 
@@ -163,16 +165,16 @@ export const WhatsAppModal: React.FC = () => {
                 </div>
                 <div>
                   <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#065F46' }}>
-                    Canal WhatsApp Activo e Seguro
+                    {t('whatsapp:channelActive')}
                   </h4>
                   <p style={{ fontSize: '12.5px', color: '#047857', marginTop: '2px' }}>
-                    O seu número está pronto para receber notificações de IVA, INSS, IRPS e Licenças com antecedência de 7, 3 e 1 dias.
+                    {t('whatsapp:channelActiveDescription')}
                   </p>
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Número de WhatsApp (com indicativo +258)</label>
+                <label className="form-label">{t('whatsapp:numberLabel')}</label>
                 <div style={{ position: 'relative' }}>
                   <Smartphone
                     size={18}
@@ -189,7 +191,7 @@ export const WhatsAppModal: React.FC = () => {
                   />
                 </div>
                 <span style={{ fontSize: '12px', color: 'var(--slate-500)', marginTop: '4px' }}>
-                  Compatível com Vodacom (84/85), Tmcel (82/83) e Movitel (86/87).
+                  {t('whatsapp:compatibleOperators')}
                 </span>
               </div>
 
@@ -207,7 +209,7 @@ export const WhatsAppModal: React.FC = () => {
                 }}
               >
                 <ShieldCheck size={16} color="var(--emerald-600)" />
-                <span>Dados criptografados de ponta a ponta e protegidos pela LGPD Moçambicana.</span>
+                <span>{t('whatsapp:privacyNote')}</span>
               </div>
             </div>
           )}
@@ -215,7 +217,7 @@ export const WhatsAppModal: React.FC = () => {
           {activeTab === 'test' && (
             <div>
               <p style={{ fontSize: '13.5px', color: 'var(--slate-600)', marginBottom: '16px' }}>
-                Clique no botão abaixo para simular o envio imediato de um alerta fiscal de vencimento para o canal seleccionado:
+                {t('whatsapp:testInstructions')}
               </p>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
@@ -234,7 +236,7 @@ export const WhatsAppModal: React.FC = () => {
                   }}
                 >
                   <MessageSquare size={22} color="#10B981" />
-                  <span style={{ fontWeight: 700 }}>Alerta WhatsApp</span>
+                  <span style={{ fontWeight: 700 }}>{t('whatsapp:alertWhatsApp')}</span>
                   <span style={{ fontSize: '11px', color: '#047857' }}>+258 84 123 4567</span>
                 </button>
 
@@ -253,7 +255,7 @@ export const WhatsAppModal: React.FC = () => {
                   }}
                 >
                   <BellRing size={22} color="#2563EB" />
-                  <span style={{ fontWeight: 700 }}>Alerta E-mail</span>
+                  <span style={{ fontWeight: 700 }}>{t('whatsapp:alertEmail')}</span>
                   <span style={{ fontSize: '11px', color: '#1D4ED8' }}>carlos.apollo@claq.co.mz</span>
                 </button>
               </div>
@@ -270,7 +272,7 @@ export const WhatsAppModal: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981' }} />
                   <span style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
-                    PRÉ-VISUALIZAÇÃO DA MENSAGEM WHATSAPP
+                    {t('whatsapp:previewLabel')}
                   </span>
                 </div>
                 <div
@@ -284,13 +286,13 @@ export const WhatsAppModal: React.FC = () => {
                   }}
                 >
                   <p style={{ fontWeight: 700, color: '#FBBF24', marginBottom: '4px' }}>
-                    🚨 [CLAQ Fiscal Alert] Lembrete de Obrigação Fiscal
+                    {t('whatsapp:previewTitle')}
                   </p>
-                  <p>Olá <b>{user?.name || 'Administrador'}</b>,</p>
-                  <p>Lembramos que a sua obrigação <b>IVA – Periódico</b> vence nos próximos dias.</p>
+<p>{t('whatsapp:previewGreeting')} <b>{user?.name || t('whatsapp:administrator')}</b>,</p>
+                  <p>{t('whatsapp:previewObligationPrefix')} <b>{t('whatsapp:previewObligationType')}</b> {t('whatsapp:previewObligationSuffix')}</p>
                   <p style={{ marginTop: '6px', color: '#94A3B8', fontSize: '11.5px' }}>
-                    Valor estimado: 127.500,00 MZN<br />
-                    Evite multas e juros de mora. Aceda ao simulador: https://claq.co.mz/sim
+                    {t('whatsapp:previewEstimatedValue')}<br />
+                    {t('whatsapp:previewCta')}
                   </p>
                 </div>
               </div>
@@ -310,10 +312,10 @@ export const WhatsAppModal: React.FC = () => {
                 }}
               >
                 <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-900)' }}>
-                  Modelo 1: Vencimento de IVA / IRPC (Crítico)
+                  {t('whatsapp:template1Title')}
                 </h4>
                 <p style={{ fontSize: '12px', color: 'var(--slate-600)', marginTop: '4px' }}>
-                  Enviado a 3 dias e 1 dia antes da data limite com aviso de multas do Art. 101 da Lei Geral Tributária.
+                  {t('whatsapp:template1Description')}
                 </p>
               </div>
 
@@ -328,10 +330,10 @@ export const WhatsAppModal: React.FC = () => {
                 }}
               >
                 <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-900)' }}>
-                  Modelo 2: Folha de Salários INSS (Mensal)
+                  {t('whatsapp:template2Title')}
                 </h4>
                 <p style={{ fontSize: '12px', color: 'var(--slate-600)', marginTop: '4px' }}>
-                  Enviado a 8 dias e 2 dias antes do dia 10 de cada mês com link para carregar folha no SISSMO.
+                  {t('whatsapp:template2Description')}
                 </p>
               </div>
 
@@ -346,10 +348,10 @@ export const WhatsAppModal: React.FC = () => {
                 }}
               >
                 <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-900)' }}>
-                  Modelo 3: Licenças Municipais e Alvarás
+                  {t('whatsapp:template3Title')}
                 </h4>
                 <p style={{ fontSize: '12px', color: 'var(--slate-600)', marginTop: '4px' }}>
-                  Avisos preventivos a 30 dias e 15 dias da renovação anual de alvarás comerciais.
+                  {t('whatsapp:template3Description')}
                 </p>
               </div>
             </div>
@@ -368,14 +370,14 @@ export const WhatsAppModal: React.FC = () => {
           }}
         >
           <button onClick={() => setIsWhatsAppModalOpen(false)} className="btn btn-secondary">
-            Fechar
+            {t('common:close')}
           </button>
           <button
             onClick={() => connectWhatsApp(phone)}
             className="btn btn-primary-gold"
           >
             <CheckCircle2 size={16} />
-            <span>Guardar e Conectar</span>
+            <span>{t('whatsapp:saveAndConnect')}</span>
           </button>
         </div>
       </div>

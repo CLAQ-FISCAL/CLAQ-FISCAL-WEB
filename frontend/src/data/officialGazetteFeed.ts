@@ -1,44 +1,45 @@
 import { NewsItem } from '../types';
+import type { TFunction } from 'i18next';
 
-export const OFFICIAL_GAZETTE_FEED: NewsItem[] = [
+export const OFFICIAL_GAZETTE_FEED = (t: TFunction): NewsItem[] => [
   {
     id: 'news-1',
-    title: 'Alteração ao Regulamento do IVA – Operações Transfronteiriças',
+    title: t('data:gazette1Title'),
     date: '2026-06-25',
-    category: 'IVA',
-    summary: 'A Autoridade Tributária clarifica a aplicação do fator 1,25 (gross-up) em contratos líquidos de impostos celebrados com entidades não residentes.',
-    readTime: '3 min',
-    source: 'Boletim da República I Série',
+    category: t('data:gazette1Category'),
+    summary: t('data:gazette1Summary'),
+    readTime: t('data:gazette1ReadTime'),
+    source: t('data:gazette1Source'),
     badgeType: 'blue'
   },
   {
     id: 'news-2',
-    title: 'Novo Prazo para Entrega da Declaração Anual Modelo 22 (IRPC)',
+    title: t('data:gazette2Title'),
     date: '2026-06-24',
-    category: 'IRPC',
-    summary: 'Prorrogação de prazos para submissão digital da demonstração de resultados fiscais no portal e-Tributação para contribuintes de média e grande dimensão.',
-    readTime: '4 min',
-    source: 'Autoridade Tributária de Moçambique',
+    category: t('data:gazette2Category'),
+    summary: t('data:gazette2Summary'),
+    readTime: t('data:gazette2ReadTime'),
+    source: t('data:gazette2Source'),
     badgeType: 'green'
   },
   {
     id: 'news-3',
-    title: 'Comunicado do INSS sobre Folhas de Salários Digitais (SISSMO)',
+    title: t('data:gazette3Title'),
     date: '2026-06-22',
-    category: 'INSS',
-    summary: 'Aviso sobre a obrigatoriedade do carregamento das folhas de remuneração até ao dia 10 de cada mês através da plataforma SISSMO.',
-    readTime: '2 min',
-    source: 'Instituto Nacional de Segurança Social',
+    category: t('data:gazette3Category'),
+    summary: t('data:gazette3Summary'),
+    readTime: t('data:gazette3ReadTime'),
+    source: t('data:gazette3Source'),
     badgeType: 'purple'
   },
   {
     id: 'news-4',
-    title: 'Postura Municipal sobre Licenciamento Simplificado em Maputo',
+    title: t('data:gazette4Title'),
     date: '2026-06-20',
-    category: 'Municipal',
-    summary: 'Conselho Municipal de Maputo aprova novos incentivos e redução de taxas de renovação do Alvará Comercial para Micro e Pequenas Empresas.',
-    readTime: '5 min',
-    source: 'Conselho Municipal de Maputo',
+    category: t('data:gazette4Category'),
+    summary: t('data:gazette4Summary'),
+    readTime: t('data:gazette4ReadTime'),
+    source: t('data:gazette4Source'),
     badgeType: 'amber'
   }
 ];

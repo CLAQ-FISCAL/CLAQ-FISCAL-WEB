@@ -32,3 +32,4 @@ crash.log
 *.njsproj
 *.sln
 *.sw?
+*.bak

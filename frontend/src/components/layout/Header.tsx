@@ -14,7 +14,9 @@ import {
   ExternalLink,
   Shield
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../context/AppStateContext';
+import { LanguageToggle } from '../../i18n/LanguageToggle';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -27,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigate,
   currentPath
 }) => {
+  const { t } = useTranslation();
   const {
     user,
     logout,
@@ -68,16 +71,16 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const getPageTitle = () => {
-    if (currentPath.startsWith('/simuladores')) return 'Centro de Simuladores';
-    if (currentPath === '/calendario') return 'Calendário Fiscal';
-    if (currentPath === '/alertas') return 'Central de Alertas';
-    if (currentPath === '/biblioteca-legal') return 'Biblioteca Legal';
-    if (currentPath === '/relatorios') return 'Relatórios e Conformidade';
-    if (currentPath === '/clientes') return 'Gestão de Clientes';
-    if (currentPath === '/newsletter') return 'Newsletter & Notícias';
-    if (currentPath === '/configuracoes') return 'Configurações do Sistema';
-    if (currentPath === '/suporte') return 'Ajuda e Suporte';
-    return 'Bem-vindo ao CLAQ Fiscal Alert';
+    if (currentPath.startsWith('/simuladores')) return t('header:pageTitleSimuladores');
+    if (currentPath === '/calendario') return t('header:pageTitleCalendario');
+    if (currentPath === '/alertas') return t('header:pageTitleAlertas');
+    if (currentPath === '/biblioteca-legal') return t('header:pageTitleBiblioteca');
+    if (currentPath === '/relatorios') return t('header:pageTitleRelatorios');
+    if (currentPath === '/clientes') return t('header:pageTitleClientes');
+    if (currentPath === '/newsletter') return t('header:pageTitleNewsletter');
+    if (currentPath === '/configuracoes') return t('header:pageTitleConfig');
+    if (currentPath === '/suporte') return t('header:pageTitleSuporte');
+    return t('header:pageTitleDashboard');
   };
 
   return (
@@ -103,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={onToggleSidebar}
           className="btn btn-ghost"
           style={{ padding: '8px', borderRadius: '8px', color: 'var(--slate-600)' }}
-          title="Alternar Menu"
+          title={t('header:toggleMenu')}
         >
           <Menu size={20} />
         </button>
@@ -128,7 +131,7 @@ export const Header: React.FC<HeaderProps> = ({
             }}
           >
             <Building2 size={16} color="var(--gold-600)" />
-            <span>{activeClient ? activeClient.name : (user?.companyName || 'CLAQ Consultores, Lda.')}</span>
+            <span>{activeClient ? activeClient.name : (user?.companyName || t('header:companyDefault'))}</span>
             <ChevronDown size={14} color="var(--slate-400)" />
           </button>
 
@@ -148,7 +151,7 @@ export const Header: React.FC<HeaderProps> = ({
               }}
             >
               <div style={{ padding: '6px 8px', fontSize: '11px', fontWeight: 700, color: 'var(--slate-400)', textTransform: 'uppercase' }}>
-                Alternar Empresa / Cliente
+                {t('header:companySwitchTitle')}
               </div>
               <button
                 onClick={() => {
@@ -171,7 +174,7 @@ export const Header: React.FC<HeaderProps> = ({
                   textAlign: 'left'
                 }}
               >
-                <span>{user?.companyName || 'CLAQ Consultores (Minha Empresa)'}</span>
+                <span>{user?.companyName || t('header:companySwitchItem')}</span>
                 {!activeClient && <CheckCircle2 size={15} color="var(--blue-600)" />}
               </button>
 
@@ -202,7 +205,7 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span>{cli.name}</span>
-                    <span style={{ fontSize: '11px', color: 'var(--slate-400)' }}>NUIT: {cli.nuit}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--slate-400)' }}>{t('header:nuitLabel', { nuit: cli.nuit })}</span>
                   </div>
                   {activeClient?.id === cli.id && <CheckCircle2 size={15} color="var(--blue-600)" />}
                 </button>
@@ -229,7 +232,7 @@ export const Header: React.FC<HeaderProps> = ({
                   cursor: 'pointer'
                 }}
               >
-                <span>Gerir Todos os Clientes</span>
+                <span>{t('header:manageAllClients')}</span>
                 <ExternalLink size={13} />
               </button>
             </div>
@@ -253,7 +256,7 @@ export const Header: React.FC<HeaderProps> = ({
           />
           <input
             type="text"
-            placeholder="Pesquisar..."
+            placeholder={t('header:searchPlaceholder')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => {
@@ -282,6 +285,9 @@ export const Header: React.FC<HeaderProps> = ({
           />
         </div>
 
+        {/* Language Toggle */}
+        <LanguageToggle variant="light" />
+
         {/* Conectar WhatsApp Button */}
         <button
           onClick={() => setIsWhatsAppModalOpen(true)}
@@ -301,7 +307,7 @@ export const Header: React.FC<HeaderProps> = ({
           }}
         >
           <MessageSquare size={16} color={settings.isWhatsAppConnected ? '#10B981' : '#2563EB'} />
-          <span>{settings.isWhatsAppConnected ? 'WhatsApp Activo' : 'Conectar WhatsApp'}</span>
+          <span>{settings.isWhatsAppConnected ? t('header:whatsappActive') : t('header:whatsappConnect')}</span>
           <span
             style={{
               width: '8px',
@@ -318,7 +324,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onNavigate('/suporte')}
           className="btn btn-ghost"
           style={{ padding: '8px', borderRadius: '8px', color: 'var(--slate-500)' }}
-          title="Ajuda e Suporte"
+          title={t('header:helpSupport')}
         >
           <HelpCircle size={19} />
         </button>
@@ -329,7 +335,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setIsAlertsOpen(!isAlertsOpen)}
             className="btn btn-ghost"
             style={{ padding: '8px', borderRadius: '8px', position: 'relative', color: 'var(--slate-500)' }}
-            title="Notificações e Alertas"
+            title={t('header:notificationsAlerts')}
           >
             <Bell size={19} />
             {unreadAlertsCount > 0 && (
@@ -385,7 +391,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Bell size={16} color="var(--blue-600)" />
                   <span style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--slate-900)' }}>
-                    Notificações Fiscais
+                    {t('header:fiscalNotifications')}
                   </span>
                 </div>
                 {unreadAlertsCount > 0 && (
@@ -400,7 +406,7 @@ export const Header: React.FC<HeaderProps> = ({
                       cursor: 'pointer'
                     }}
                   >
-                    Marcar lidas
+                    {t('header:markAsRead')}
                   </button>
                 )}
               </div>
@@ -435,7 +441,9 @@ export const Header: React.FC<HeaderProps> = ({
                           color: alert.severity === 'critical' ? 'var(--red-600)' : alert.severity === 'warning' ? 'var(--gold-700)' : 'var(--blue-600)'
                         }}
                       >
-                        Vence em {alert.daysRemaining} dias
+                        {alert.daysRemaining <= 0
+                          ? t('header:dueToday')
+                          : t('header:dueInXDays', { count: alert.daysRemaining })}
                       </span>
                     </div>
                     <p style={{ fontSize: '12px', color: 'var(--slate-600)', lineHeight: 1.4 }}>
@@ -467,7 +475,7 @@ export const Header: React.FC<HeaderProps> = ({
                     cursor: 'pointer'
                   }}
                 >
-                  Ver todos os alertas →
+                  {t('header:viewAllAlerts')}
                 </button>
               </div>
             </div>
@@ -494,7 +502,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <img
               src={user?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
-              alt={user?.name || 'Utilizador'}
+              alt={user?.name || t('header:userFallback')}
               style={{
                 width: '38px',
                 height: '38px',
@@ -506,10 +514,10 @@ export const Header: React.FC<HeaderProps> = ({
             />
             <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', lineHeight: 1.2 }}>
               <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-900)' }}>
-                {user?.name || 'Utilizador'}
+                {user?.name || t('header:userFallback')}
               </span>
               <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 500 }}>
-                Plano {user?.plan || 'PME'}
+                {t('header:planLabel', { plan: user?.plan || 'PME' })}
               </span>
             </div>
             <ChevronDown size={14} color="var(--slate-400)" />
@@ -536,10 +544,10 @@ export const Header: React.FC<HeaderProps> = ({
                 <p style={{ fontSize: '11.5px', color: 'var(--slate-500)' }}>{user?.email}</p>
                 <div style={{ marginTop: '6px', display: 'flex', gap: '6px' }}>
                   <span className="badge badge-amber" style={{ fontSize: '10px' }}>
-                    Plano {user?.plan}
+                    {t('header:planLabel', { plan: user?.plan })}
                   </span>
                   <span className="badge badge-green" style={{ fontSize: '10px' }}>
-                    Activo
+                    {t('header:activeBadge')}
                   </span>
                 </div>
               </div>
@@ -568,7 +576,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                 >
                   <User size={16} />
-                  <span>Meu Perfil</span>
+                  <span>{t('header:myProfile')}</span>
                 </button>
 
                 <button
@@ -594,7 +602,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                 >
                   <Settings size={16} />
-                  <span>Configurações</span>
+                  <span>{t('header:settings')}</span>
                 </button>
               </div>
 
@@ -623,7 +631,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                 >
                   <LogOut size={16} />
-                  <span>Terminar Sessão</span>
+                  <span>{t('header:logout')}</span>
                 </button>
               </div>
             </div>

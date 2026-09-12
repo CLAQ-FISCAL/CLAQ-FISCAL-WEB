@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Star } from 'lucide-react';
 import { simulatorCatalog } from '../../components/simulators/simulatorCatalog';
 
@@ -6,7 +7,18 @@ interface SimuladoresHubProps {
   onNavigate: (path: string) => void;
 }
 
+const CATEGORY_TABS: { code: string; key: string }[] = [
+  { code: 'Todos', key: 'categoryTodos' },
+  { code: 'Fiscal', key: 'categoryFiscal' },
+  { code: 'Laboral (RH)', key: 'categoryLaboral' },
+  { code: 'Contabilidade', key: 'categoryContabilidade' },
+  { code: 'Legal', key: 'categoryLegal' },
+  { code: 'Financeiro', key: 'categoryFinanceiro' },
+];
+
 export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) => {
+  const { t } = useTranslation();
+  const catalog = simulatorCatalog(t);
   const [categoryFilter, setCategoryFilter] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -23,12 +35,12 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
     );
   };
 
-  const fiscalSimulators = simulatorCatalog.filter((s) => s.category === 'Fiscal');
-  const laborSimulators = simulatorCatalog.filter(
+  const fiscalSimulators = catalog.filter((s) => s.category === 'Fiscal');
+  const laborSimulators = catalog.filter(
     (s) => s.category === 'Laboral (RH)'
   );
 
-  const applyFilters = (sims: typeof simulatorCatalog) => {
+  const applyFilters = (sims: typeof catalog) => {
     return sims
       .filter((s) => !favoritesOnly || favorites.includes(s.id))
       .filter(
@@ -38,7 +50,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
       );
   };
 
-  const renderCard = (sim: (typeof simulatorCatalog)[0]) => {
+  const renderCard = (sim: (typeof catalog)[0]) => {
     const Icon = sim.icon;
     const isFav = favorites.includes(sim.id);
     return (
@@ -123,7 +135,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
               color: 'var(--slate-900)',
             }}
           >
-            Centro de Simuladores
+            {t('simuladores:catalogCenterTitle')}
           </h1>
           <p
             style={{
@@ -132,8 +144,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
               marginTop: '2px',
             }}
           >
-            Escolha um simulador e obtenha cálculos automáticos com base na
-            legislação moçambicana.
+            {t('simuladores:catalogIntro')}
           </p>
         </div>
 
@@ -150,7 +161,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
             fill={favoritesOnly ? '#F59E0B' : 'none'}
             color="#F59E0B"
           />
-          <span>Meus Favoritos ({favorites.length})</span>
+          <span>{t('simuladores:myFavorites', { count: favorites.length })}</span>
         </button>
       </div>
 
@@ -167,29 +178,27 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
         }}
       >
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {['Todos', 'Fiscal', 'Laboral (RH)', 'Contabilidade', 'Legal', 'Financeiro'].map(
-            (cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategoryFilter(cat)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  backgroundColor:
-                    categoryFilter === cat ? 'var(--blue-600)' : 'transparent',
-                  color:
-                    categoryFilter === cat ? '#FFFFFF' : 'var(--slate-600)',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                {cat}
-              </button>
-            )
-          )}
+          {CATEGORY_TABS.map((cat) => (
+            <button
+              key={cat.code}
+              onClick={() => setCategoryFilter(cat.code)}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor:
+                  categoryFilter === cat.code ? 'var(--blue-600)' : 'transparent',
+                color:
+                  categoryFilter === cat.code ? '#FFFFFF' : 'var(--slate-600)',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {t(`simuladores:${cat.key}`)}
+            </button>
+          ))}
         </div>
 
         <div style={{ position: 'relative', width: '280px' }}>
@@ -207,7 +216,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
             type="text"
             className="form-control"
             style={{ paddingLeft: '36px', fontSize: '13px' }}
-            placeholder="Pesquisar simulador..."
+            placeholder={t('simuladores:searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -216,7 +225,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
 
       {/* Catalog Cards Grid */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Simuladores Fiscais */}
+        {/* Fiscal simulators */}
         {(categoryFilter === 'Todos' || categoryFilter === 'Fiscal') && (
           <div>
             <h3
@@ -228,7 +237,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
                 letterSpacing: '0.02em',
               }}
             >
-              Simuladores Fiscais
+              {t('simuladores:catalogFiscalGroup')}
             </h3>
             <div
               style={{
@@ -242,7 +251,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
           </div>
         )}
 
-        {/* Simuladores Laborais */}
+        {/* Employment simulators */}
         {(categoryFilter === 'Todos' || categoryFilter === 'Laboral (RH)') && (
           <div>
             <h3
@@ -254,7 +263,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
                 letterSpacing: '0.02em',
               }}
             >
-              Simuladores Laborais (RH)
+              {t('simuladores:catalogLaboralGroup')}
             </h3>
             <div
               style={{
@@ -272,10 +281,10 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
         {['Contabilidade', 'Legal', 'Financeiro'].includes(categoryFilter) && (
           <div className="card" style={{ padding: '48px 24px', textAlign: 'center' }}>
             <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>
-              Nenhum simulador disponível nesta categoria
+              {t('simuladores:hubEmptyTitle')}
             </p>
             <p style={{ fontSize: '12.5px', color: 'var(--slate-500)', marginTop: '4px' }}>
-              Os simuladores da categoria «{categoryFilter}» serão adicionados em breve.
+              {t('simuladores:hubEmptyMsg', { category: categoryFilter })}
             </p>
           </div>
         )}

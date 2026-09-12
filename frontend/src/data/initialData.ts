@@ -42,7 +42,7 @@ export const INITIAL_SETTINGS: SystemSettings = {
   whatsappNumber: '+258 84 123 4567',
   isWhatsAppConnected: true,
   theme: 'light',
-  language: 'pt-PT'
+  language: 'pt'
 };
 
 export const INITIAL_OBLIGATIONS: FiscalObligation[] = [

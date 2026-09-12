@@ -1,0 +1,13 @@
+{
+  "title": "Newsletter & Tax Bulletin",
+  "subtitle": "Stay informed about legislative changes, new decrees and Tax Authority deadlines.",
+  "bannerLabel": "Free Weekly Bulletin",
+  "bannerTitle": "Receive tax updates in your inbox every Monday",
+  "bannerDescription": "Legal analysis commented by CLAQ consultants with practical impact on your business in Mozambique.",
+  "emailPlaceholder": "o.seu.email@empresa.co.mz",
+  "subscribe": "Subscribe",
+  "sourceLabel": "Source: {{source}}",
+  "readMore": "Read full article →",
+  "toastSubscribeTitle": "Subscription Complete!",
+  "toastSubscribeMessage": "We will send the weekly tax summary to {{email}}."
+}

@@ -194,7 +194,7 @@ export class ClaqStack extends Stack {
     });
 
     // ---------- Security: WAF on API Gateway ----------
-    const webAcl = new wafv2.CfnWebACL(this, 'ApiWaf', {
+    const _webAcl = new wafv2.CfnWebACL(this, 'ApiWaf', {
       scope: 'REGIONAL',
       defaultAction: { allow: {} },
       visibilityConfig: { cloudWatchMetricsEnabled: true, metricName: 'ClaqApiWaf', sampledRequestsEnabled: true },
@@ -226,7 +226,7 @@ export class ClaqStack extends Stack {
     // WebACL is created; attach via console or switch prod to eu-west-1/us-east-1 when ready.
     // new wafv2.CfnWebACLAssociation(this, 'ApiWafAssociation', {
     //   resourceArn: `arn:aws:apigateway:${this.region}::/apis/${api.httpApiId}/stages/$default`,
-    //   webAclArn: webAcl.attrArn,
+    //   webAclArn: _webAcl.attrArn,
     // });
 
     // ---------- Security: CloudTrail ----------

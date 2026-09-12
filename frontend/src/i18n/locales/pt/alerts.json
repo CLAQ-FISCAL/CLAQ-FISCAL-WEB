@@ -1,0 +1,17 @@
+{
+  "pageTitle": "Alertas",
+  "pageSubtitle": "Receba notificações e mantenha a sua empresa sempre em conformidade fiscal.",
+  "markAllAsRead": "Marcar todas como lidas",
+  "configureAlerts": "Configurar Alertas",
+  "filterAll": "Todos",
+  "filterPending": "Pendentes",
+  "filterOverdue": "Vencidos",
+  "filterInformative": "Informativos",
+  "filterRead": "Lidos / Concluídos",
+  "dueInDays_one": "Vence em {{count}} dia",
+  "dueInDays_other": "Vence em {{count}} dias",
+  "deadlineLabel": "Data Limite: {{date}}",
+  "howAlertsWork": "Como funcionam os alertas?",
+  "howAlertsWorkBody": "Enviamos lembretes por e-mail, WhatsApp e no sistema conforme suas configurações.",
+  "managePreferences": "Gerenciar preferências"
+}

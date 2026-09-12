@@ -15,9 +15,11 @@ import {
   ExternalLink,
   MessageSquare
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
 
 export const Configuracoes: React.FC = () => {
+  const { t } = useTranslation();
   const {
     user,
     updateUser,
@@ -53,7 +55,7 @@ export const Configuracoes: React.FC = () => {
   };
 
   const handleSavePreferences = () => {
-    addToast('success', 'Preferências Salvas!', 'As configurações de alerta e notificação foram actualizadas.');
+    addToast('success', t('config:toastPrefTitle'), t('config:toastPrefMessage'));
   };
 
   return (
@@ -61,22 +63,22 @@ export const Configuracoes: React.FC = () => {
       {/* Header */}
       <div>
         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--slate-900)' }}>
-          Configurações
+          {t('config:title')}
         </h1>
         <p style={{ fontSize: '13.5px', color: 'var(--slate-500)', marginTop: '2px' }}>
-          Personalize a sua conta, preferências de notificação e integrações de sistema.
+          {t('config:subtitle')}
         </p>
       </div>
 
       {/* Tabs Bar */}
       <div className="card" style={{ padding: '0 20px', display: 'flex', gap: '8px', borderBottom: '1px solid var(--slate-200)', overflowX: 'auto' }}>
         {[
-          { id: 'profile', label: 'Perfil', icon: User },
-          { id: 'preferences', label: 'Preferências', icon: Sliders },
-          { id: 'alerts', label: 'Alertas', icon: Bell },
-          { id: 'security', label: 'Segurança', icon: Shield },
-          { id: 'plan', label: 'Assinatura & Plano', icon: CreditCard },
-          { id: 'integrations', label: 'Integrações', icon: Database }
+          { id: 'profile', label: t('config:tabProfile'), icon: User },
+          { id: 'preferences', label: t('config:tabPreferences'), icon: Sliders },
+          { id: 'alerts', label: t('config:tabAlerts'), icon: Bell },
+          { id: 'security', label: t('config:tabSecurity'), icon: Shield },
+          { id: 'plan', label: t('config:tabPlan'), icon: CreditCard },
+          { id: 'integrations', label: t('config:tabIntegrations'), icon: Database }
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -114,10 +116,10 @@ export const Configuracoes: React.FC = () => {
             {/* Left: Preferências de Notificação */}
             <div>
               <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '6px' }}>
-                Preferências de Notificação
+                {t('config:notificationsTitle')}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--slate-500)', marginBottom: '20px' }}>
-                Escolha como deseja receber os seus alertas fiscais e lembretes de prazos.
+                {t('config:notificationsSubtitle')}
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -128,8 +130,8 @@ export const Configuracoes: React.FC = () => {
                       <Mail size={18} color="var(--blue-600)" />
                     </div>
                     <div>
-                      <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>E-mail</h4>
-                      <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Receber alertas por e-mail ({user?.email})</p>
+                      <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>{t('config:channelEmail')}</h4>
+                      <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('config:channelEmailDesc', { email: user?.email })}</p>
                     </div>
                   </div>
 
@@ -148,8 +150,8 @@ export const Configuracoes: React.FC = () => {
                       <MessageSquare size={18} color="#10B981" />
                     </div>
                     <div>
-                      <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>WhatsApp</h4>
-                      <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Receber alertas no WhatsApp (+258 84 123 4567)</p>
+                      <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>{t('config:channelWhatsApp')}</h4>
+                      <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('config:channelWhatsAppDesc')}</p>
                     </div>
                   </div>
 
@@ -168,8 +170,8 @@ export const Configuracoes: React.FC = () => {
                       <Bell size={18} color="#7E22CE" />
                     </div>
                     <div>
-                      <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>Notificações no Sistema</h4>
-                      <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Receber notificações dentro da plataforma</p>
+                      <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>{t('config:channelInApp')}</h4>
+                      <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('config:channelInAppDesc')}</p>
                     </div>
                   </div>
 
@@ -188,8 +190,8 @@ export const Configuracoes: React.FC = () => {
                       <Smartphone size={18} color="var(--slate-600)" />
                     </div>
                     <div>
-                      <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>SMS</h4>
-                      <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Receber alertas por SMS no telemóvel</p>
+                      <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>{t('config:channelSms')}</h4>
+                      <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('config:channelSmsDesc')}</p>
                     </div>
                   </div>
 
@@ -206,10 +208,10 @@ export const Configuracoes: React.FC = () => {
             {/* Right: Antecedência dos Alertas */}
             <div>
               <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '6px' }}>
-                Antecedência dos Alertas
+                {t('config:timingTitle')}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--slate-500)', marginBottom: '20px' }}>
-                Defina com quantos dias de antecedência deseja receber os lembretes.
+                {t('config:timingSubtitle')}
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', backgroundColor: 'var(--slate-50)', padding: '20px', borderRadius: '12px', border: '1px solid var(--slate-200)' }}>
@@ -220,7 +222,7 @@ export const Configuracoes: React.FC = () => {
                     onChange={() => toggleAlertTiming('d7')}
                     style={{ width: '18px', height: '18px', accentColor: 'var(--blue-600)' }}
                   />
-                  <span>7 dias antes</span>
+                  <span>{t('config:timing7')}</span>
                 </label>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13.5px', color: 'var(--slate-800)', cursor: 'pointer', fontWeight: 600 }}>
@@ -230,7 +232,7 @@ export const Configuracoes: React.FC = () => {
                     onChange={() => toggleAlertTiming('d3')}
                     style={{ width: '18px', height: '18px', accentColor: 'var(--blue-600)' }}
                   />
-                  <span>3 dias antes</span>
+                  <span>{t('config:timing3')}</span>
                 </label>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13.5px', color: 'var(--slate-800)', cursor: 'pointer', fontWeight: 600 }}>
@@ -240,7 +242,7 @@ export const Configuracoes: React.FC = () => {
                     onChange={() => toggleAlertTiming('d1')}
                     style={{ width: '18px', height: '18px', accentColor: 'var(--blue-600)' }}
                   />
-                  <span>1 dia antes</span>
+                  <span>{t('config:timing1')}</span>
                 </label>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13.5px', color: 'var(--slate-800)', cursor: 'pointer', fontWeight: 600 }}>
@@ -250,7 +252,7 @@ export const Configuracoes: React.FC = () => {
                     onChange={() => toggleAlertTiming('d0')}
                     style={{ width: '18px', height: '18px', accentColor: 'var(--blue-600)' }}
                   />
-                  <span>No dia do vencimento</span>
+                  <span>{t('config:timing0')}</span>
                 </label>
               </div>
             </div>
@@ -259,7 +261,7 @@ export const Configuracoes: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '28px' }}>
             <button onClick={handleSavePreferences} className="btn btn-primary-gold btn-lg">
               <CheckCircle2 size={18} />
-              <span>Salvar Preferências</span>
+              <span>{t('config:savePreferences')}</span>
             </button>
           </div>
         </div>
@@ -269,7 +271,7 @@ export const Configuracoes: React.FC = () => {
       {activeTab === 'profile' && (
         <div className="card" style={{ padding: '32px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '24px' }}>
-            Meu Perfil & Informações da Empresa
+            {t('config:profileTitle')}
           </h2>
 
           <form onSubmit={handleSaveProfile}>
@@ -282,52 +284,52 @@ export const Configuracoes: React.FC = () => {
               <div>
                 <button
                   type="button"
-                  onClick={() => addToast('info', 'Foto', 'Funcionalidade de upload de fotografia activada.')}
+                  onClick={() => addToast('info', t('config:toastPhotoTitle'), t('config:toastPhotoMessage'))}
                   className="btn btn-secondary btn-sm"
                 >
-                  Alterar Foto
+                  {t('config:changePhoto')}
                 </button>
                 <p style={{ fontSize: '11.5px', color: 'var(--slate-400)', marginTop: '4px' }}>
-                  Formatos aceites: JPG, PNG ou WebP. Máximo 2MB.
+                  {t('config:photoFormats')}
                 </p>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
               <div className="form-group">
-                <label className="form-label">Nome Completo</label>
+                <label className="form-label">{t('config:labelFullName')}</label>
                 <input type="text" className="form-control" value={name} onChange={e => setName(e.target.value)} required />
               </div>
 
               <div className="form-group">
-                <label className="form-label">E-mail</label>
+                <label className="form-label">{t('config:labelEmail')}</label>
                 <input type="email" className="form-control" value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Telefone</label>
+                <label className="form-label">{t('config:labelPhone')}</label>
                 <input type="text" className="form-control" value={phone} onChange={e => setPhone(e.target.value)} required />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Função / Cargo</label>
+                <label className="form-label">{t('config:labelRole')}</label>
                 <input type="text" className="form-control" value={role} onChange={e => setRole(e.target.value)} required />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Nome da Empresa</label>
+                <label className="form-label">{t('config:labelCompanyName')}</label>
                 <input type="text" className="form-control" value={companyName} onChange={e => setCompanyName(e.target.value)} required />
               </div>
 
               <div className="form-group">
-                <label className="form-label">NUIT da Empresa</label>
+                <label className="form-label">{t('config:labelCompanyNuit')}</label>
                 <input type="text" className="form-control" value={companyNuit} onChange={e => setCompanyNuit(e.target.value)} required />
               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button type="submit" className="btn btn-primary-gold btn-lg">
-                <span>Salvar Alterações</span>
+                <span>{t('config:saveChanges')}</span>
               </button>
             </div>
           </form>
@@ -338,25 +340,25 @@ export const Configuracoes: React.FC = () => {
       {activeTab === 'plan' && (
         <div className="card" style={{ padding: '32px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '20px' }}>
-            Plano & Faturação
+            {t('config:planTitle')}
           </h2>
 
           <div style={{ padding: '24px', backgroundColor: 'var(--slate-50)', borderRadius: '14px', border: '1px solid var(--slate-200)', marginBottom: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <span className="badge badge-amber" style={{ fontSize: '11px', marginBottom: '6px' }}>
-                  Plano PME Activo
+                  {t('config:planBadge')}
                 </span>
                 <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--slate-900)' }}>
-                  CLAQ Fiscal Alert Pro PME
+                  {t('config:planName')}
                 </h3>
                 <p style={{ fontSize: '13px', color: 'var(--slate-500)', marginTop: '2px' }}>
-                  Próxima renovação em 15/12/2026 • Faturação anual
+                  {t('config:planRenewal')}
                 </p>
               </div>
 
               <button className="btn btn-primary-gold">
-                Fazer Upgrade para Enterprise
+                {t('config:planUpgrade')}
               </button>
             </div>
           </div>
@@ -367,32 +369,32 @@ export const Configuracoes: React.FC = () => {
       {activeTab === 'integrations' && (
         <div className="card" style={{ padding: '32px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '20px' }}>
-            Integrações de Software
+            {t('config:integrationsTitle')}
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', border: '1px solid var(--slate-200)' }}>
               <div>
-                <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>WhatsApp Business Cloud API</h4>
-                <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Envio automático de alertas fiscais para clientes e contabilistas.</p>
+                <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>{t('config:intWhatsappName')}</h4>
+                <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('config:intWhatsappDesc')}</p>
               </div>
-              <span className="badge badge-green">Conectado ✓</span>
+              <span className="badge badge-green">{t('config:intWhatsappStatus')}</span>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', border: '1px solid var(--slate-200)' }}>
               <div>
-                <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>Autoridade Tributária (e-Tributação)</h4>
-                <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Sincronização de guias e certidão de quitação fiscal.</p>
+                <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>{t('config:intAtName')}</h4>
+                <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('config:intAtDesc')}</p>
               </div>
-              <span className="badge badge-green">Activo ✓</span>
+              <span className="badge badge-green">{t('config:intAtStatus')}</span>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', border: '1px solid var(--slate-200)' }}>
               <div>
-                <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>ERP Primavera / PHC / Moloni</h4>
-                <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Exportação de ficheiro SAF-T MZ e memórias de cálculo.</p>
+                <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>{t('config:intErpName')}</h4>
+                <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('config:intErpDesc')}</p>
               </div>
-              <button className="btn btn-secondary btn-sm">Configurar</button>
+              <button className="btn btn-secondary btn-sm">{t('config:intErpConfigure')}</button>
             </div>
           </div>
         </div>

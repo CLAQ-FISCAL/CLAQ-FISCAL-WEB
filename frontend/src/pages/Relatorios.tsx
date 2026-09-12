@@ -12,6 +12,7 @@ import {
   TrendingUp,
   DollarSign
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
 import { formatMZN, formatDate } from '../utils/formatters';
 
@@ -20,8 +21,9 @@ interface RelatoriosProps {
 }
 
 export const Relatorios: React.FC<RelatoriosProps> = ({ onNavigate }) => {
+  const { t } = useTranslation();
   const { obligations, addToast } = useAppState();
-  const [typeFilter, setTypeFilter] = useState('Todos os tipos');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   const currentYear = new Date().getFullYear();
   const dateRange = `01/01/${currentYear} – 31/12/${currentYear}`;
@@ -57,26 +59,26 @@ export const Relatorios: React.FC<RelatoriosProps> = ({ onNavigate }) => {
 
   const handleExportReport = () => {
     const csvRows = [
-      ['RELATORIO DE CONFORMIDADE FISCAL - CLAQ FISCAL ALERT'],
-      ['Periodo', dateRange],
-      ['Obrigacoes Pagas', pagasCount],
-      ['Pendentes', pendentesCount],
-      ['Vencidas', vencidasCount],
-      ['Total', totalCount],
-      ['Impostos Pagos (MZN)', taxesPaid.toFixed(2)],
-      ['Contribuicoes INSS (MZN)', inssPaid.toFixed(2)],
-      ['Taxas Municipais (MZN)', municipalPaid.toFixed(2)],
-      ['Total Pago (MZN)', totalPaid.toFixed(2)]
+      [t('reports:csvTitle')],
+      [t('reports:csvPeriod'), dateRange],
+      [t('reports:csvPaidObligations'), pagasCount],
+      [t('reports:csvPending'), pendentesCount],
+      [t('reports:csvOverdue'), vencidasCount],
+      [t('reports:csvTotal'), totalCount],
+      [t('reports:csvTaxesPaid'), taxesPaid.toFixed(2)],
+      [t('reports:csvINSSContributions'), inssPaid.toFixed(2)],
+      [t('reports:csvMunicipalFees'), municipalPaid.toFixed(2)],
+      [t('reports:csvTotalPaid'), totalPaid.toFixed(2)]
     ];
     const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(row => row.map(cell => sanitizeCsvCell(cell)).join(',')).join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Relatorio_Conformidade_CLAQ_${currentYear}.csv`);
+    link.setAttribute('download', `${t('reports:csvFileName', { year: currentYear })}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    addToast('success', 'Relatório Exportado', 'Ficheiro de conformidade descarregado com sucesso.');
+    addToast('success', t('reports:toastExportTitle'), t('reports:toastExportMsg'));
   };
 
   return (
@@ -85,16 +87,16 @@ export const Relatorios: React.FC<RelatoriosProps> = ({ onNavigate }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--slate-900)' }}>
-            Relatórios Financeiros & Fiscais
+            {t('reports:pageTitle')}
           </h1>
           <p style={{ fontSize: '13.5px', color: 'var(--slate-500)', marginTop: '2px' }}>
-            Consulte a agregação em tempo real de pagamentos de impostos, INSS e taxas municipais.
+            {t('reports:pageSubtitle')}
           </p>
         </div>
 
         <button onClick={handleExportReport} className="btn btn-secondary" style={{ fontSize: '13px' }}>
           <Download size={16} />
-          <span>Exportar Relatório</span>
+          <span>{t('reports:exportReport')}</span>
         </button>
       </div>
 
@@ -112,10 +114,10 @@ export const Relatorios: React.FC<RelatoriosProps> = ({ onNavigate }) => {
             className="form-control"
             style={{ width: '180px', padding: '7px 12px', fontSize: '13px' }}
           >
-            <option value="Todos os tipos">Todos os tipos</option>
-            <option value="Impostos">Impostos (IVA / IRPC)</option>
-            <option value="INSS">Segurança Social</option>
-            <option value="Municipais">Taxas Municipais</option>
+            <option value="all">{t('reports:allTypes')}</option>
+            <option value="taxes">{t('reports:filterTaxes')}</option>
+            <option value="inss">{t('reports:filterSocialSecurity')}</option>
+            <option value="municipal">{t('reports:filterMunicipal')}</option>
           </select>
         </div>
       </div>
@@ -124,49 +126,49 @@ export const Relatorios: React.FC<RelatoriosProps> = ({ onNavigate }) => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
         <div className="card" style={{ padding: '20px' }}>
           <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--slate-500)', textTransform: 'uppercase' }}>
-            PAGAS
+            {t('reports:paid')}
           </span>
           <h3 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '6px' }}>
             {pagasCount}
           </h3>
           <span className="badge" style={{ marginTop: '8px', backgroundColor: '#ECFDF5', color: '#059669' }}>
-            {totalCount > 0 ? `${Math.round((pagasCount / totalCount) * 100)}% concluído` : '0%'}
+            {totalCount > 0 ? t('reports:percentCompleted', { percent: Math.round((pagasCount / totalCount) * 100) }) : '0%'}
           </span>
         </div>
 
         <div className="card" style={{ padding: '20px' }}>
           <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--slate-500)', textTransform: 'uppercase' }}>
-            PENDENTES
+            {t('reports:pending')}
           </span>
           <h3 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '6px' }}>
             {pendentesCount}
           </h3>
           <span className="badge" style={{ marginTop: '8px', backgroundColor: '#FFFBEB', color: '#D97706' }}>
-            A liquidar
+            {t('reports:toBeSettled')}
           </span>
         </div>
 
         <div className="card" style={{ padding: '20px' }}>
           <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--slate-500)', textTransform: 'uppercase' }}>
-            VENCIDAS
+            {t('reports:overdue')}
           </span>
           <h3 style={{ fontSize: '28px', fontWeight: 800, color: vencidasCount > 0 ? '#DC2626' : 'var(--slate-900)', marginTop: '6px' }}>
             {vencidasCount}
           </h3>
           <span className="badge" style={{ marginTop: '8px', backgroundColor: vencidasCount > 0 ? '#FEF2F2' : '#ECFDF5', color: vencidasCount > 0 ? '#DC2626' : '#059669' }}>
-            {vencidasCount > 0 ? 'Atenção necessária' : 'Sem atrasos'}
+            {vencidasCount > 0 ? t('reports:attentionNeeded') : t('reports:noDelays')}
           </span>
         </div>
 
         <div className="card" style={{ padding: '20px' }}>
           <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--slate-500)', textTransform: 'uppercase' }}>
-            TOTAL REGISTADO
+            {t('reports:totalRegistered')}
           </span>
           <h3 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '6px' }}>
             {totalCount}
           </h3>
           <span className="badge" style={{ marginTop: '8px', backgroundColor: '#EFF6FF', color: '#2563EB' }}>
-            Exercício {currentYear}
+            {t('reports:fiscalYear', { year: currentYear })}
           </span>
         </div>
       </div>
@@ -174,33 +176,33 @@ export const Relatorios: React.FC<RelatoriosProps> = ({ onNavigate }) => {
       {/* Financial Breakdown Card */}
       <div className="card" style={{ padding: '24px' }}>
         <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '16px' }}>
-          Discriminação Financeira Real (Liquidações Registadas)
+          {t('reports:financialBreakdown')}
         </h3>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
           <div style={{ padding: '16px', borderRadius: '10px', backgroundColor: 'var(--slate-50)', border: '1px solid var(--slate-200)' }}>
-            <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Impostos Pagos (IVA / IRPC / IRPS)</p>
+            <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('reports:taxesPaidBreakdown')}</p>
             <h4 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '4px' }}>
               {formatMZN(taxesPaid)}
             </h4>
           </div>
 
           <div style={{ padding: '16px', borderRadius: '10px', backgroundColor: 'var(--slate-50)', border: '1px solid var(--slate-200)' }}>
-            <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Contribuições INSS Liquidadas</p>
+            <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('reports:inssPaidBreakdown')}</p>
             <h4 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '4px' }}>
               {formatMZN(inssPaid)}
             </h4>
           </div>
 
           <div style={{ padding: '16px', borderRadius: '10px', backgroundColor: 'var(--slate-50)', border: '1px solid var(--slate-200)' }}>
-            <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Taxas Municipais & Licenças</p>
+            <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('reports:municipalBreakdown')}</p>
             <h4 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '4px' }}>
               {formatMZN(municipalPaid)}
             </h4>
           </div>
 
           <div style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#EFF6FF', border: '1px solid rgba(37,99,235,0.2)' }}>
-            <p style={{ fontSize: '12px', color: '#1E40AF', fontWeight: 700 }}>Total Desembolsado em Impostos</p>
+            <p style={{ fontSize: '12px', color: '#1E40AF', fontWeight: 700 }}>{t('reports:totalDisbursed')}</p>
             <h4 style={{ fontSize: '22px', fontWeight: 800, color: '#1D4ED8', marginTop: '4px' }}>
               {formatMZN(totalPaid)}
             </h4>

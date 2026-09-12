@@ -11,9 +11,11 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
 
 export const Suporte: React.FC = () => {
+  const { t } = useTranslation();
   const { addToast, setIsWhatsAppModalOpen, setIsAIAssistantOpen } = useAppState();
 
   const [subject, setSubject] = useState('');
@@ -22,27 +24,27 @@ export const Suporte: React.FC = () => {
 
   const faqs = [
     {
-      q: 'Qual é o prazo legal para entrega e pagamento da declaração periódica do IVA (Modelo A)?',
-      a: 'Nos termos do Código do IVA moçambicano (Lei n.º 32/2007 e Lei n.º 1/2018), a declaração periódica e o respectivo pagamento devem ser efectuados até ao último dia útil do mês seguinte àquele a que respeitam as operações.'
+      q: t('support:faq1Q'),
+      a: t('support:faq1A')
     },
     {
-      q: 'Como funciona a retenção na fonte de IRPC para serviços prestados por não residentes?',
-      a: 'Aplica-se a taxa de 20% a título definitivo (Art. 66 do CIRPC) calculada sobre a base de incidência majorada pelo fator de contra-valor (1,25), salvo se existir Convenção de Dupla Tributação (CDT) ratificada com taxa reduzida (ex: 10% com Portugal ou África do Sul) mediante Certificado de Residência Fiscal.'
+      q: t('support:faq2Q'),
+      a: t('support:faq2A')
     },
     {
-      q: 'Até que dia deve ser submetida a folha de salários e pagas as contribuições do INSS?',
-      a: 'As folhas de remuneração devem ser carregadas e o valor correspondente (3% trabalhador + 4% patronal) liquidado até ao dia 10 do mês seguinte àquele a que dizem respeito.'
+      q: t('support:faq3Q'),
+      a: t('support:faq3A')
     },
     {
-      q: 'O que acontece se uma empresa pagar o imposto fora do prazo legal?',
-      a: 'Conforme o Artigo 101 da Lei Geral Tributária (Lei n.º 15/2002), o atraso no pagamento sujeita o contribuinte a uma multa de 25% a 100% do imposto devido, acrescida de juros de mora calculados à taxa de referência (MIMO) do Banco de Moçambique acrescida de 2 pontos percentuais.'
+      q: t('support:faq4Q'),
+      a: t('support:faq4A')
     }
   ];
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim()) {
-      addToast('success', 'Mensagem Enviada!', 'A equipa técnica da CLAQ Consultores responderá no prazo de 2 horas úteis.');
+      addToast('success', t('support:toastTitle'), t('support:toastMessage'));
       setSubject('');
       setMessage('');
     }
@@ -53,10 +55,10 @@ export const Suporte: React.FC = () => {
       {/* Header */}
       <div>
         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--slate-900)' }}>
-          Ajuda & Suporte Técnico Especializado
+          {t('support:title')}
         </h1>
         <p style={{ fontSize: '13.5px', color: 'var(--slate-500)', marginTop: '2px' }}>
-          Entre em contacto directo com os consultores fiscais e contabilistas da CLAQ Moçambique.
+          {t('support:subtitle')}
         </p>
       </div>
 
@@ -71,8 +73,8 @@ export const Suporte: React.FC = () => {
             <MessageSquare size={22} color="#FFFFFF" />
           </div>
           <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#065F46' }}>WhatsApp Direto</h4>
-            <p style={{ fontSize: '12px', color: '#047857' }}>+258 84 123 4567 • Atendimento Instantâneo</p>
+            <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#065F46' }}>{t('support:whatsappTitle')}</h4>
+            <p style={{ fontSize: '12px', color: '#047857' }}>{t('support:whatsappSubtitle')}</p>
           </div>
         </div>
 
@@ -85,8 +87,8 @@ export const Suporte: React.FC = () => {
             <Sparkles size={22} color="#FFFFFF" />
           </div>
           <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#1E40AF' }}>Assistente CLAQ AI</h4>
-            <p style={{ fontSize: '12px', color: '#1D4ED8' }}>Respostas imediatas 24/7 sobre leis fiscais</p>
+            <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#1E40AF' }}>{t('support:aiTitle')}</h4>
+            <p style={{ fontSize: '12px', color: '#1D4ED8' }}>{t('support:aiSubtitle')}</p>
           </div>
         </div>
 
@@ -98,8 +100,8 @@ export const Suporte: React.FC = () => {
             <MapPin size={22} color="var(--gold-600)" />
           </div>
           <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>Escritório Maputo</h4>
-            <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Av. 24 de Julho, Platinum 5º Andar</p>
+            <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>{t('support:officeTitle')}</h4>
+            <p style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('support:officeSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -109,7 +111,7 @@ export const Suporte: React.FC = () => {
         {/* FAQ Accordion */}
         <div className="card" style={{ padding: '24px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '16px' }}>
-            Perguntas Frequentes (FAQ Tributário)
+            {t('support:faqTitle')}
           </h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -160,16 +162,16 @@ export const Suporte: React.FC = () => {
         {/* Contact Form */}
         <div className="card" style={{ padding: '24px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '16px' }}>
-            Fale com um Consultor CLAQ
+            {t('support:contactTitle')}
           </h3>
 
           <form onSubmit={handleSendMessage}>
             <div className="form-group">
-              <label className="form-label">Assunto</label>
+              <label className="form-label">{t('support:subjectLabel')}</label>
               <input
                 type="text"
                 className="form-control"
-                placeholder="Ex: Dúvida sobre retenção de IRPS ou declaração de IVA"
+                placeholder={t('support:subjectPlaceholder')}
                 value={subject}
                 onChange={e => setSubject(e.target.value)}
                 required
@@ -177,11 +179,11 @@ export const Suporte: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">A sua mensagem ou dúvida técnica</label>
+              <label className="form-label">{t('support:messageLabel')}</label>
               <textarea
                 className="form-control"
                 rows={5}
-                placeholder="Descreva a sua questão fiscal ou suporte pretendido..."
+                placeholder={t('support:messagePlaceholder')}
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 required
@@ -190,7 +192,7 @@ export const Suporte: React.FC = () => {
 
             <button type="submit" className="btn btn-primary-gold" style={{ width: '100%', padding: '12px' }}>
               <Send size={16} />
-              <span>Enviar Pedido de Suporte</span>
+              <span>{t('support:sendButton')}</span>
             </button>
           </form>
         </div>

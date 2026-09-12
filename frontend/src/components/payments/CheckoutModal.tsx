@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Lock
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../context/AppStateContext';
 
 interface CheckoutModalProps {
@@ -23,10 +24,13 @@ interface CheckoutModalProps {
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   isOpen,
   onClose,
-  planName = 'Plano PME Pro',
-  planPrice = '3.500,00 MZN / mês'
+  planName,
+  planPrice
 }) => {
+  const { t } = useTranslation();
   const { addToast } = useAppState();
+  const resolvedPlanName = planName ?? t('checkout:planName');
+  const resolvedPlanPrice = planPrice ?? t('checkout:planPrice');
 
   const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'emola' | 'card' | 'bank'>('mpesa');
   const [phone, setPhone] = useState('841234567');
@@ -41,13 +45,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     setTimeout(() => {
       setIsProcessing(false);
-      addToast('info', 'Pagamento pendente', 'O plano será actualizado apenas após a confirmação segura do fornecedor de pagamento.');
+addToast('info', t('checkout:toastPaymentPendingTitle'), t('checkout:toastPaymentPendingMessage'));
     }, 600);
   };
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    addToast('info', 'Copiado!', `${label} copiado para a área de transferência.`);
+    addToast('info', t('checkout:toastCopiedTitle'), t('checkout:toastCopiedMessage', { label }));
   };
 
   return (
@@ -56,9 +60,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         {/* Header */}
         <div style={{ backgroundColor: 'var(--navy-900)', color: '#FFFFFF', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Assinatura & Pagamento Seguro</h3>
+            <h3 style={{ fontSize: '18px', fontWeight: 800 }}>{t('checkout:title')}</h3>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '2px' }}>
-              {planName} • {planPrice}
+              {resolvedPlanName} • {resolvedPlanPrice}
             </p>
           </div>
           <button
@@ -74,9 +78,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#ECFDF5', color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <CheckCircle2 size={36} />
             </div>
-            <h4 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)' }}>Pagamento Concluído com Sucesso!</h4>
+            <h4 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)' }}>{t('checkout:successTitle')}</h4>
             <p style={{ fontSize: '13.5px', color: 'var(--slate-500)', marginTop: '8px', maxWidth: '380px', margin: '8px auto 24px' }}>
-              A sua conta foi actualizada. O recibo fiscal foi enviado para o seu email registado.
+              {t('checkout:successMessage')}
             </p>
             <button
               onClick={() => {
@@ -86,7 +90,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               className="btn btn-primary-gold"
               style={{ padding: '10px 28px' }}
             >
-              Fechar & Continuar
+              {t('checkout:closeAndContinue')}
             </button>
           </div>
         ) : (
@@ -166,7 +170,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 }}
               >
                 <Building size={20} color="var(--navy-800)" />
-                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--navy-900)' }}>Bancos MZ</span>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--navy-900)' }}>{t('checkout:bankOption')}</span>
               </button>
             </div>
 
@@ -174,7 +178,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             {paymentMethod === 'mpesa' && (
               <form onSubmit={handlePay}>
                 <div className="form-group">
-                  <label className="form-label">Número de Telemóvel Vodacom (+258)</label>
+                  <label className="form-label">{t('checkout:mpesaLabel')}</label>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <span style={{ padding: '10px 14px', backgroundColor: 'var(--slate-100)', borderRadius: '8px', border: '1px solid var(--slate-300)', fontSize: '13px', fontWeight: 700 }}>
                       +258
@@ -189,7 +193,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     />
                   </div>
                   <p style={{ fontSize: '11.5px', color: 'var(--slate-500)', marginTop: '6px' }}>
-                    Receberá um prompt USSD no seu ecrã para introduzir o seu PIN M-Pesa.
+                    {t('checkout:mpesaHint')}
                   </p>
                 </div>
 
@@ -199,7 +203,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   className="btn btn-primary-gold"
                   style={{ width: '100%', padding: '12px', marginTop: '12px' }}
                 >
-                  {isProcessing ? 'Aguardando confirmação no telemóvel...' : `Pagar ${planPrice} via M-Pesa`}
+                  {isProcessing ? t('checkout:processingMpesa') : t('checkout:payMpesa', { price: resolvedPlanPrice })}
                 </button>
               </form>
             )}
@@ -207,7 +211,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             {paymentMethod === 'emola' && (
               <form onSubmit={handlePay}>
                 <div className="form-group">
-                  <label className="form-label">Número de Telemóvel Movitel (+258)</label>
+                  <label className="form-label">{t('checkout:emolaLabel')}</label>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <span style={{ padding: '10px 14px', backgroundColor: 'var(--slate-100)', borderRadius: '8px', border: '1px solid var(--slate-300)', fontSize: '13px', fontWeight: 700 }}>
                       +258
@@ -221,7 +225,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     />
                   </div>
                   <p style={{ fontSize: '11.5px', color: 'var(--slate-500)', marginTop: '6px' }}>
-                    Confirme a transacção no menu pop-up do seu telemóvel Movitel.
+                    {t('checkout:emolaHint')}
                   </p>
                 </div>
 
@@ -231,7 +235,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   className="btn btn-primary-gold"
                   style={{ width: '100%', padding: '12px', marginTop: '12px' }}
                 >
-                  {isProcessing ? 'Processando E-Mola...' : `Pagar ${planPrice} via E-Mola`}
+                  {isProcessing ? t('checkout:processingEmola') : t('checkout:payEmola', { price: resolvedPlanPrice })}
                 </button>
               </form>
             )}
@@ -239,12 +243,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             {paymentMethod === 'card' && (
               <form onSubmit={handlePay}>
                 <div className="form-group">
-                  <label className="form-label">Número do Cartão (Ponto24 / SIMO / Visa / MC)</label>
+                  <label className="form-label">{t('checkout:cardNumberLabel')}</label>
                   <input type="text" className="form-control" placeholder="4000 1234 5678 9010" required />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div className="form-group">
-                    <label className="form-label">Validade</label>
+                    <label className="form-label">{t('checkout:expiry')}</label>
                     <input type="text" className="form-control" placeholder="MM/AA" required />
                   </div>
                   <div className="form-group">
@@ -258,7 +262,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   className="btn btn-primary-gold"
                   style={{ width: '100%', padding: '12px', marginTop: '12px' }}
                 >
-                  {isProcessing ? 'Validando 3D Secure...' : `Autorizar Pagamento Seguro`}
+                  {isProcessing ? t('checkout:processingCard') : t('checkout:authorizePayment')}
                 </button>
               </form>
             )}
@@ -267,24 +271,24 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <div>
                 <div style={{ backgroundColor: 'var(--slate-50)', padding: '14px', borderRadius: '10px', border: '1px solid var(--slate-200)', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Entidade:</span>
+                    <span style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('checkout:entity')}</span>
                     <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--slate-900)' }}>99001 (CLAQ)</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Referência:</span>
+                    <span style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('checkout:reference')}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '13px', fontWeight: 800, color: '#2563EB' }}>400 889 900</span>
-                      <Copy size={14} style={{ cursor: 'pointer' }} onClick={() => copyToClipboard('400889900', 'Referência')} />
+                      <Copy size={14} style={{ cursor: 'pointer' }} onClick={() => copyToClipboard('400889900', t('checkout:reference'))} />
                     </div>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--slate-500)' }}>Montante:</span>
+                    <span style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{t('common:amount')}:</span>
                     <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--slate-900)' }}>3 500,00 MZN</span>
                   </div>
                 </div>
 
                 <p style={{ fontSize: '12px', color: 'var(--slate-600)', lineHeight: 1.5, marginBottom: '16px' }}>
-                  Disponível nos canais de Internet Banking e Caixas ATM dos bancos: <strong>Millennium BIM</strong>, <strong>BCI</strong>, e <strong>Standard Bank Moçambique</strong>.
+                  {t('checkout:bankChannelsIntro')}: <strong>Millennium BIM</strong>, <strong>BCI</strong> {t('checkout:and')} <strong>Standard Bank Moçambique</strong>.
                 </p>
 
                 <button
@@ -294,14 +298,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   style={{ width: '100%', padding: '12px' }}
                 >
                   <CheckCircle2 size={16} />
-                  <span>Já Efectuei o Pagamento</span>
+                  <span>{t('checkout:paidAlready')}</span>
                 </button>
               </div>
             )}
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '16px', fontSize: '11px', color: 'var(--slate-400)' }}>
               <Lock size={12} />
-              <span>Transacções processadas com encriptação bancária SSL 256-bit</span>
+              <span>{t('checkout:secureTransactions')}</span>
             </div>
           </div>
         )}

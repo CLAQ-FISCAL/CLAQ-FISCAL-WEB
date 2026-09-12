@@ -10,17 +10,21 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { OFFICIAL_GAZETTE_FEED } from '../data/officialGazetteFeed';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
 
 export const Newsletter: React.FC = () => {
+  const { t } = useTranslation();
   const { addToast } = useAppState();
   const [subscriberEmail, setSubscriberEmail] = useState('');
   const [selectedNews, setSelectedNews] = useState<any | null>(null);
 
+  const items = OFFICIAL_GAZETTE_FEED(t);
+
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (subscriberEmail) {
-      addToast('success', 'Subscrição Concluída!', `Enviaremos o resumo fiscal semanal para ${subscriberEmail}.`);
+      addToast('success', t('newsletter:toastSubscribeTitle'), t('newsletter:toastSubscribeMessage', { email: subscriberEmail }));
       setSubscriberEmail('');
     }
   };
@@ -30,10 +34,10 @@ export const Newsletter: React.FC = () => {
       {/* Header */}
       <div>
         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--slate-900)' }}>
-          Newsletter & Boletim Fiscal
+          {t('newsletter:title')}
         </h1>
         <p style={{ fontSize: '13.5px', color: 'var(--slate-500)', marginTop: '2px' }}>
-          Mantenha-se informado sobre alterações legislativas, novos decretos e prazos da Autoridade Tributária.
+          {t('newsletter:subtitle')}
         </p>
       </div>
 
@@ -56,21 +60,21 @@ export const Newsletter: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <Sparkles size={18} color="#F59E0B" />
             <span style={{ fontSize: '12px', fontWeight: 700, color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Boletim Semanal Gratuito
+              {t('newsletter:bannerLabel')}
             </span>
           </div>
           <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#FFFFFF' }}>
-            Receba actualizações tributárias no seu e-mail todas as segundas-feiras
+            {t('newsletter:bannerTitle')}
           </h3>
           <p style={{ fontSize: '13px', color: '#94A3B8', marginTop: '6px', lineHeight: 1.4 }}>
-            Análise jurídica comentada por consultores da CLAQ com impacto prático no seu negócio em Moçambique.
+            {t('newsletter:bannerDescription')}
           </p>
         </div>
 
         <form onSubmit={handleSubscribe} style={{ display: 'flex', gap: '10px', width: '100%', maxWidth: '400px' }}>
           <input
             type="email"
-            placeholder="o.seu.email@empresa.co.mz"
+            placeholder={t('newsletter:emailPlaceholder')}
             className="form-control"
             value={subscriberEmail}
             onChange={e => setSubscriberEmail(e.target.value)}
@@ -79,14 +83,14 @@ export const Newsletter: React.FC = () => {
           />
           <button type="submit" className="btn btn-primary-gold" style={{ flexShrink: 0 }}>
             <Send size={15} />
-            <span>Subscrever</span>
+            <span>{t('newsletter:subscribe')}</span>
           </button>
         </form>
       </div>
 
       {/* News Feed Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-        {OFFICIAL_GAZETTE_FEED.map(item => (
+{items.map(item => (
           <div
             key={item.id}
             onClick={() => setSelectedNews(item)}
@@ -120,9 +124,9 @@ export const Newsletter: React.FC = () => {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--slate-100)', paddingTop: '12px', fontSize: '12px', color: 'var(--slate-400)' }}>
-              <span>Fonte: {item.source}</span>
+              <span>{t('newsletter:sourceLabel', { source: item.source })}</span>
               <span style={{ color: 'var(--blue-600)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                Ler artigo completo →
+                {t('newsletter:readMore')}
               </span>
             </div>
           </div>

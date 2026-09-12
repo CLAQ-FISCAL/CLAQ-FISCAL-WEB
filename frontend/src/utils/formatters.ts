@@ -1,4 +1,5 @@
 // Currency and date formatting utilities for Mozambique
+import i18n from '../i18n';
 
 export const formatMZN = (val: number | undefined | null): string => {
   if (val === undefined || val === null || isNaN(val)) return '0,00 MZN';
@@ -25,8 +26,8 @@ export const formatDate = (dateStr: string): string => {
 };
 
 export const formatRelativeDays = (days: number): string => {
-  if (days < 0) return `Vencido há ${Math.abs(days)} dia${Math.abs(days) > 1 ? 's' : ''}`;
-  if (days === 0) return 'Vence hoje';
-  if (days === 1) return 'Vence amanhã';
-  return `Vence em ${days} dias`;
+  if (days < 0) return i18n.t('data:overdueXDays', { count: Math.abs(days) });
+  if (days === 0) return i18n.t('data:dueToday');
+  if (days === 1) return i18n.t('data:dueTomorrow');
+  return i18n.t('data:dueInXDays', { count: days });
 };

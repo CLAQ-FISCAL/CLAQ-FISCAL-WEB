@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Printer, Save } from 'lucide-react';
 
 export interface SimulatorLayoutProps {
@@ -22,6 +23,19 @@ export const SimulatorLayout: React.FC<SimulatorLayoutProps> = ({
   onSave,
   children,
 }) => {
+  const { t } = useTranslation();
+
+  const categoriaLabel =
+    categoria === 'Fiscal'
+      ? t('simuladores:categoryFiscal')
+      : t('simuladores:categoryLaboral');
+
+  const stepLabels = [
+    t('simuladores:stepData'),
+    t('simuladores:stepResults'),
+    t('simuladores:stepSummary'),
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Breadcrumb & Navigation Bar */}
@@ -41,11 +55,12 @@ export const SimulatorLayout: React.FC<SimulatorLayoutProps> = ({
             style={{ color: 'var(--blue-600)', fontWeight: 600 }}
           >
             <ArrowLeft size={16} />
-            <span>Voltar para Simuladores</span>
+            <span>{t('simuladores:backToSimulators')}</span>
           </button>
           <div style={{ fontSize: '13px', color: 'var(--slate-400)' }}>
-            Simuladores &gt;{' '}
-            <span style={{ color: 'var(--slate-600)' }}>{categoria}</span> &gt;{' '}
+            {t('simuladores:bcSimulators')} &gt;{' '}
+            <span style={{ color: 'var(--slate-600)' }}>{categoriaLabel}</span>{' '}
+            &gt;{' '}
             <span style={{ color: 'var(--slate-900)', fontWeight: 600 }}>
               {nome}
             </span>
@@ -59,7 +74,7 @@ export const SimulatorLayout: React.FC<SimulatorLayoutProps> = ({
               className="btn btn-secondary btn-sm"
             >
               <Printer size={15} />
-              <span>Imprimir / PDF</span>
+              <span>{t('simuladores:printPdfButton')}</span>
             </button>
           )}
           {onSave && (
@@ -68,7 +83,7 @@ export const SimulatorLayout: React.FC<SimulatorLayoutProps> = ({
               className="btn btn-secondary btn-sm"
             >
               <Save size={15} />
-              <span>Guardar</span>
+              <span>{t('simuladores:saveButton')}</span>
             </button>
           )}
         </div>
@@ -80,7 +95,7 @@ export const SimulatorLayout: React.FC<SimulatorLayoutProps> = ({
         style={{ padding: '16px 24px', display: 'flex', justifyContent: 'center' }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          {(['Dados', 'Resultados', 'Resumo'] as const).map((label, idx) => {
+          {stepLabels.map((label, idx) => {
             const step = (idx + 1) as 1 | 2 | 3;
             const isActive = currentStep === step;
             const isCompleted = currentStep > step;

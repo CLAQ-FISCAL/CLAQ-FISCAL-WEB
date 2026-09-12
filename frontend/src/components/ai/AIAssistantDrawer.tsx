@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Lightbulb
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../context/AppStateContext';
 
 interface ChatMessage {
@@ -21,6 +22,7 @@ interface ChatMessage {
 }
 
 export const AIAssistantDrawer: React.FC = () => {
+  const { t } = useTranslation();
   const {
     isAIAssistantOpen,
     setIsAIAssistantOpen,
@@ -34,8 +36,8 @@ export const AIAssistantDrawer: React.FC = () => {
     {
       id: 'msg-1',
       sender: 'ai',
-      text: 'Olá ! Sou o seu Assistente Fiscal CLAQ AI especializado no sistema tributário moçambicano. Posso analisar memórias de cálculo, interpretar artigos do Código do IVA, IRPC, IRPS, verificar convenções de dupla tributação ou esclarecer prazos da Autoridade Tributária. Como posso ajudar hoje?',
-      time: 'Agora'
+text: t('ai:welcomeMessage'),
+      time: t('ai:timeNow')
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
@@ -52,10 +54,10 @@ export const AIAssistantDrawer: React.FC = () => {
   }, [messages, isTyping]);
 
   const predefinedPrompts = [
-    'Como funciona o fator de gross-up 1,25?',
-    'Moçambique tem convenção de dupla tributação com EUA?',
-    'Qual o prazo de pagamento do IVA em operações ao exterior?',
-    'Como deduzir IVA de faturas com retenção na fonte?'
+    t('ai:promptGrossUp'),
+    t('ai:promptDTA'),
+    t('ai:promptIVADeadline'),
+    t('ai:promptIVADeduct')
   ];
 
   const handleSendMessage = (textToSend?: string) => {
@@ -77,16 +79,16 @@ export const AIAssistantDrawer: React.FC = () => {
       let reply = '';
       const lower = text.toLowerCase();
 
-      if (lower.includes('1,25') || lower.includes('fator') || lower.includes('gross-up')) {
-        reply = `**Explicação do Fator 1,25 (Gross-up):**\n\nConforme o Ofício Circular n.º 3012/AT/2021 e a prática fiscal moçambicana, quando um contrato estipula que os impostos em Moçambique correm por conta do adquirente residente (*net of tax*), a base tributável deve ser recalculada.\n\n$$\\text{Base} = \\frac{\\text{Valor Líquido}}{1 - (\\text{IRPC} 20\\%)} = \\frac{100\\%}{80\\%} = 1,25$$\n\nPortanto, multiplica-se o valor em Meticais por 1,25 para encontrar o Contra-Valor sobre o qual incidem o IVA (16%) e o IRPC retido na fonte (20%).`;
-      } else if (lower.includes('convenção') || lower.includes('dupla tributação') || lower.includes('dta') || lower.includes('eua') || lower.includes('estados unidos')) {
-        reply = `**Convenções de Dupla Tributação (CDT / DTA):**\n\n1. Moçambique **NÃO possui** actualmente Convenção de Dupla Tributação em vigor com os **Estados Unidos da América (EUA)**. Aplica-se a taxa padrão de retenção de 20% de IRPC (Art. 66 do CIRPC).\n\n2. Moçambique possui convenções ratificadas com: **Portugal (taxa reduzida de 10%), África do Sul (10%), Itália, Emirados Árabes Unidos, Índia, Macau, Maurícias, Vietname e Botswana**.\n\nPara beneficiar de taxas reduzidas, o prestador deve apresentar o Certificado de Residência Fiscal emitido pela autoridade do país de origem antes do pagamento.`;
-      } else if (lower.includes('prazo') || lower.includes('pagamento') || lower.includes('modelo a')) {
-        reply = `**Prazos Oficiais de Cumprimento:**\n\n- **IVA (Modelo A):** Deve ser submetido e pago até ao **último dia útil do mês seguinte** àquele a que respeitam as operações (ex.: IVA de Junho vence a 30 de Junho / Julho).\n- **IRPC Retenção na Fonte (Guia M/11):** Deve ser entregue e pago até ao **dia 20 do mês seguinte** ao da realização da retenção.\n- **INSS (Folha de Salários):** Até ao **dia 10 do mês seguinte**.`;
-      } else if (lower.includes('revisão') || lower.includes('analisar')) {
-        reply = `**Análise e Validação Fiscal Concluída ✓**\n\nExaminámos os valores da simulação actual:\n- Valor em MZN: 637.500,00 MZN\n- Base recalculada (Fator 1,25): 796.875,00 MZN\n- IVA (16%): 127.500,00 MZN\n- IRPC (20%): 159.375,00 MZN\n- Total de Tributos: 286.875,00 MZN\n\nTodos os cálculos estão em estrita conformidade com a Lei n.º 1/2018 (CIVA) e Lei n.º 34/2014 (CIRPC). Pode gerar o relatório oficial com carimbo digital da CLAQ.`;
+      if (lower.includes('1,25') || lower.includes('1.25') || lower.includes('fator') || lower.includes('factor') || lower.includes('gross-up')) {
+        reply = t('ai:replyGrossUp');
+      } else if (lower.includes('convenção') || lower.includes('dupla tributação') || lower.includes('dta') || lower.includes('double tax') || lower.includes('treaty') || lower.includes('eua') || lower.includes('estados unidos') || lower.includes('united states') || lower.includes('usa')) {
+        reply = t('ai:replyDTA');
+      } else if (lower.includes('prazo') || lower.includes('deadline') || lower.includes('pagamento') || lower.includes('payment') || lower.includes('modelo a')) {
+        reply = t('ai:replyDeadlines');
+      } else if (lower.includes('revisão') || lower.includes('review') || lower.includes('analisar') || lower.includes('analys') || lower.includes('analy')) {
+        reply = t('ai:replyReview');
       } else {
-        reply = `Compreendi a sua questão sobre **"${text}"**.\n\nDe acordo com o quadro fiscal moçambicano e as orientações da Autoridade Tributária de Moçambique (AT), todas as operações financeiras e contratuais devem ter suporte documental com NUIT válido, fatura carimbada e retenções efectuadas no momento do pagamento ou colocação à disposição.\n\nDeseja que prepare uma memória de cálculo detalhada ou consulte um artigo específico da legislação?`;
+        reply = t('ai:replyDefault', { question: text });
       }
 
       const aiMsg: ChatMessage = {
@@ -94,7 +96,7 @@ export const AIAssistantDrawer: React.FC = () => {
         sender: 'ai',
         text: reply,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        badge: 'Legislação Moçambicana 2026'
+        badge: t('ai:badgeLegislation')
       };
 
       setMessages(prev => [...prev, aiMsg]);
@@ -161,7 +163,7 @@ export const AIAssistantDrawer: React.FC = () => {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#FFFFFF' }}>
-                  Assistente CLAQ AI
+                  {t('ai:title')}
                 </h3>
                 <span
                   style={{
@@ -177,7 +179,7 @@ export const AIAssistantDrawer: React.FC = () => {
                 </span>
               </div>
               <p style={{ fontSize: '11.5px', color: '#94A3B8' }}>
-                Inteligência fiscal moçambicana em tempo real
+                {t('ai:subtitle')}
               </p>
             </div>
           </div>
@@ -282,7 +284,7 @@ export const AIAssistantDrawer: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: '#FFFFFF', borderRadius: '12px', width: 'fit-content', border: '1px solid var(--slate-200)' }}>
               <Sparkles size={16} color="var(--gold-600)" />
               <span style={{ fontSize: '12.5px', color: 'var(--slate-500)', fontStyle: 'italic' }}>
-                CLAQ AI a analisar legislação moçambicana...
+                {t('ai:typing')}
               </span>
             </div>
           )}
@@ -303,7 +305,7 @@ export const AIAssistantDrawer: React.FC = () => {
           <input
             type="text"
             className="form-control"
-            placeholder="Faça uma pergunta sobre impostos moçambicanos..."
+            placeholder={t('ai:inputPlaceholder')}
             value={inputMessage}
             onChange={e => setInputMessage(e.target.value)}
             onKeyDown={e => {

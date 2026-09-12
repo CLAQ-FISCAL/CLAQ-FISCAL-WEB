@@ -15,8 +15,10 @@ import {
   Sparkles,
   X
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ClaqLogo } from '../components/common/ClaqLogo';
 import { useAppState } from '../context/AppStateContext';
+import { LanguageToggle } from '../i18n/LanguageToggle';
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -24,6 +26,7 @@ interface LoginProps {
 
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const { login, registerUser } = useAppState();
+  const { t } = useTranslation();
 
   // Login Form State
   const [emailOrNuit, setEmailOrNuit] = useState('');
@@ -54,7 +57,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
   const handleSocialLogin = (provider: string) => {
     void provider;
-    alert('O início de sessão corporativo ainda não está configurado. Utilize as credenciais da sua conta.');
+    alert(t('login:socialLoginAlert'));
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
@@ -63,14 +66,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
     setIsLoading(true);
     await registerUser({
-        name: regFullName || 'Administrador',
+        name: regFullName || t('login:adminDefault'),
         email: regEmail,
         phone: regPhone || '+258 84 000 0000',
         companyName: regCompanyName,
         companyNuit: regCompanyNuit,
         companyProvince: regProvince,
         companyCity: regProvince.includes('Maputo') ? 'Maputo' : regProvince,
-        role: 'Contabilista / Administrador',
+        role: t('login:adminRole'),
         password: regPassword
       });
     setIsLoading(false);
@@ -90,6 +93,18 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         overflow: 'hidden'
       }}
     >
+      {/* Language Toggle (fixed top-right, available pre-login) */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '20px',
+          right: '24px',
+          zIndex: 1000
+        }}
+      >
+        <LanguageToggle variant="dark" />
+      </div>
+
       {/* LEFT PANEL: Branding, Features, Bridge Image, Geometric Lines, Quote Swoosh */}
       <div
         style={{
@@ -242,9 +257,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 margin: 0
               }}
             >
-              Nunca mais perca
+              {t('login:heroTitlePart1')}
               <br />
-              um <span style={{ color: '#F59E0B' }}>prazo fiscal</span>.
+              {t('login:heroTitlePart2')}<span style={{ color: '#F59E0B' }}>{t('login:heroTitleHighlight')}</span>
+              {t('login:heroTitlePart3')}
             </h1>
             <p
               style={{
@@ -255,7 +271,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 maxWidth: '460px'
               }}
             >
-              O CLAQ Fiscal Alert ajuda empresas e contabilistas a cumprir todas as suas obrigações fiscais, laborais e municipais com antecedência.
+              {t('login:heroSubtitle')}
             </p>
           </div>
 
@@ -281,10 +297,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 <span style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF' }}>
-                  Alertas personalizados
+                  {t('login:feature1Title')}
                 </span>
                 <span style={{ fontSize: '12.5px', color: '#94A3B8', lineHeight: '1.4' }}>
-                  Receba lembretes automáticos antes dos prazos.
+                  {t('login:feature1Desc')}
                 </span>
               </div>
             </div>
@@ -309,10 +325,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 <span style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF' }}>
-                  Calendário Fiscal
+                  {t('login:feature2Title')}
                 </span>
                 <span style={{ fontSize: '12.5px', color: '#94A3B8', lineHeight: '1.4' }}>
-                  Acompanhe todas as obrigações num só lugar.
+                  {t('login:feature2Desc')}
                 </span>
               </div>
             </div>
@@ -337,10 +353,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 <span style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF' }}>
-                  Simuladores Inteligentes
+                  {t('login:feature3Title')}
                 </span>
                 <span style={{ fontSize: '12.5px', color: '#94A3B8', lineHeight: '1.4' }}>
-                  Calcule impostos, contribuições e muito mais.
+                  {t('login:feature3Desc')}
                 </span>
               </div>
             </div>
@@ -365,10 +381,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 <span style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF' }}>
-                  Conformidade e Segurança
+                  {t('login:feature4Title')}
                 </span>
                 <span style={{ fontSize: '12.5px', color: '#94A3B8', lineHeight: '1.4' }}>
-                  Mantenha a sua empresa sempre em conformidade.
+                  {t('login:feature4Desc')}
                 </span>
               </div>
             </div>
@@ -422,9 +438,9 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 margin: 0
               }}
             >
-              Mais organização, menos multas,
+              {t('login:quoteLine1')}
               <br />
-              mais crescimento para o seu negócio.
+              {t('login:quoteLine2')}
             </p>
             <div style={{ marginTop: '10px' }}>
               <span
@@ -519,7 +535,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 margin: 0
               }}
             >
-              Bem-vindo de volta! 👋
+              {t('login:welcomeBack')}
             </h2>
             <p
               style={{
@@ -530,7 +546,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 margin: '6px 0 0 0'
               }}
             >
-              Faça login para aceder à sua conta
+              {t('login:loginSubtitle')}
             </p>
           </div>
 
@@ -547,12 +563,12 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                   marginBottom: '6px'
                 }}
               >
-                Email ou NUIT
+                {t('login:emailOrNuit')}
               </label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <input
                   type="text"
-                  placeholder="exemplo@empresa.co.mz"
+                  placeholder={t('login:emailPlaceholder')}
                   value={emailOrNuit}
                   onChange={e => setEmailOrNuit(e.target.value)}
                   required
@@ -599,12 +615,12 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                   marginBottom: '6px'
                 }}
               >
-                Senha
+                {t('login:password')}
               </label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Digite sua senha"
+                  placeholder={t('login:passwordPlaceholder')}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
@@ -691,13 +707,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                     cursor: 'pointer'
                   }}
                 />
-                Lembrar-me
+                {t('login:rememberMe')}
               </label>
               <a
                 href="#forgot"
                 onClick={e => {
                   e.preventDefault();
-                  alert('Para redefinir a sua senha, contacte o suporte CLAQ ou o administrador da sua empresa.');
+                  alert(t('login:forgotAlert'));
                 }}
                 style={{
                   fontSize: '13px',
@@ -706,7 +722,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                   textDecoration: 'none'
                 }}
               >
-                Esqueceu a senha?
+                {t('login:forgotPassword')}
               </a>
             </div>
 
@@ -746,10 +762,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               }}
             >
               {isLoading ? (
-                'A entrar...'
+                t('login:loggingIn')
               ) : (
                 <>
-                  Entrar na sua conta
+                  {t('login:loginButton')}
                   <ArrowRight size={17} strokeWidth={2.4} />
                 </>
               )}
@@ -767,7 +783,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           >
             <div style={{ flex: 1, height: '1px', backgroundColor: '#E2E8F0' }} />
             <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 500 }}>
-              ou continuar com
+              {t('login:orContinueWith')}
             </span>
             <div style={{ flex: 1, height: '1px', backgroundColor: '#E2E8F0' }} />
           </div>
@@ -904,7 +920,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           {/* Bottom Sign-up CTA */}
           <div style={{ textAlign: 'center', marginTop: '26px' }}>
             <span style={{ fontSize: '13px', color: '#64748B' }}>
-              Não tem uma conta?{' '}
+              {t('login:noAccount')}{' '}
               <button
                 type="button"
                 onClick={() => setShowRegisterModal(true)}
@@ -921,7 +937,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                   gap: '4px'
                 }}
               >
-                Criar conta grátis →
+                {t('login:createFreeAccount')}
               </button>
             </span>
           </div>
@@ -958,10 +974,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A', lineHeight: 1.2 }}>
-                Dados protegidos
+                {t('login:badgeProtectedTitle')}
               </span>
               <span style={{ fontSize: '11px', color: '#64748B', lineHeight: 1.2 }}>
-                Segurança máxima
+                {t('login:badgeProtectedSub')}
               </span>
             </div>
           </div>
@@ -987,7 +1003,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 100% Moçambique
               </span>
               <span style={{ fontSize: '11px', color: '#64748B', lineHeight: 1.2 }}>
-                Leis e prazos atualizados
+                {t('login:badgeMozambiqueSub')}
               </span>
             </div>
           </div>
@@ -1010,10 +1026,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A', lineHeight: 1.2 }}>
-                Suporte dedicado
+                {t('login:badgeSupportTitle')}
               </span>
               <span style={{ fontSize: '11px', color: '#64748B', lineHeight: 1.2 }}>
-                Estamos aqui para ajudar
+                {t('login:badgeSupportSub')}
               </span>
             </div>
           </div>
@@ -1070,21 +1086,21 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
             <div style={{ marginBottom: '20px' }}>
               <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-                Criar Nova Conta Empresarial
+                {t('login:registerTitle')}
               </h3>
               <p style={{ fontSize: '13px', color: '#64748B', marginTop: '4px' }}>
-                Registo rápido para empresas e gabinetes em Moçambique.
+                {t('login:registerSubtitle')}
               </p>
             </div>
 
             <form onSubmit={handleRegisterSubmit}>
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                  Nome Completo
+                  {t('login:fullName')}
                 </label>
                 <input
                   type="text"
-                  placeholder="Ex: Carlos Apollo"
+                  placeholder={t('login:fullNamePlaceholder')}
                   value={regFullName}
                   onChange={e => setRegFullName(e.target.value)}
                   required
@@ -1101,7 +1117,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                    Email Corporativo
+                    {t('login:corporateEmail')}
                   </label>
                   <input
                     type="email"
@@ -1120,7 +1136,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                    Telemóvel
+                    {t('login:phone')}
                   </label>
                   <input
                     type="text"
@@ -1141,11 +1157,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                    Nome da Empresa
+                    {t('login:companyName')}
                   </label>
                   <input
                     type="text"
-                    placeholder="Ex: ABC Serviços, Lda"
+                    placeholder={t('login:companyNamePlaceholder')}
                     value={regCompanyName}
                     onChange={e => setRegCompanyName(e.target.value)}
                     required
@@ -1160,7 +1176,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                    NUIT (9 dígitos)
+                    {t('login:nuitLabel')}
                   </label>
                   <input
                     type="text"
@@ -1182,7 +1198,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                  Província Fiscal
+                  {t('login:fiscalProvince')}
                 </label>
                 <select
                   value={regProvince}
@@ -1212,11 +1228,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                  Senha de Acesso
+                  {t('login:accessPassword')}
                 </label>
                 <input
                   type="password"
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder={t('login:passwordPlaceholderMin')}
                   value={regPassword}
                   onChange={e => setRegPassword(e.target.value)}
                   required
@@ -1245,7 +1261,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                   fontSize: '14px'
                 }}
               >
-                {isLoading ? 'A criar conta...' : 'Criar Conta e Começar'}
+                {isLoading ? t('login:creatingAccount') : t('login:createAccountStart')}
               </button>
             </form>
           </div>

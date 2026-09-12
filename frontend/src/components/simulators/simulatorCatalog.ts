@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import {
   DollarSign,
   Percent,
@@ -22,13 +23,13 @@ export interface SimulatorCard {
   bg: string;
 }
 
-export const simulatorCatalog: SimulatorCard[] = [
+export const simulatorCatalog = (t: TFunction): SimulatorCard[] => [
   {
     id: 'non-resident',
     slug: 'pagamento-nao-residentes',
     category: 'Fiscal',
-    title: 'Pagamento de Serviços a Não Residentes',
-    desc: 'Calcule IVA e IRPC sobre pagamentos ao exterior.',
+    title: t('simuladores:simNonResidentTitle'),
+    desc: t('simuladores:simNonResidentDesc'),
     icon: DollarSign,
     color: '#2563EB',
     bg: 'var(--blue-50)',
@@ -37,8 +38,8 @@ export const simulatorCatalog: SimulatorCard[] = [
     id: 'iva-ops',
     slug: 'iva-operacoes',
     category: 'Fiscal',
-    title: 'IVA – Operações',
-    desc: 'Calcule o IVA a pagar ou recuperar nas operações.',
+    title: t('simuladores:simIvaOpsTitle'),
+    desc: t('simuladores:simIvaOpsDesc'),
     icon: Percent,
     color: '#D97706',
     bg: 'var(--gold-50)',
@@ -47,8 +48,8 @@ export const simulatorCatalog: SimulatorCard[] = [
     id: 'irps-ret',
     slug: 'irps-retencoes',
     category: 'Fiscal',
-    title: 'IRPS – Retenções',
-    desc: 'Calcule o imposto sobre rendimentos de trabalho.',
+    title: t('simuladores:simIrpsTitle'),
+    desc: t('simuladores:simIrpsDesc'),
     icon: Users,
     color: '#059669',
     bg: 'var(--emerald-50)',
@@ -57,8 +58,8 @@ export const simulatorCatalog: SimulatorCard[] = [
     id: 'irpc-est',
     slug: 'irpc-estimativa',
     category: 'Fiscal',
-    title: 'IRPC – Estimativa',
-    desc: 'Calcule o IRPC estimado da sua empresa.',
+    title: t('simuladores:simIrpcTitle'),
+    desc: t('simuladores:simIrpcDesc'),
     icon: TrendingUp,
     color: '#7C3AED',
     bg: '#FAF5FF',
@@ -67,8 +68,8 @@ export const simulatorCatalog: SimulatorCard[] = [
     id: 'inss-cont',
     slug: 'inss-contribuicoes',
     category: 'Fiscal',
-    title: 'INSS – Contribuições',
-    desc: 'Calcule as contribuições ao INSS trabalhador e patronal.',
+    title: t('simuladores:simInssTitle'),
+    desc: t('simuladores:simInssDesc'),
     icon: Briefcase,
     color: '#0284C7',
     bg: '#F0F9FF',
@@ -77,8 +78,8 @@ export const simulatorCatalog: SimulatorCard[] = [
     id: 'fines',
     slug: 'juros-multas',
     category: 'Fiscal',
-    title: 'Juros e Multas',
-    desc: 'Calcule juros e multas por incumprimento fiscal.',
+    title: t('simuladores:simFinesTitle'),
+    desc: t('simuladores:simFinesDesc'),
     icon: Info,
     color: '#DC2626',
     bg: 'var(--red-50)',
@@ -87,8 +88,8 @@ export const simulatorCatalog: SimulatorCard[] = [
     id: 'stamp-tax',
     slug: 'imposto-selo',
     category: 'Fiscal',
-    title: 'Imposto de Selo',
-    desc: 'Calcule o imposto de selo aplicável a contratos e recibos.',
+    title: t('simuladores:simStampTaxTitle'),
+    desc: t('simuladores:simStampTaxDesc'),
     icon: FileText,
     color: '#475569',
     bg: 'var(--slate-100)',
@@ -97,8 +98,8 @@ export const simulatorCatalog: SimulatorCard[] = [
     id: 'salario',
     slug: 'salario-liquido',
     category: 'Laboral (RH)',
-    title: 'Salário Líquido',
-    desc: 'Calcule o salário líquido do colaborador após descontos legais.',
+    title: t('simuladores:simSalaryTitle'),
+    desc: t('simuladores:simSalaryDesc'),
     icon: Calculator,
     color: '#2563EB',
     bg: 'var(--blue-50)',
@@ -107,8 +108,8 @@ export const simulatorCatalog: SimulatorCard[] = [
     id: 'extra-hours',
     slug: 'horas-extras',
     category: 'Laboral (RH)',
-    title: 'Horas Extras',
-    desc: 'Calcule o valor das horas extras a pagar.',
+    title: t('simuladores:simExtraHoursTitle'),
+    desc: t('simuladores:simExtraHoursDesc'),
     icon: Clock,
     color: '#D97706',
     bg: 'var(--gold-50)',
@@ -117,8 +118,8 @@ export const simulatorCatalog: SimulatorCard[] = [
     id: 'vacations',
     slug: 'ferias',
     category: 'Laboral (RH)',
-    title: 'Férias',
-    desc: 'Calcule dias e valores de férias dos trabalhadores.',
+    title: t('simuladores:simVacationsTitle'),
+    desc: t('simuladores:simVacationsDesc'),
     icon: Calendar,
     color: '#059669',
     bg: 'var(--emerald-50)',
@@ -127,8 +128,8 @@ export const simulatorCatalog: SimulatorCard[] = [
     id: 'indemnity',
     slug: 'indemnizacao',
     category: 'Laboral (RH)',
-    title: 'Indemnização',
-    desc: 'Calcule a indemnização por cessação de contrato.',
+    title: t('simuladores:simIndemnityTitle'),
+    desc: t('simuladores:simIndemnityDesc'),
     icon: Briefcase,
     color: '#EA580C',
     bg: '#FFF7ED',
@@ -136,7 +137,8 @@ export const simulatorCatalog: SimulatorCard[] = [
 ];
 
 export function getSimulatorBySlug(
-  slug: string
+  slug: string,
+  t: TFunction
 ): SimulatorCard | undefined {
-  return simulatorCatalog.find((s) => s.slug === slug);
+  return simulatorCatalog(t).find((s) => s.slug === slug);
 }

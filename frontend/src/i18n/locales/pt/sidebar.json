@@ -1,0 +1,17 @@
+{
+  "dashboard": "Dashboard",
+  "calendario": "Calendário Fiscal",
+  "alertas": "Alertas",
+  "biblioteca": "Biblioteca Legal",
+  "simuladores": "Simuladores",
+  "relatorios": "Relatórios",
+  "clientes": "Meus Clientes",
+  "newsletter": "Newsletter",
+  "configuracoes": "Configurações",
+  "suporte": "Ajuda e Suporte",
+  "aiAssistant": "Assistente Fiscal AI",
+  "bePremium": "Seja Premium",
+  "bePremiumDesc": "Tenha acesso a todos os recursos, integrações e alertas em tempo real.",
+  "upgradeNow": "Upgrade Agora",
+  "tagline": "Transformamos obrigação em tranquilidade."
+}

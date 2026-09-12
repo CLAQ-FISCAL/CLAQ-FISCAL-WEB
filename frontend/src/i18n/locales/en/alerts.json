@@ -1,0 +1,17 @@
+{
+  "pageTitle": "Alerts",
+  "pageSubtitle": "Receive notifications and keep your company always fiscally compliant.",
+  "markAllAsRead": "Mark all as read",
+  "configureAlerts": "Configure Alerts",
+  "filterAll": "All",
+  "filterPending": "Pending",
+  "filterOverdue": "Overdue",
+  "filterInformative": "Informative",
+  "filterRead": "Read / Completed",
+  "dueInDays_one": "Due in {{count}} day",
+  "dueInDays_other": "Due in {{count}} days",
+  "deadlineLabel": "Deadline: {{date}}",
+  "howAlertsWork": "How do alerts work?",
+  "howAlertsWorkBody": "We send reminders by e-mail, WhatsApp and in the system according to your settings.",
+  "managePreferences": "Manage preferences"
+}

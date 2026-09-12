@@ -144,5 +144,5 @@ export interface SystemSettings {
   whatsappNumber: string;
   isWhatsAppConnected: boolean;
   theme: 'light' | 'dark' | 'system';
-  language: 'pt-PT';
+  language: 'pt' | 'en';
 }

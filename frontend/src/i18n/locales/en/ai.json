@@ -1,0 +1,19 @@
+{
+  "title": "CLAQ AI Assistant",
+  "online": "ONLINE",
+  "subtitle": "Real-time Mozambican tax intelligence",
+  "inputPlaceholder": "Ask a question about Mozambican taxes...",
+  "typing": "CLAQ AI is analysing Mozambican legislation...",
+  "timeNow": "Now",
+  "badgeLegislation": "Mozambican Legislation 2026",
+  "welcomeMessage": "Hello! I am your CLAQ AI Tax Assistant, specialised in the Mozambican tax system. I can analyse calculation memoranda, interpret articles of the VAT, IRPC and IRPS Codes, check double taxation treaties or clarify Tax Authority deadlines. How can I help you today?",
+  "promptGrossUp": "How does the 1.25 gross-up factor work?",
+  "promptDTA": "Does Mozambique have a double taxation treaty with the USA?",
+  "promptIVADeadline": "What is the VAT payment deadline for transactions abroad?",
+  "promptIVADeduct": "How can I deduct VAT from invoices with withholding at source?",
+  "replyGrossUp": "**Explanation of Factor 1.25 (Gross-up):**\n\nAccording to Circular Letter no. 3012/AT/2021 and Mozambican tax practice, when a contract stipulates that taxes in Mozambique are borne by the resident purchaser (*net of tax*), the taxable base must be recalculated.\n\n$$\\text{Base} = \\frac{\\text{Net Value}}{1 - (\\text{IRPC} 20\\%)} = \\frac{100\\%}{80\\%} = 1.25$$\n\nTherefore, multiply the value in Meticais by 1.25 to find the Counter-Value on which IVA (16%) and IRPC withheld at source (20%) are applied.",
+  "replyDTA": "**Double Tax Treaties (DTT / DTA):**\n\n1. Mozambique **does NOT** currently have a Double Tax Treaty in force with the **United States of America (USA)**. The standard withholding rate of 20% IRPC applies (Art. 66 of the CIRPC).\n\n2. Mozambique has ratified treaties with: **Portugal (reduced rate of 10%), South Africa (10%), Italy, United Arab Emirates, India, Macau, Mauritius, Vietnam and Botswana**.\n\nTo benefit from reduced rates, the provider must present the Tax Residency Certificate issued by the authority of the country of origin before payment.",
+  "replyDeadlines": "**Official Compliance Deadlines:**\n\n- **IVA (Model A):** Must be submitted and paid by the **last business day of the following month** for the operations they refer to (e.g. June IVA falls due on 30 June / July).\n- **IRPC Withholding at Source (Guide M/11):** Must be delivered and paid by the **20th day of the following month** after the withholding.\n- **INSS (Payroll):** By the **10th day of the following month**.",
+  "replyReview": "**Tax Analysis and Validation Completed ✓**\n\nWe have examined the values of the current simulation:\n- Value in MZN: 637.500,00 MZN\n- Recalculated Base (Factor 1.25): 796.875,00 MZN\n- IVA (16%): 127.500,00 MZN\n- IRPC (20%): 159.375,00 MZN\n- Total Taxes: 286.875,00 MZN\n\nAll calculations are in strict compliance with Law no. 1/2018 (CIVA) and Law no. 34/2014 (CIRPC). You can generate the official report with the CLAQ digital seal.",
+  "replyDefault": "I have understood your question about **\"{{question}}\"**.\n\nUnder the Mozambican tax framework and the guidelines of the Tax Authority of Mozambique (AT), all financial and contractual operations must have documentary support with a valid NUIT, stamped invoice and withholdings made at the time of payment or when made available.\n\nWould you like me to prepare a detailed calculation memorandum or consult a specific article of the legislation?"
+}

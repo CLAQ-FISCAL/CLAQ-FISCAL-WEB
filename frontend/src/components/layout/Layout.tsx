@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { WhatsAppModal } from '../whatsapp/WhatsAppModal';
@@ -26,6 +27,7 @@ export const Layout: React.FC<LayoutProps> = ({
   currentPath,
   onNavigate
 }) => {
+  const { t } = useTranslation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const {
     toasts,
@@ -92,7 +94,7 @@ export const Layout: React.FC<LayoutProps> = ({
             cursor: 'pointer',
             transition: 'all 0.2s ease'
           }}
-          title="Abrir Assistente CLAQ AI"
+          title={t('layout:openAiAssistant')}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
         >
@@ -115,7 +117,7 @@ export const Layout: React.FC<LayoutProps> = ({
             cursor: 'pointer',
             transition: 'all 0.2s ease'
           }}
-          title="WhatsApp Fiscal Directo"
+          title={t('layout:openWhatsApp')}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
         >

@@ -13,6 +13,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { useAppState } from '../context/AppStateContext';
+import { useTranslation } from 'react-i18next';
 import { AlertItem } from '../types';
 
 interface AlertasProps {
@@ -20,6 +21,7 @@ interface AlertasProps {
 }
 
 export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
+  const { t } = useTranslation();
   const { alerts, markAllAlertsAsRead, markAlertAsRead, setIsWhatsAppModalOpen } = useAppState();
 
   const [activeFilter, setActiveFilter] = useState<'todos' | 'pendentes' | 'vencidos' | 'informativos' | 'pagos'>('todos');
@@ -38,21 +40,21 @@ export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--slate-900)' }}>
-            Alertas
+            {t('alerts:pageTitle')}
           </h1>
           <p style={{ fontSize: '13.5px', color: 'var(--slate-500)', marginTop: '2px' }}>
-            Receba notificações e mantenha a sua empresa sempre em conformidade fiscal.
+            {t('alerts:pageSubtitle')}
           </p>
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
           <button onClick={markAllAlertsAsRead} className="btn btn-secondary btn-sm">
             <CheckCircle2 size={15} />
-            <span>Marcar todas como lidas</span>
+            <span>{t('alerts:markAllAsRead')}</span>
           </button>
           <button onClick={() => onNavigate('/configuracoes')} className="btn btn-secondary btn-sm">
             <Settings size={15} />
-            <span>Configurar Alertas</span>
+            <span>{t('alerts:configureAlerts')}</span>
           </button>
         </div>
       </div>
@@ -60,11 +62,11 @@ export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
       {/* Filter Tabs */}
       <div className="card" style={{ padding: '8px 16px', display: 'flex', gap: '8px', overflowX: 'auto' }}>
         {[
-          { id: 'todos', label: 'Todos' },
-          { id: 'pendentes', label: 'Pendentes' },
-          { id: 'vencidos', label: 'Vencidos' },
-          { id: 'informativos', label: 'Informativos' },
-          { id: 'pagos', label: 'Lidos / Concluídos' }
+          { id: 'todos', label: t('alerts:filterAll') },
+          { id: 'pendentes', label: t('alerts:filterPending') },
+          { id: 'vencidos', label: t('alerts:filterOverdue') },
+          { id: 'informativos', label: t('alerts:filterInformative') },
+          { id: 'pagos', label: t('alerts:filterRead') }
         ].map(f => (
           <button
             key={f.id}
@@ -146,10 +148,10 @@ export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                 <div style={{ textAlign: 'right' }}>
                   <span style={{ fontSize: '13px', fontWeight: 800, color: textColor, display: 'block' }}>
-                    Vence em {alt.daysRemaining} dias
+                    {t('alerts:dueInDays', { count: alt.daysRemaining })}
                   </span>
                   <span style={{ fontSize: '11.5px', color: 'var(--slate-500)' }}>
-                    Data Limite: {alt.dueDate}
+                    {t('alerts:deadlineLabel', { date: alt.dueDate })}
                   </span>
                 </div>
 
@@ -177,7 +179,7 @@ export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Info size={18} color="var(--blue-600)" />
           <span>
-            <b>Como funcionam os alertas?</b> Enviamos lembretes por e-mail, WhatsApp e no sistema conforme suas configurações.
+            <b>{t('alerts:howAlertsWork')}</b> {t('alerts:howAlertsWorkBody')}
           </span>
         </div>
 
@@ -191,7 +193,7 @@ export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
             cursor: 'pointer'
           }}
         >
-          Gerenciar preferências →
+          {t('alerts:managePreferences')} →
         </button>
       </div>
     </div>

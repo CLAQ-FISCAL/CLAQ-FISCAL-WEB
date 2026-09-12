@@ -17,6 +17,7 @@ import {
   Trash2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
 import { FiscalObligation, ObligationCategory, TaxAuthority } from '../types';
 import { formatMZN, formatDate } from '../utils/formatters';
@@ -27,6 +28,7 @@ interface CalendarioProps {
 }
 
 export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
+  const { t, i18n } = useTranslation();
   const {
     obligations,
     markObligationPaid,
@@ -40,7 +42,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
   const displayDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
   const displayYear = displayDate.getFullYear();
   const displayMonthIndex = displayDate.getMonth();
-  const displayMonthLabel = CalendarEngine.getMonthNamePt(displayMonthIndex, displayYear);
+  const displayMonthLabel = CalendarEngine.getMonthName(displayMonthIndex, displayYear, i18n.language);
 
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterAuthority, setFilterAuthority] = useState<string>('all');
@@ -77,7 +79,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
       status: 'a_vencer',
       amount: Number(newAmount) || 0,
       authority: newAuthority,
-      description: newDescription || `Obrigação registada para ${displayMonthLabel}`,
+      description: newDescription || t('calendar:obligationRegistered', { month: displayMonthLabel }),
       daysRemaining: CalendarEngine.getDaysRemaining(newDueDate)
     });
 
@@ -97,7 +99,15 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
   };
 
   const exportCalendarCSV = () => {
-    const headers = ['Título', 'Categoria', 'Período', 'Vencimento', 'Montante (MZN)', 'Entidade', 'Estado'];
+    const headers = [
+      t('calendar:csvTitle'),
+      t('calendar:csvCategory'),
+      t('calendar:csvPeriod'),
+      t('calendar:csvDueDate'),
+      t('calendar:csvAmount'),
+      t('calendar:csvEntity'),
+      t('calendar:csvStatus')
+    ];
     const rows = filteredObligations.map(o => [
       `"${o.title}"`,
       o.category,
@@ -112,7 +122,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `Calendario_Fiscal_${displayMonthLabel.replace(/\s+/g, '_')}.csv`);
+    link.setAttribute('download', `${t('calendar:csvFileName', { month: displayMonthLabel.replace(/\s+/g, '_') })}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -124,10 +134,10 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--slate-900)' }}>
-            Calendário Fiscal de Moçambique
+            {t('calendar:pageTitle')}
           </h1>
           <p style={{ fontSize: '13.5px', color: 'var(--slate-500)', marginTop: '2px' }}>
-            Acompanhe, simule e registe todas as obrigações tributárias, laborais e municipais.
+            {t('calendar:pageSubtitle')}
           </p>
         </div>
 
@@ -138,7 +148,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
             style={{ padding: '9px 14px', fontSize: '13px' }}
           >
             <Download size={15} />
-            <span>Exportar CSV</span>
+            <span>{t('calendar:exportCSV')}</span>
           </button>
 
           <button
@@ -147,7 +157,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
             style={{ padding: '9px 16px', fontSize: '13px' }}
           >
             <Plus size={15} />
-            <span>+ Nova Obrigação</span>
+            <span>+ {t('calendar:newObligation')}</span>
           </button>
         </div>
       </div>
@@ -182,7 +192,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
               className="btn btn-secondary"
               style={{ padding: '4px 10px', fontSize: '11px', fontWeight: 700 }}
             >
-              Hoje
+              {t('common:today')}
             </button>
           )}
         </div>
@@ -191,36 +201,36 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Filter size={14} color="var(--slate-400)" />
-            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--slate-500)' }}>Categoria:</span>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--slate-500)' }}>{t('calendar:categoryLabel')}:</span>
             <select
               value={filterCategory}
               onChange={e => setFilterCategory(e.target.value)}
               className="form-control"
               style={{ padding: '6px 10px', fontSize: '12px', width: 'auto' }}
             >
-              <option value="all">Todas as Categorias</option>
-              <option value="IVA">IVA (Imposto sobre Valor Acrescentado)</option>
-              <option value="INSS">INSS (Segurança Social)</option>
-              <option value="IRPS">IRPS (Retenções na Fonte)</option>
-              <option value="IRPC">IRPC (Imposto Rendimento P. Colectivas)</option>
-              <option value="TAE">TAE (Taxa de Atividade Económica)</option>
-              <option value="Alvara">Alvará Comercial</option>
+              <option value="all">{t('calendar:allCategories')}</option>
+              <option value="IVA">{t('calendar:optIVADesc')}</option>
+              <option value="INSS">{t('calendar:optINSSDesc')}</option>
+              <option value="IRPS">{t('calendar:optIRPSDesc')}</option>
+              <option value="IRPC">{t('calendar:optIRPCDesc')}</option>
+              <option value="TAE">{t('calendar:optTAEDesc')}</option>
+              <option value="Alvara">{t('calendar:optAlvara')}</option>
             </select>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--slate-500)' }}>Entidade:</span>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--slate-500)' }}>{t('calendar:entityLabel')}:</span>
             <select
               value={filterAuthority}
               onChange={e => setFilterAuthority(e.target.value)}
               className="form-control"
               style={{ padding: '6px 10px', fontSize: '12px', width: 'auto' }}
             >
-              <option value="all">Todas as Entidades</option>
-              <option value="AT">AT (Autoridade Tributária)</option>
+              <option value="all">{t('calendar:allEntities')}</option>
+              <option value="AT">{t('calendar:optAT')}</option>
               <option value="INSS">INSS</option>
-              <option value="Municipio">Município / Autarquia</option>
-              <option value="BAU">BAU (Balcão de Atendimento Único)</option>
+              <option value="Municipio">{t('calendar:optMunicipio')}</option>
+              <option value="BAU">{t('calendar:optBAU')}</option>
             </select>
           </div>
         </div>
@@ -230,13 +240,13 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
       <div className="card" style={{ padding: '24px' }}>
         {/* Days of Week Header */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: '12px', fontSize: '12px', fontWeight: 700, color: 'var(--slate-400)' }}>
-          <div>SEGUNDA</div>
-          <div>TERÇA</div>
-          <div>QUARTA</div>
-          <div>QUINTA</div>
-          <div>SEXTA</div>
-          <div>SÁBADO</div>
-          <div>DOMINGO</div>
+          <div>{t('calendar:dayMonday')}</div>
+          <div>{t('calendar:dayTuesday')}</div>
+          <div>{t('calendar:dayWednesday')}</div>
+          <div>{t('calendar:dayThursday')}</div>
+          <div>{t('calendar:dayFriday')}</div>
+          <div>{t('calendar:daySaturday')}</div>
+          <div>{t('calendar:daySunday')}</div>
         </div>
 
         {/* 35 / 42 Cells Grid */}
@@ -289,7 +299,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
                   </span>
                   {dayInfo.isToday && (
                     <span style={{ fontSize: '9px', fontWeight: 800, color: 'var(--blue-600)', textTransform: 'uppercase' }}>
-                      Hoje
+                      {t('common:today')}
                     </span>
                   )}
                 </div>
@@ -349,7 +359,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
                     color: selectedDayObligation.status === 'pago' ? '#059669' : '#D97706'
                   }}
                 >
-                  {selectedDayObligation.status === 'pago' ? 'Liquidado / Pago' : 'A Vencer'}
+                  {selectedDayObligation.status === 'pago' ? t('calendar:paidSettled') : t('common:statusDue')}
                 </span>
               </div>
               <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '8px' }}>
@@ -370,23 +380,23 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginTop: '20px', padding: '16px', backgroundColor: 'var(--slate-50)', borderRadius: '10px' }}>
             <div>
-              <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--slate-400)', textTransform: 'uppercase' }}>Vencimento</p>
+              <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--slate-400)', textTransform: 'uppercase' }}>{t('calendar:dueDate')}</p>
               <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--slate-800)', marginTop: '2px' }}>
                 {formatDate(selectedDayObligation.dueDate)}
               </h4>
             </div>
             <div>
-              <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--slate-400)', textTransform: 'uppercase' }}>Montante Estimado</p>
+              <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--slate-400)', textTransform: 'uppercase' }}>{t('calendar:estimatedAmount')}</p>
               <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '2px' }}>
                 {formatMZN(selectedDayObligation.amount)}
               </h4>
             </div>
             <div>
-              <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--slate-400)', textTransform: 'uppercase' }}>Prazo Restante</p>
+              <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--slate-400)', textTransform: 'uppercase' }}>{t('calendar:remainingDeadline')}</p>
               <h4 style={{ fontSize: '15px', fontWeight: 800, color: CalendarEngine.getDaysRemaining(selectedDayObligation.dueDate) <= 3 ? '#DC2626' : '#2563EB', marginTop: '2px' }}>
                 {CalendarEngine.getDaysRemaining(selectedDayObligation.dueDate) < 0
-                  ? `Vencido há ${Math.abs(CalendarEngine.getDaysRemaining(selectedDayObligation.dueDate))} dias`
-                  : `${CalendarEngine.getDaysRemaining(selectedDayObligation.dueDate)} dias`}
+                  ? t('calendar:overdueByDays', { count: Math.abs(CalendarEngine.getDaysRemaining(selectedDayObligation.dueDate)) })
+                  : t('calendar:daysLeft', { count: CalendarEngine.getDaysRemaining(selectedDayObligation.dueDate) })}
               </h4>
             </div>
           </div>
@@ -398,7 +408,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
               style={{ padding: '8px 16px', fontSize: '12.5px', color: '#DC2626' }}
             >
               <Trash2 size={14} />
-              <span>Eliminar</span>
+              <span>{t('common:delete')}</span>
             </button>
 
             {selectedDayObligation.status !== 'pago' && (
@@ -408,7 +418,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
                 style={{ padding: '8px 20px', fontSize: '12.5px' }}
               >
                 <CheckCircle2 size={16} />
-                <span>Marcar como Pago</span>
+                <span>{t('calendar:markAsPaid')}</span>
               </button>
             )}
           </div>
@@ -421,7 +431,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
           <div className="modal-content" style={{ maxWidth: '520px', width: '90%', padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)' }}>
-                Registar Nova Obrigação Fiscal
+                {t('calendar:registerNewObligation')}
               </h3>
               <button
                 onClick={() => setIsAddModalOpen(false)}
@@ -433,11 +443,11 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
 
             <form onSubmit={handleCreateObligation}>
               <div className="form-group">
-                <label className="form-label">Título da Obrigação</label>
+                <label className="form-label">{t('calendar:obligationTitle')}</label>
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Ex: IVA – Modelo A ou Pagamento por Conta IRPC"
+                  placeholder={t('calendar:titlePlaceholder')}
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
                   required
@@ -446,7 +456,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div className="form-group">
-                  <label className="form-label">Categoria</label>
+                  <label className="form-label">{t('calendar:categoryLabel')}</label>
                   <select
                     className="form-control"
                     value={newCategory}
@@ -457,20 +467,20 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
                     <option value="IRPS">IRPS</option>
                     <option value="IRPC">IRPC</option>
                     <option value="TAE">TAE</option>
-                    <option value="Alvara">Alvará Comercial</option>
+                    <option value="Alvara">{t('calendar:optAlvara')}</option>
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Entidade Tributária</label>
+                  <label className="form-label">{t('calendar:taxEntity')}</label>
                   <select
                     className="form-control"
                     value={newAuthority}
                     onChange={e => setNewAuthority(e.target.value as TaxAuthority)}
                   >
-                    <option value="AT">AT (Autoridade Tributária)</option>
+                    <option value="AT">{t('calendar:optAT')}</option>
                     <option value="INSS">INSS</option>
-                    <option value="Municipio">Município</option>
+                    <option value="Municipio">{t('calendar:optMunicipioShort')}</option>
                     <option value="BAU">BAU</option>
                   </select>
                 </div>
@@ -478,7 +488,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div className="form-group">
-                  <label className="form-label">Data de Vencimento</label>
+                  <label className="form-label">{t('calendar:dueDateLabel')}</label>
                   <input
                     type="date"
                     className="form-control"
@@ -489,7 +499,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Montante Estimado (MZN)</label>
+                  <label className="form-label">{t('calendar:estimatedAmountMZN')}</label>
                   <input
                     type="number"
                     className="form-control"
@@ -501,11 +511,11 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Notas & Descrição Adicional</label>
+                <label className="form-label">{t('calendar:notesDescription')}</label>
                 <textarea
                   className="form-control"
                   rows={3}
-                  placeholder="Informações sobre guias de pagamento, modelo ou instruções..."
+                  placeholder={t('calendar:notesPlaceholder')}
                   value={newDescription}
                   onChange={e => setNewDescription(e.target.value)}
                 />
@@ -517,10 +527,10 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
                   onClick={() => setIsAddModalOpen(false)}
                   className="btn btn-secondary"
                 >
-                  Cancelar
+                  {t('common:cancel')}
                 </button>
                 <button type="submit" className="btn btn-primary-gold">
-                  Gravar Obrigação
+                  {t('calendar:saveObligation')}
                 </button>
               </div>
             </form>

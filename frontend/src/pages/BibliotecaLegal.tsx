@@ -14,25 +14,37 @@ import {
 } from 'lucide-react';
 import { STATUTORY_LEGISLATION } from '../data/statutoryLegislation';
 import { LegalDoc } from '../types';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
 
 export const BibliotecaLegal: React.FC = () => {
+  const { t } = useTranslation();
   const { addToast } = useAppState();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('todos');
   const [selectedDoc, setSelectedDoc] = useState<LegalDoc | null>(null);
 
+  const docs = STATUTORY_LEGISLATION(t);
+
   const categoryCounts = {
-    todos: STATUTORY_LEGISLATION.length,
-    lei: STATUTORY_LEGISLATION.filter(d => d.type === 'lei').length,
-    decreto: STATUTORY_LEGISLATION.filter(d => d.type === 'decreto').length,
-    regulamento: STATUTORY_LEGISLATION.filter(d => d.type === 'regulamento').length,
-    diploma: STATUTORY_LEGISLATION.filter(d => d.type === 'diploma').length,
-    outro: STATUTORY_LEGISLATION.filter(d => d.type === 'outro').length
+    todos: docs.length,
+    lei: docs.filter(d => d.type === 'lei').length,
+    decreto: docs.filter(d => d.type === 'decreto').length,
+    regulamento: docs.filter(d => d.type === 'regulamento').length,
+    diploma: docs.filter(d => d.type === 'diploma').length,
+    outro: docs.filter(d => d.type === 'outro').length
   };
 
-  const filteredDocs = STATUTORY_LEGISLATION.filter(doc => {
+  const typeLabels: Record<LegalDoc['type'], string> = {
+    lei: t('biblioteca:typeLei'),
+    decreto: t('biblioteca:typeDecreto'),
+    regulamento: t('biblioteca:typeRegulamento'),
+    diploma: t('biblioteca:typeDiploma'),
+    outro: t('biblioteca:typeOutro')
+  };
+
+  const filteredDocs = docs.filter(doc => {
     if (selectedType !== 'todos' && doc.type !== selectedType) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -47,9 +59,10 @@ export const BibliotecaLegal: React.FC = () => {
   });
 
   const handleCopyCitation = (doc: LegalDoc) => {
-    const citation = `${doc.title}, ${doc.number}, publicado no Boletim da República de Moçambique (${doc.officialGazette || 'I Série'}).`;
+    const gazette = doc.officialGazette || 'I Série';
+    const citation = t('biblioteca:citationTemplate', { title: doc.title, number: doc.number, gazette });
     navigator.clipboard.writeText(citation);
-    addToast('success', 'Citação Copiada', 'Referência jurídica copiada para a área de transferência.');
+    addToast('success', t('biblioteca:toastCitationTitle'), t('biblioteca:toastCitationMessage'));
   };
 
   return (
@@ -57,10 +70,10 @@ export const BibliotecaLegal: React.FC = () => {
       {/* Top Header */}
       <div>
         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--slate-900)' }}>
-          Biblioteca Legal
+          {t('biblioteca:title')}
         </h1>
         <p style={{ fontSize: '13.5px', color: 'var(--slate-500)', marginTop: '2px' }}>
-          Consulte leis, decretos, regulamentos e documentos oficiais tributários de Moçambique.
+          {t('biblioteca:subtitle')}
         </p>
       </div>
 
@@ -72,7 +85,7 @@ export const BibliotecaLegal: React.FC = () => {
             type="text"
             className="form-control"
             style={{ paddingLeft: '38px', fontSize: '13.5px' }}
-            placeholder="Pesquisar por palavra-chave, assunto ou número do diploma..."
+            placeholder={t('biblioteca:searchPlaceholder')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
@@ -80,16 +93,16 @@ export const BibliotecaLegal: React.FC = () => {
 
         <div style={{ display: 'flex', gap: '10px' }}>
           <select className="form-control" style={{ width: '160px', padding: '8px 12px', fontSize: '13px' }}>
-            <option>Todos os tipos</option>
-            <option>Leis</option>
-            <option>Decretos</option>
-            <option>Regulamentos</option>
+            <option>{t('biblioteca:typeAll')}</option>
+            <option>{t('biblioteca:categoryLei')}</option>
+            <option>{t('biblioteca:categoryDecreto')}</option>
+            <option>{t('biblioteca:categoryRegulamento')}</option>
           </select>
 
           <select className="form-control" style={{ width: '150px', padding: '8px 12px', fontSize: '13px' }}>
-            <option>Mais recentes</option>
-            <option>Mais consultados</option>
-            <option>Ordem alfabética</option>
+            <option>{t('biblioteca:sortRecent')}</option>
+            <option>{t('biblioteca:sortViewed')}</option>
+            <option>{t('biblioteca:sortAlpha')}</option>
           </select>
         </div>
       </div>
@@ -97,12 +110,12 @@ export const BibliotecaLegal: React.FC = () => {
       {/* Category Filter Pills */}
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         {[
-          { id: 'todos', label: 'Todos', count: categoryCounts.todos },
-          { id: 'lei', label: 'Leis', count: categoryCounts.lei },
-          { id: 'decreto', label: 'Decretos', count: categoryCounts.decreto },
-          { id: 'regulamento', label: 'Regulamentos', count: categoryCounts.regulamento },
-          { id: 'diploma', label: 'Diplomas Ministeriais', count: categoryCounts.diploma },
-          { id: 'outro', label: 'Outros', count: categoryCounts.outro }
+          { id: 'todos', label: t('biblioteca:categoryAll'), count: categoryCounts.todos },
+          { id: 'lei', label: t('biblioteca:categoryLei'), count: categoryCounts.lei },
+          { id: 'decreto', label: t('biblioteca:categoryDecreto'), count: categoryCounts.decreto },
+          { id: 'regulamento', label: t('biblioteca:categoryRegulamento'), count: categoryCounts.regulamento },
+          { id: 'diploma', label: t('biblioteca:categoryDiploma'), count: categoryCounts.diploma },
+          { id: 'outro', label: t('biblioteca:categoryOutro'), count: categoryCounts.outro }
         ].map(cat => (
           <button
             key={cat.id}
@@ -170,7 +183,7 @@ export const BibliotecaLegal: React.FC = () => {
                     }`}
                     style={{ fontSize: '10.5px' }}
                   >
-                    {doc.type.toUpperCase()}
+                    {typeLabels[doc.type]}
                   </span>
                 </div>
 
@@ -192,7 +205,7 @@ export const BibliotecaLegal: React.FC = () => {
                     handleCopyCitation(doc);
                   }}
                   className="btn btn-ghost btn-sm"
-                  title="Copiar Citação"
+                  title={t('biblioteca:copyCitationTitle')}
                 >
                   <Copy size={15} />
                 </button>
@@ -204,7 +217,7 @@ export const BibliotecaLegal: React.FC = () => {
                   className="btn btn-secondary btn-sm"
                 >
                   <Eye size={15} />
-                  <span>Ver Diploma</span>
+                  <span>{t('biblioteca:viewDiploma')}</span>
                 </button>
               </div>
             </div>
@@ -226,7 +239,7 @@ export const BibliotecaLegal: React.FC = () => {
                     {selectedDoc.title}
                   </h3>
                   <span style={{ fontSize: '12px', color: 'var(--slate-500)' }}>
-                    {selectedDoc.number} • {selectedDoc.officialGazette || 'Boletim da República de Moçambique'}
+                    {selectedDoc.number} • {selectedDoc.officialGazette || t('biblioteca:gazetteFallback')}
                   </span>
                 </div>
               </div>
@@ -239,7 +252,7 @@ export const BibliotecaLegal: React.FC = () => {
             <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
                 <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>
-                  Sumário & Objecto do Diploma
+                  {t('biblioteca:summaryTitle')}
                 </h4>
                 <p style={{ fontSize: '13.5px', color: 'var(--slate-800)', marginTop: '4px', lineHeight: 1.6 }}>
                   {selectedDoc.summary}
@@ -249,7 +262,7 @@ export const BibliotecaLegal: React.FC = () => {
               {selectedDoc.keyArticles && (
                 <div>
                   <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase', marginBottom: '12px' }}>
-                    Artigos Chave para Consulta Rápida
+                    {t('biblioteca:articlesTitle')}
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {selectedDoc.keyArticles.map((art, idx) => (
@@ -273,17 +286,17 @@ export const BibliotecaLegal: React.FC = () => {
                 className="btn btn-secondary btn-sm"
               >
                 <Copy size={15} />
-                <span>Copiar Citação Oficial</span>
+                <span>{t('biblioteca:copyOfficialCitation')}</span>
               </button>
 
               <button
                 onClick={() => {
-                  addToast('success', 'Download Iniciado', `Descarregando texto integral do ${selectedDoc.number}.`);
+                  addToast('success', t('biblioteca:toastDownloadTitle'), t('biblioteca:toastDownloadMessage', { number: selectedDoc.number }));
                 }}
                 className="btn btn-primary-blue btn-sm"
               >
                 <Download size={15} />
-                <span>Baixar Diploma (PDF)</span>
+                <span>{t('biblioteca:downloadDiploma')}</span>
               </button>
             </div>
           </div>

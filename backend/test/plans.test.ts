@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getPlanLimits, isValidPlan, CORE_SIMULATORS, ALL_SIMULATORS, PLAN_LABELS, type PlanCode } from '../src/lib/plans';
+import { getPlanLimits, isValidPlan, ALL_SIMULATORS, PLAN_LABELS } from '../src/lib/plans';
 
 describe('plan definitions', () => {
   it('recognizes all three plans', () => {

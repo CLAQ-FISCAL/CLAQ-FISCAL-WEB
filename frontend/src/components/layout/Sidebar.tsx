@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Sparkles
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ClaqLogo } from '../common/ClaqLogo';
 import { useAppState } from '../../context/AppStateContext';
 
@@ -28,19 +29,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNavigate,
   collapsed = false
 }) => {
+  const { t } = useTranslation();
   const { unreadAlertsCount, setIsAIAssistantOpen } = useAppState();
 
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/calendario', label: 'Calendário Fiscal', icon: Calendar },
-    { path: '/alertas', label: 'Alertas', icon: Bell, badge: unreadAlertsCount > 0 ? unreadAlertsCount : undefined },
-    { path: '/biblioteca-legal', label: 'Biblioteca Legal', icon: BookOpen },
-    { path: '/simuladores', label: 'Simuladores', icon: Calculator },
-    { path: '/relatorios', label: 'Relatórios', icon: FileSpreadsheet },
-    { path: '/clientes', label: 'Meus Clientes', icon: Users },
-    { path: '/newsletter', label: 'Newsletter', icon: Mail },
-    { path: '/configuracoes', label: 'Configurações', icon: Settings },
-    { path: '/suporte', label: 'Ajuda e Suporte', icon: HelpCircle }
+    { path: '/dashboard', label: t('sidebar:dashboard'), icon: LayoutDashboard },
+    { path: '/calendario', label: t('sidebar:calendario'), icon: Calendar },
+    { path: '/alertas', label: t('sidebar:alertas'), icon: Bell, badge: unreadAlertsCount > 0 ? unreadAlertsCount : undefined },
+    { path: '/biblioteca-legal', label: t('sidebar:biblioteca'), icon: BookOpen },
+    { path: '/simuladores', label: t('sidebar:simuladores'), icon: Calculator },
+    { path: '/relatorios', label: t('sidebar:relatorios'), icon: FileSpreadsheet },
+    { path: '/clientes', label: t('sidebar:clientes'), icon: Users },
+    { path: '/newsletter', label: t('sidebar:newsletter'), icon: Mail },
+    { path: '/configuracoes', label: t('sidebar:configuracoes'), icon: Settings },
+    { path: '/suporte', label: t('sidebar:suporte'), icon: HelpCircle }
   ];
 
   return (
@@ -173,7 +175,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Sparkles size={15} color="#60A5FA" />
-              <span>Assistente Fiscal AI</span>
+              <span>{t('sidebar:aiAssistant')}</span>
             </div>
             <ChevronRight size={14} />
           </button>
@@ -205,17 +207,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Crown size={19} color="#F59E0B" />
             </div>
             <h4 style={{ color: '#FFFFFF', fontSize: '13.5px', fontWeight: 700, marginBottom: '4px' }}>
-              Seja Premium
+              {t('sidebar:bePremium')}
             </h4>
             <p style={{ color: '#94A3B8', fontSize: '11.5px', lineHeight: 1.4, marginBottom: '12px' }}>
-              Tenha acesso a todos os recursos, integrações e alertas em tempo real.
+              {t('sidebar:bePremiumDesc')}
             </p>
             <button
               onClick={() => onNavigate('/configuracoes')}
               className="btn btn-primary-gold"
               style={{ width: '100%', padding: '8px 12px', fontSize: '12.5px', borderRadius: '8px' }}
             >
-              Upgrade Agora
+              {t('sidebar:upgradeNow')}
             </button>
           </div>
 
@@ -225,7 +227,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               CLAQ CONSULTORES, LDA
             </p>
             <p style={{ fontSize: '10px', color: '#475569', marginTop: '2px' }}>
-              Transformamos obrigação em tranquilidade.
+              {t('sidebar:tagline')}
             </p>
           </div>
         </div>
