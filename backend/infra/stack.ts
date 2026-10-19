@@ -178,7 +178,15 @@ export class ClaqStack extends Stack {
       });
     }
 
-    const api = new apigwv2.HttpApi(this, 'HttpApi', { createDefaultStage: true });
+    const api = new apigwv2.HttpApi(this, 'HttpApi', {
+      createDefaultStage: true,
+      corsPreflight: {
+        allowOrigins: ['*'],
+        allowMethods: [apigwv2.CorsHttpMethod.ANY],
+        allowHeaders: ['*'],
+        allowCredentials: false,
+      },
+    });
     const jwt = new authorizers.HttpJwtAuthorizer('CognitoJwt', `https://cognito-idp.${this.region}.amazonaws.com/${pool.userPoolId}`, { jwtAudience: [client.userPoolClientId] });
     api.addRoutes({ path: '/v1/health', methods: [apigwv2.HttpMethod.GET], integration: new integrations.HttpLambdaIntegration('HealthIntegration', apiFn) });
     api.addRoutes({ path: '/v1/payments/webhook/mpesa', methods: [apigwv2.HttpMethod.POST], integration: new integrations.HttpLambdaIntegration('MpesaWebhookIntegration', apiFn) });

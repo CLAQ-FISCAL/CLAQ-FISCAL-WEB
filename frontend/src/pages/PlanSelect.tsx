@@ -164,6 +164,7 @@ export const PlanSelect: React.FC<PlanSelectProps> = ({ onSelect }) => {
   const suggestQuery = useSuggestPlan(audience === 'empresa' ? debouncedRevenue : null);
 
   const accountantPlans = plansQuery.data?.families.ACCOUNTANT ?? [];
+  const companyPlans = plansQuery.data?.families.COMPANY ?? [];
 
   const handleRevenueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const digits = e.target.value.replace(/\D/g, '');
@@ -394,6 +395,31 @@ export const PlanSelect: React.FC<PlanSelectProps> = ({ onSelect }) => {
                     selected={selectedPlan === suggestQuery.data.suggested.code}
                     onSelect={() => setSelectedPlan(suggestQuery.data!.suggested.code)}
                   />
+                </div>
+              )}
+
+              {companyPlans.length > 0 && (
+                <div style={{ marginTop: '18px' }}>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>
+                    All company plans
+                  </div>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                      gap: '16px'
+                    }}
+                  >
+                    {companyPlans.map((plan) => (
+                      <PlanCard
+                        key={plan.code}
+                        plan={plan}
+                        recommended={suggestQuery.data?.suggested?.code === plan.code}
+                        selected={selectedPlan === plan.code}
+                        onSelect={() => setSelectedPlan(plan.code)}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
 

@@ -21,7 +21,7 @@ import type {
   ApplyResult,
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/v1';
 
 // Helper to retrieve Cognito IdToken — tries Amplify session first, falls back to localStorage
 async function getAuthToken(): Promise<string | null> {
