@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Stack, StackProps, CfnOutput, Tags, Duration, CustomResource, SecretValue } from 'aws-cdk-lib';
 import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
@@ -25,8 +25,11 @@ function migrationsHash(): string {
   const root = join(__dirname, '..', 'prisma', 'migrations');
   const hash = createHash('sha256');
   for (const folder of readdirSync(root).sort()) {
+    // The directory also holds migration_lock.toml, which is a file, not a migration folder.
+    const sql = join(root, folder, 'migration.sql');
+    if (!existsSync(sql)) continue;
     hash.update(folder);
-    hash.update(readFileSync(join(root, folder, 'migration.sql')));
+    hash.update(readFileSync(sql));
   }
   return hash.digest('hex').slice(0, 16);
 }
@@ -141,12 +144,39 @@ export class ClaqStack extends Stack {
         NOTIFICATION_QUEUE: foundation.queue.queueUrl,
         KMS_KEY_ID: foundation.dataKey.keyId,
         ...(cfg.mpesaWebhookSecret ? { MPESA_WEBHOOK_SECRET: cfg.mpesaWebhookSecret } : {}),
+        ...(cfg.stripeSecretKey ? { STRIPE_SECRET_KEY: cfg.stripeSecretKey } : {}),
+        ...(cfg.stripeWebhookSecret ? { STRIPE_WEBHOOK_SECRET: cfg.stripeWebhookSecret } : {}),
+        ...(cfg.stripePrices ? { STRIPE_PRICES: JSON.stringify(cfg.stripePrices) } : {}),
       },
       description: 'CLAQ HTTP API (Prisma + RLS tenant guard)',
     });
     foundation.documents.grantReadWrite(apiFn);
     foundation.queue.grantSendMessages(apiFn);
     foundation.dataKey.grantEncryptDecrypt(apiFn);
+
+    // ---------- Demo seed (custom resource, demo stage only) ----------
+    // Idempotent synthetic bootstrap so demo@claq.co.mz can log in and see a populated
+    // ACCOUNTANT_PREMIUM tenant. Strictly gated: prod never has cfg.demoSeed set.
+    if (!prod && cfg.demoSeed) {
+      const seederFn = baseFn('DemoSeeder', 'seed', {
+        description: 'Idempotent demo bootstrap: tenant, memberships, synthetic companies, notification settings',
+      });
+      foundation.database.secret!.grantRead(seederFn);
+      const seedProvider = new customresources.Provider(this, 'DemoSeedProvider', {
+        onEventHandler: seederFn,
+      });
+      new CustomResource(this, 'DemoSeed', {
+        serviceToken: seedProvider.serviceToken,
+        resourceType: 'Custom::ClaqDemoSeed',
+        properties: {
+          SecretArn: foundation.database.secret!.secretArn,
+          SeedKey: 'v1',
+          DemoSub: cfg.demoSeed.cognitoSub,
+          DemoEmail: cfg.demoSeed.email,
+          DemoDisplayName: cfg.demoSeed.displayName ?? cfg.demoSeed.email,
+        },
+      });
+    }
 
     const api = new apigwv2.HttpApi(this, 'HttpApi', { createDefaultStage: true });
     const jwt = new authorizers.HttpJwtAuthorizer('CognitoJwt', `https://cognito-idp.${this.region}.amazonaws.com/${pool.userPoolId}`, { jwtAudience: [client.userPoolClientId] });
@@ -156,6 +186,8 @@ export class ClaqStack extends Stack {
     // Declared explicitly so these paths are not captured by the JWT-protected catch-all below.
     api.addRoutes({ path: '/v1/plans', methods: [apigwv2.HttpMethod.GET], integration: new integrations.HttpLambdaIntegration('PlansIntegration', apiFn) });
     api.addRoutes({ path: '/v1/plans/suggest', methods: [apigwv2.HttpMethod.GET], integration: new integrations.HttpLambdaIntegration('PlansSuggestIntegration', apiFn) });
+    // Stripe authenticates with a signature over the raw body, so this route carries no JWT authorizer.
+    api.addRoutes({ path: '/v1/billing/webhook', methods: [apigwv2.HttpMethod.POST], integration: new integrations.HttpLambdaIntegration('StripeWebhookIntegration', apiFn) });
     api.addRoutes({ path: '/v1/{proxy+}', methods: [apigwv2.HttpMethod.ANY], integration: new integrations.HttpLambdaIntegration('Integration', apiFn), authorizer: jwt });
 
     // ---------- Reminder scheduler + notifier ----------
@@ -198,40 +230,46 @@ export class ClaqStack extends Stack {
     });
 
     // ---------- Security: WAF on API Gateway ----------
-    const _webAcl = new wafv2.CfnWebACL(this, 'ApiWaf', {
-      scope: 'REGIONAL',
-      defaultAction: { allow: {} },
-      visibilityConfig: { cloudWatchMetricsEnabled: true, metricName: 'ClaqApiWaf', sampledRequestsEnabled: true },
-      rules: [
-        {
-          name: 'RateLimit2k',
-          priority: 1,
-          action: { block: {} },
-          statement: { rateBasedStatement: { limit: 2000, aggregateKeyType: 'IP' } },
-          visibilityConfig: { cloudWatchMetricsEnabled: true, metricName: 'RateLimit', sampledRequestsEnabled: true },
-        },
-        {
-          name: 'AWSManagedRulesCommonRuleSet',
-          priority: 2,
-          overrideAction: { none: {} },
-          statement: { managedRuleGroupStatement: { vendorName: 'AWS', name: 'AWSManagedRulesCommonRuleSet' } },
-          visibilityConfig: { cloudWatchMetricsEnabled: true, metricName: 'CommonRuleSet', sampledRequestsEnabled: true },
-        },
-        {
-          name: 'AWSManagedRulesSQLiRuleSet',
-          priority: 3,
-          overrideAction: { none: {} },
-          statement: { managedRuleGroupStatement: { vendorName: 'AWS', name: 'AWSManagedRulesSQLiRuleSet' } },
-          visibilityConfig: { cloudWatchMetricsEnabled: true, metricName: 'SqlInjection', sampledRequestsEnabled: true },
-        },
-      ],
-    });
-    // WAF association for HTTP APIs is not supported in af-south-1 via CfnWebACLAssociation.
-    // WebACL is created; attach via console or switch prod to eu-west-1/us-east-1 when ready.
-    // new wafv2.CfnWebACLAssociation(this, 'ApiWafAssociation', {
-    //   resourceArn: `arn:aws:apigateway:${this.region}::/apis/${api.httpApiId}/stages/$default`,
-    //   webAclArn: _webAcl.attrArn,
-    // });
+    // Opt-in via enableWaf. Note: WAF association for HTTP APIs is not supported in
+    // af-south-1 via CfnWebACLAssociation — keep wafAttachToApi off there and attach via
+    // console, or move prod to a region that supports it.
+    if (cfg.enableWaf) {
+      const webAcl = new wafv2.CfnWebACL(this, 'ApiWaf', {
+        scope: 'REGIONAL',
+        defaultAction: { allow: {} },
+        visibilityConfig: { cloudWatchMetricsEnabled: true, metricName: 'ClaqApiWaf', sampledRequestsEnabled: true },
+        rules: [
+          {
+            name: 'RateLimit2k',
+            priority: 1,
+            action: { block: {} },
+            statement: { rateBasedStatement: { limit: 2000, aggregateKeyType: 'IP' } },
+            visibilityConfig: { cloudWatchMetricsEnabled: true, metricName: 'RateLimit', sampledRequestsEnabled: true },
+          },
+          {
+            name: 'AWSManagedRulesCommonRuleSet',
+            priority: 2,
+            overrideAction: { none: {} },
+            statement: { managedRuleGroupStatement: { vendorName: 'AWS', name: 'AWSManagedRulesCommonRuleSet' } },
+            visibilityConfig: { cloudWatchMetricsEnabled: true, metricName: 'CommonRuleSet', sampledRequestsEnabled: true },
+          },
+          {
+            name: 'AWSManagedRulesSQLiRuleSet',
+            priority: 3,
+            overrideAction: { none: {} },
+            statement: { managedRuleGroupStatement: { vendorName: 'AWS', name: 'AWSManagedRulesSQLiRuleSet' } },
+            visibilityConfig: { cloudWatchMetricsEnabled: true, metricName: 'SqlInjection', sampledRequestsEnabled: true },
+          },
+        ],
+      });
+      new CfnOutput(this, 'ApiWafArn', { value: webAcl.attrArn });
+      if (cfg.wafAttachToApi) {
+        new wafv2.CfnWebACLAssociation(this, 'ApiWafAssociation', {
+          resourceArn: `arn:aws:apigateway:${this.region}::/apis/${api.httpApiId}/stages/$default`,
+          webAclArn: webAcl.attrArn,
+        });
+      }
+    }
 
     // ---------- Security: CloudTrail ----------
     new cloudtrail.Trail(this, 'ManagementTrail', {

@@ -94,6 +94,7 @@ model Tenant {
   type                String                @default("ACCOUNTANT")
   /// Declared annual revenue in MZN — drives the Empresas tier suggestion.
   annualRevenueMzn    Decimal?              @db.Decimal(18, 2)
+  stripeCustomerId    String?               @unique
   createdAt           DateTime              @default(now())
   memberships         Membership[]
   companies           Company[]
@@ -101,6 +102,8 @@ model Tenant {
   simulations         Simulation[]
   payments            PaymentTransaction[]
   uploadBatches       UploadBatch[]
+  billingSubscriptions BillingSubscription[]
+  invoices            Invoice[]
 }
 
 model User {
@@ -268,6 +271,39 @@ model Simulation {
   createdAt    DateTime @default(now())
   tenant       Tenant   @relation(fields: [tenantId], references: [id])
   @@index([tenantId, code, createdAt])
+}
+
+/// Stripe subscription that determines the tenant's plan. Written only by the
+/// verified Stripe webhook, never directly by a client request.
+model BillingSubscription {
+  id                   String   @id @default(uuid())
+  tenantId             String
+  stripeCustomerId     String
+  stripeSubscriptionId String   @unique
+  status               String
+  priceId              String
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  tenant               Tenant   @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@index([stripeCustomerId])
+}
+
+model Invoice {
+  id               String   @id @default(uuid())
+  tenantId         String
+  stripeInvoiceId  String   @unique
+  amountDue        Decimal  @db.Decimal(12, 2)
+  currency         String   @default("MZN")
+  status           String
+  invoicePdfUrl    String?
+  hostedInvoiceUrl String?
+  createdAt        DateTime @default(now())
+  tenant           Tenant   @relation(fields: [tenantId], references: [id])
+  @@index([tenantId, createdAt])
 }
 
 model PaymentTransaction {

@@ -1,0 +1,117 @@
+# CLAQ Fiscal Alert backend
+
+Backend for the CLAQ Fiscal Alert product (tax compliance, obligations, simulators and
+alerts for Mozambique). Two completely separate environments:
+
+- **demo**: investor/test environment. Synthetic data only, low-cost configuration, demo banner on.
+- **prod**: customer environment. Multi-AZ database, deletion protection, 35-day backups, GitHub approval gate.
+
+This application tracks compliance and estimates taxes; it does **not** submit returns to
+AT and never embeds tax rates or deadlines in source code — all fiscal content lives in
+reviewed `RuleSet` rows (see `docs/TAX-CONTENT.md`).
+
+## What is implemented
+
+- **Infrastructure (CDK)**: VPC (public/app/isolated-db subnets, NAT), RDS PostgreSQL 16
+  encrypted with a rotating KMS CMK, Secrets Manager credentials, SQS notifications queue
+  + DLQ, S3 documents bucket (private, versioned, SSL-enforced), Cognito user pool
+  (admin-created users, optional TOTP MFA), API Gateway HTTP API with Cognito JWT authorizer
+- **Security**: WAF (rate limiting + AWS managed rules, opt-in via `enableWaf`), CloudTrail (multi-region management trail), GuardDuty (threat detection), Security Hub (compliance dashboard)
+- **Subscription plans**: Two families enforced server-side. **Accountants** (`Tenant.type = ACCOUNTANT`): `ACCOUNTANT_FREE` (3 companies), `ACCOUNTANT_PRO` (20), `ACCOUNTANT_PREMIUM` (60+). **Companies** (`Tenant.type = COMPANY`): `COMPANY_MICRO` (1 user, calendar + alerts), `COMPANY_PEQUENA` (3 users, risk score, 5 GB documents), `COMPANY_MEDIA` (15 users, audit + branches), `COMPANY_GRANDE` (multi-enterprise / multicontribution). `GET /v1/subscription` returns family, limits, features and usage; `GET /v1/plans` lists the catalogue and Empresas revenue thresholds.
+- **SSO**: Google, Microsoft (Azure AD) and Apple federated login via Cognito (configured per-stage in config/*.json).
+- **WhatsApp**: Meta Cloud API integration for obligation reminders (via Secrets Manager).
+- **Billing**: Stripe subscription management with webhook receiver, invoice tracking, plan syncing.
+- **Database migrations**: SQL under `prisma/migrations` applied by a Lambda custom
+  resource on every deploy; tenant tables protected by `FORCE ROW LEVEL SECURITY` with
+  `app.tenant_id` set per transaction (`withTenant`)
+- **HTTP API** (`src/router.ts`): me/tenants, dashboard, obligations (list/patch/generate),
+  calendar, companies (NUIT sealed with KMS, reveal audited), simulators, simulation
+  history, rule transparency, notification settings — see `docs/API.md`
+- **Reminder pipeline**: EventBridge daily cron → planner Lambda (status sync
+  UPCOMING→DUE→OVERDUE, per-tenant lead-day dedup) → SQS → SES email Lambda with batch
+  failure reporting
+- **Simulator engine**: 13 simulators (IVA, IRPS retention, IRPC, INSS, net salary,
+  employer cost, penalties, non-resident services, overtime, leave, severance, stamp
+  duty, TAE) — every number computed from **APPROVED** rule content only, with Decimal
+  math and full calculation breakdowns
+- **CI/CD**: `verify` workflow (lint, typecheck, tests, synth) and OIDC-based `deploy`
+  workflow with GitHub environments (`demo`, `prod` requires reviewers)
+
+## Repository layout
+
+```text
+claq-backend/
+  src/                 # API router, domain logic, simulators, workers (TypeScript)
+  prisma/              # schema.prisma + SQL migrations + synthetic demo seed
+  infra/               # CDK app/stack/foundation — the only place cloud resources are declared
+  config/              # demo.json / prod.json guardrails (no secrets)
+  scripts/             # esbuild lambda bundler
+  test/                # vitest: rules guard, simulators, generator, planner, router
+  docs/                # API.md, TAX-CONTENT.md, RUNBOOK.md, SECURITY.md
+  .github/workflows/   # verify.yml, deploy.yml
+```
+
+## Commands
+
+```powershell
+npm install          # postinstall runs prisma generate
+npm run lint
+npm test
+npm run synth -- --context env=demo
+npm run deploy:demo
+npm run seed:demo    # after first deploy; needs DATABASE_URL (see docs/RUNBOOK.md)
+```
+
+## First-time deployment
+
+Follow `docs/RUNBOOK.md` in order (bootstrap → deploy → seed → create Cognito users →
+bind membership → hand the frontend exactly `COGNITO_USER_POOL_ID`, `COGNITO_CLIENT_ID`,
+`API_BASE_URL`). The first deploy creates the database and runs migrations automatically.
+
+## Local extensions (beyond the upstream `claq-backend`)
+
+This deployment carries features that are **not** in the upstream repository. They are
+additive and do not change the upstream plan/billing behaviour described above.
+
+- **Client data upload & reconciliation** — `POST /v1/uploads` stages a CSV into
+  `UploadBatch`/`StagingRow`, reconciles each line against approved obligation templates
+  (`MatchState`), records a human verdict (`RowDecision`), and only then materialises
+  `Obligation` rows via `POST /v1/uploads/:id/apply`. Deciding/applying is restricted to
+  `OWNER`/`ADMIN`/`ACCOUNTANT`.
+- **Mozambican payment gateways** — `POST /v1/payments/{mpesa,emola,simo,bank-transfer}`
+  plus an `MPESA_WEBHOOK_SECRET`-verified `POST /v1/payments/webhook/mpesa`. These collect
+  **tax payments in MZN**; they are distinct from the Stripe **plan subscription** flow.
+- **AI, PDF and content services** — `POST /v1/ai/chat` (RAG over `LegalDocument`/
+  `LegalArticle`), `POST /v1/pdf/generate`, `GET /v1/exchange-rates`, `GET /v1/news`,
+  `POST /v1/newsletter/subscribe`.
+- **Local dev server** — `npm run dev` starts `src/local.ts`, an HTTP wrapper over the same
+  Lambda handler with Cognito JWT verification and CORS, so the frontend can run without AWS.
+
+### Intentional divergences from upstream
+
+- `GET /v1/plans` and `GET /v1/plans/suggest` are **public** here (upstream puts them behind
+  the Cognito JWT authorizer) because the onboarding wizard reads the catalogue before sign-in.
+  They are dispatched before authentication and return no tenant data.
+- The plan DTO is **nested** (`plan.limits.*`) with a numeric `999999` unlimited sentinel;
+  upstream returns a flat object with `null` for unlimited. The client (`PlanCard`,
+  `useAudience`) depends on the nested numeric shape.
+- `Invoice.amountDue` is `Decimal(12,2)` (upstream: `Int`) and `currency` defaults to `MZN`
+  (upstream: lowercase `'mzn'`).
+- WAF is opt-in via `enableWaf`; `wafAttachToApi` must stay off in `af-south-1`, where
+  `CfnWebACLAssociation` is unsupported for HTTP APIs.
+
+## Non-negotiable guardrails
+
+- Use fake names/NUITs and amounts in demo. Never copy production data into it.
+- Tax rules must have an official source, effective dates, an accountant reviewer and
+  `APPROVED` state. The seed content is deliberately `DRAFT`.
+- Every tenant table requires `tenant_id` + RLS. The API derives tenant membership
+  server-side from the authenticated user; it never trusts a frontend-provided tenant.
+- Documents stay private; short-lived upload/download URLs and malware scanning come
+  before any document feature goes live.
+- Investor/demo is not an official tax calculation, filing, payment, or WhatsApp consent proof.
+
+## Not yet implemented (required before production)
+
+Push notifications (FCM/APNs), PDF report pipeline, RDS Proxy, external penetration test.
+See `docs/SECURITY.md` and `docs/RUNBOOK.md` for the full checklist.
