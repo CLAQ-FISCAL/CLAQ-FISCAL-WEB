@@ -72,7 +72,7 @@ async function main(): Promise<void> {
   const year = new Date().getUTCFullYear();
   const tenantId = await prisma.$transaction(async (master) => {
     const tenant = await master.tenant.create({
-      data: { name: 'CLAQ DEMO (ESCRITÓRIO DE CONTABILIDADE)', plan: 'ACCOUNTANT_OFFICE' },
+      data: { name: 'CLAQ DEMO (ESCRITÓRIO DE CONTABILIDADE)', plan: 'ACCOUNTANT_PREMIUM', type: 'ACCOUNTANT' },
     });
     await master.$queryRaw`SELECT set_config('app.tenant_id', ${tenant.id}, true)`;
 

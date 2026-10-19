@@ -59,16 +59,48 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum UploadStatus {
+  RECEIVED
+  RECONCILED
+  DECIDED
+  APPLIED
+  FAILED
+}
+
+enum MatchState {
+  MATCHED
+  AMOUNT_MISMATCH
+  UNMATCHED
+  NOT_APPLICABLE
+  DUPLICATE
+  INVALID
+}
+
+enum RowDecision {
+  PENDING
+  ADOPT
+  TRUST_RULE
+  TRUST_UPLOAD
+  EXCLUDE
+  CREATE_TEMPLATE
+  REJECT
+}
+
 model Tenant {
   id                  String                @id @default(uuid())
   name                String
-  plan                String                @default("ACCOUNTANT_OFFICE")
+  plan                String                @default("ACCOUNTANT_FREE")
+  /// ACCOUNTANT (portfolio of clients) or COMPANY (single-empresa dashboard).
+  type                String                @default("ACCOUNTANT")
+  /// Declared annual revenue in MZN — drives the Empresas tier suggestion.
+  annualRevenueMzn    Decimal?              @db.Decimal(18, 2)
   createdAt           DateTime              @default(now())
   memberships         Membership[]
   companies           Company[]
   notificationSettings NotificationSetting[]
   simulations         Simulation[]
   payments            PaymentTransaction[]
+  uploadBatches       UploadBatch[]
 }
 
 model User {
@@ -96,8 +128,10 @@ model Company {
   nuitCiphertext Bytes?
   municipality   String?
   taxRegime      String?
+  annualRevenueMzn Decimal? @db.Decimal(18, 2)
   tenant         Tenant     @relation(fields: [tenantId], references: [id])
   obligations    Obligation[]
+  uploadBatches  UploadBatch[]
   @@index([tenantId])
 }
 
@@ -168,6 +202,58 @@ model NotificationAttempt {
   obligation   Obligation          @relation(fields: [obligationId], references: [id])
   @@unique([obligationId, channel, leadDay])
   @@index([tenantId, createdAt])
+}
+
+/// One client upload. A batch is the unit of idempotency: re-uploading identical bytes
+/// is a no-op, and nothing here is trusted until it has been reconciled and decided.
+model UploadBatch {
+  id            String       @id @default(uuid())
+  tenantId      String
+  companyId     String
+  fileName      String
+  contentHash   String
+  byteSize      Int
+  status        UploadStatus @default(RECEIVED)
+  rowCount      Int          @default(0)
+  validCount    Int          @default(0)
+  exceptionCount Int         @default(0)
+  appliedAt     DateTime?
+  createdBy     String?
+  createdAt     DateTime     @default(now())
+  tenant        Tenant       @relation(fields: [tenantId], references: [id])
+  company       Company      @relation(fields: [companyId], references: [id])
+  rows          StagingRow[]
+  @@unique([tenantId, contentHash])
+  @@index([tenantId, createdAt])
+}
+
+/// One CSV line, held in staging. A staging row can never become an Obligation on its
+/// own: MatchState decides whether it is backed by an approved template, and RowDecision
+/// records the human verdict. UNMATCHED rows become candidate RuleSet templates instead.
+model StagingRow {
+  id                 String          @id @default(uuid())
+  uploadId           String
+  tenantId           String
+  rowNumber          Int
+  raw                Json
+  normalizedTitle    String?
+  dueAt              DateTime?
+  amount             Decimal?        @db.Decimal(14, 2)
+  claimedStatus      ObligationStatus?
+  ruleCode           String?
+  matchState         MatchState      @default(INVALID)
+  matchedTemplateCode String?
+  expectedAmount     Decimal?        @db.Decimal(14, 2)
+  decision           RowDecision     @default(PENDING)
+  errors             Json?
+  decidedBy          String?
+  decidedAt          DateTime?
+  createdAt          DateTime        @default(now())
+  upload             UploadBatch     @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  @@unique([uploadId, rowNumber])
+  @@index([uploadId, matchState])
+  @@index([uploadId, dueAt])
+  @@index([tenantId])
 }
 
 model Simulation {

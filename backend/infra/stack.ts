@@ -152,6 +152,10 @@ export class ClaqStack extends Stack {
     const jwt = new authorizers.HttpJwtAuthorizer('CognitoJwt', `https://cognito-idp.${this.region}.amazonaws.com/${pool.userPoolId}`, { jwtAudience: [client.userPoolClientId] });
     api.addRoutes({ path: '/v1/health', methods: [apigwv2.HttpMethod.GET], integration: new integrations.HttpLambdaIntegration('HealthIntegration', apiFn) });
     api.addRoutes({ path: '/v1/payments/webhook/mpesa', methods: [apigwv2.HttpMethod.POST], integration: new integrations.HttpLambdaIntegration('MpesaWebhookIntegration', apiFn) });
+    // The plan catalogue is public: onboarding must read it before the user has a session.
+    // Declared explicitly so these paths are not captured by the JWT-protected catch-all below.
+    api.addRoutes({ path: '/v1/plans', methods: [apigwv2.HttpMethod.GET], integration: new integrations.HttpLambdaIntegration('PlansIntegration', apiFn) });
+    api.addRoutes({ path: '/v1/plans/suggest', methods: [apigwv2.HttpMethod.GET], integration: new integrations.HttpLambdaIntegration('PlansSuggestIntegration', apiFn) });
     api.addRoutes({ path: '/v1/{proxy+}', methods: [apigwv2.HttpMethod.ANY], integration: new integrations.HttpLambdaIntegration('Integration', apiFn), authorizer: jwt });
 
     // ---------- Reminder scheduler + notifier ----------

@@ -6,15 +6,31 @@ import { audit } from './lib/audit';
 import { NUIT_RE, maskNuit } from './lib/crypto';
 import { AppError, errorResponse, header, jsonResponse, parseJsonBody, optionalString, requireString, type ApiResponse } from './lib/http';
 import { ensureUser, resolveTenant, withTenant } from './lib/tenant';
-import { assertNotificationChannel, assertSimulatorAccess, enforceCompanyLimit, getPlanLimits } from './lib/plans';
+import {
+  ACCOUNTANT_PLAN_CODES,
+  COMPANY_PLAN_CODES,
+  REVENUE_THRESHOLDS,
+  UNLIMITED,
+  assertNotificationChannel,
+  assertSimulatorAccess,
+  enforceCompanyLimit,
+  getPlanFamily,
+  getPlanLimits,
+  suggestCompanyPlanCode,
+  ALL_SIMULATORS,
+  type PlanCode,
+} from './lib/plans';
 import { dashboardSummary, toDto } from './domain/dashboard';
 import { generateObligations, validateStatusTransition } from './domain/obligations';
+import { applyUpload, decideRows, loadBatchView, MATCH_STATES, MAX_UPLOAD_BYTES, ROW_DECISIONS, stageUpload, type RowDecisionName } from './domain/uploads';
 import { getApprovedRule } from './rules';
 import { parseInputs, runSimulator } from './simulators/engine';
 import { getSimulator, simulators } from './simulators/definitions';
 
 const OBLIGATION_STATUSES = ['UPCOMING', 'DUE', 'OVERDUE', 'PAID', 'SUBMITTED', 'NOT_APPLICABLE'] as const;
 const CHANNELS = ['EMAIL', 'PUSH', 'WHATSAPP', 'IN_APP'] as const;
+/** Deciding or applying an upload changes filed tax state, so it is not a read-only role. */
+const DECIDE_ROLES = ['OWNER', 'ADMIN', 'ACCOUNTANT'] as const;
 
 export type CryptoDeps = {
   sealValue: (plaintext: string) => Promise<Buffer>;
@@ -39,6 +55,13 @@ type RequestContext = {
 
 type Route = { method: string; pattern: RegExp; status?: number; handler: (ctx: RequestContext, params: RouteParams) => Promise<object> };
 
+/**
+ * The plan catalogue is marketing copy and tier arithmetic, not tenant data, so it is
+ * served before authentication: the onboarding wizard asks for a plan before the user
+ * has signed in. These handlers never receive a tenant context.
+ */
+type PublicRoute = { method: string; pattern: RegExp; handler: (params: RouteParams, query: Record<string, string | undefined>) => Promise<object> };
+
 function parseDate(value: string | undefined, field: string): Date | undefined {
   if (value === undefined || value === '') return undefined;
   const date = new Date(value);
@@ -58,6 +81,96 @@ function jsonInputs(inputs: Record<string, Decimal | string>): Record<string, st
   return Object.fromEntries(Object.entries(inputs).map(([k, v]) => [k, typeof v === 'string' ? v : v.toFixed(2)]));
 }
 
+/**
+ * Plan limits as sent to the client. `Infinity` is serialised as UNLIMITED rather than
+ * null so the catalogue stays numeric for every consumer.
+ */
+function limitsDto(planCode: string) {
+  const limits = getPlanLimits(planCode);
+  return {
+    maxCompanies: limits.maxCompanies === Infinity ? UNLIMITED : limits.maxCompanies,
+    maxUsers: limits.maxUsers === Infinity ? UNLIMITED : limits.maxUsers,
+    storageLimitBytes: limits.storageLimitBytes ?? UNLIMITED,
+    features: limits.features,
+    simulatorAccess: limits.simulatorAccess === 'all' ? [...ALL_SIMULATORS] : [...limits.coreSimulatorCodes],
+    notificationChannels: limits.notificationChannels,
+    maxLeadDaysEntries: limits.maxLeadDaysEntries,
+    annualRevenueMaxMzn: limits.annualRevenueMaxMzn,
+  };
+}
+
+function planDto(planCode: PlanCode) {
+  const limits = getPlanLimits(planCode);
+  return {
+    code: limits.code,
+    label: limits.label,
+    family: limits.family,
+    description: limits.description,
+    priceMzn: limits.priceMzn,
+    limits: limitsDto(planCode),
+  };
+}
+
+/** Revenue bands with explicit lower/upper bounds, for the client's own copy. */
+function revenueThresholdsDto() {
+  return REVENUE_THRESHOLDS.map((tier) => ({
+    plan: tier.plan,
+    minMzn: tier.minMzn ?? 0,
+    maxMzn: tier.maxAnnualRevenueMzn,
+  }));
+}
+
+function assertCanDecide(role: string): void {
+  if (!(DECIDE_ROLES as readonly string[]).includes(role)) {
+    throw new AppError(403, 'FORBIDDEN', 'Only an owner, admin or accountant can decide or apply an upload.');
+  }
+}
+
+function intArray(value: unknown, field: string, max: number): number[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length > max) throw new AppError(422, 'INPUT_INVALID', `Field '${field}' must be an array of at most ${max} items.`);
+  for (const entry of value) {
+    if (typeof entry !== 'number' || !Number.isInteger(entry)) throw new AppError(422, 'INPUT_INVALID', `Field '${field}' must contain only integers.`);
+  }
+  return value as number[];
+}
+
+function enumArray<T extends string>(value: unknown, field: string, allowed: readonly T[]): T[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length > allowed.length) throw new AppError(422, 'INPUT_INVALID', `Field '${field}' must be an array of at most ${allowed.length} items.`);
+  for (const entry of value) {
+    if (typeof entry !== 'string' || !(allowed as readonly string[]).includes(entry)) {
+      throw new AppError(422, 'INPUT_INVALID', `Field '${field}' contains an unknown value '${String(entry)}'.`);
+    }
+  }
+  return value as T[];
+}
+
+const publicRoutes: PublicRoute[] = [
+  {
+    method: 'GET',
+    pattern: /^\/v1\/plans$/,
+    handler: async () => ({
+      families: {
+        ACCOUNTANT: ACCOUNTANT_PLAN_CODES.map(planDto),
+        COMPANY: COMPANY_PLAN_CODES.map(planDto),
+      },
+      revenueThresholds: revenueThresholdsDto(),
+    }),
+  },
+  {
+    method: 'GET',
+    pattern: /^\/v1\/plans\/suggest$/,
+    handler: async (_params, query) => {
+      const revenue = Number(query.annualRevenueMzn);
+      if (!Number.isFinite(revenue) || revenue < 0) {
+        throw new AppError(422, 'INPUT_INVALID', "Query parameter 'annualRevenueMzn' must be a non-negative number.");
+      }
+      return { annualRevenueMzn: revenue, suggested: planDto(suggestCompanyPlanCode(revenue)) };
+    },
+  },
+];
+
 const routes: Route[] = [
   {
     method: 'GET',
@@ -76,7 +189,7 @@ const routes: Route[] = [
     method: 'GET',
     pattern: /^\/v1\/subscription$/,
     handler: async (ctx) => {
-      const tenant = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { plan: true } });
+      const tenant = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { plan: true, type: true } });
       if (!tenant) throw new AppError(404, 'TENANT_NOT_FOUND', 'Tenant not found.');
       const limits = getPlanLimits(tenant.plan);
       const [companyCount, userCount] = await Promise.all([
@@ -86,13 +199,9 @@ const routes: Route[] = [
       return {
         plan: tenant.plan,
         label: limits.label,
-        limits: {
-          maxCompanies: limits.maxCompanies === Infinity ? null : limits.maxCompanies,
-          maxUsers: limits.maxUsers === Infinity ? null : limits.maxUsers,
-          simulatorAccess: limits.simulatorAccess,
-          notificationChannels: limits.notificationChannels,
-          maxLeadDaysEntries: limits.maxLeadDaysEntries,
-        },
+        family: getPlanFamily(tenant.plan),
+        tenantType: tenant.type,
+        limits: limitsDto(tenant.plan),
         usage: { companies: companyCount, users: userCount },
       };
     },
@@ -389,6 +498,67 @@ const routes: Route[] = [
       });
     },
   },
+  // ---------- Uploads ----------
+  {
+    method: 'POST',
+    pattern: /^\/v1\/uploads$/,
+    status: 201,
+    handler: async (ctx) => {
+      const companyId = requireString(ctx.body, 'companyId', 64);
+      const fileName = requireString(ctx.body, 'fileName', 200);
+      const content = requireString(ctx.body, 'content', MAX_UPLOAD_BYTES);
+      if (Buffer.byteLength(content, 'utf8') > MAX_UPLOAD_BYTES) {
+        throw new AppError(413, 'UPLOAD_TOO_LARGE', `The file is over the ${MAX_UPLOAD_BYTES / (1024 * 1024)}MB limit.`);
+      }
+      return ctx.run((tx) => stageUpload(tx, { tenantId: ctx.tenantId, companyId, fileName, content, actorId: ctx.userId, requestId: ctx.requestId }));
+    },
+  },
+  {
+    method: 'GET',
+    pattern: /^\/v1\/uploads$/,
+    handler: async (ctx) =>
+      ctx.run(async (tx) => {
+        const items = await tx.uploadBatch.findMany({
+          where: { tenantId: ctx.tenantId },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: { id: true, fileName: true, status: true, rowCount: true, validCount: true, exceptionCount: true, companyId: true, createdAt: true, appliedAt: true },
+        });
+        return { items: items.map((b) => ({ ...b, createdAt: b.createdAt.toISOString(), appliedAt: b.appliedAt?.toISOString() ?? null })) };
+      }),
+  },
+  {
+    method: 'GET',
+    pattern: /^\/v1\/uploads\/(?<id>[\w-]+)$/,
+    handler: async (ctx, params) => {
+      const matchState = enumArray(ctx.query.matchState?.split(',').map((s) => s.trim()).filter(Boolean), 'matchState', MATCH_STATES);
+      const decision = enumArray(ctx.query.decision?.split(',').map((s) => s.trim()).filter(Boolean), 'decision', ROW_DECISIONS);
+      return ctx.run((tx) => loadBatchView(tx, { tenantId: ctx.tenantId, uploadId: params.id, matchState, decision }));
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/v1\/uploads\/(?<id>[\w-]+)\/decisions$/,
+    handler: async (ctx, params) => {
+      assertCanDecide(ctx.role);
+      const decision = requireString(ctx.body, 'decision', 40).toUpperCase();
+      if (!(ROW_DECISIONS as readonly string[]).includes(decision)) throw new AppError(422, 'INPUT_INVALID', `Unknown decision '${decision}'.`);
+      const rowNumbers = intArray(ctx.body.rowNumbers, 'rowNumbers', 5000);
+      const matchStates = enumArray(ctx.body.matchStates, 'matchStates', MATCH_STATES);
+      if (rowNumbers === undefined && matchStates === undefined) {
+        throw new AppError(422, 'INPUT_INVALID', "Provide 'rowNumbers' or 'matchStates' so the decision has a defined scope.");
+      }
+      return ctx.run((tx) => decideRows(tx, { tenantId: ctx.tenantId, uploadId: params.id, decision: decision as RowDecisionName, rowNumbers, matchStates, actorId: ctx.userId, requestId: ctx.requestId }));
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/v1\/uploads\/(?<id>[\w-]+)\/apply$/,
+    handler: async (ctx, params) => {
+      assertCanDecide(ctx.role);
+      return ctx.run((tx) => applyUpload(tx, { tenantId: ctx.tenantId, uploadId: params.id, actorId: ctx.userId, requestId: ctx.requestId }));
+    },
+  },
   // ---------- Payments ----------
   {
     method: 'POST',
@@ -657,6 +827,17 @@ export function createHandler(db: PrismaClient, crypto: CryptoDeps): (event: API
           return jsonResponse(200, { status: 'ok', environment: process.env.APP_ENV, requestId }, requestId);
         } catch {
           return jsonResponse(503, { status: 'degraded', environment: process.env.APP_ENV, requestId }, requestId);
+        }
+      }
+
+      // Public routes are answered before identity is established, so onboarding can read
+      // the catalogue without a session. They carry no tenant data by construction.
+      if (method === 'GET') {
+        for (const route of publicRoutes) {
+          const match = route.pattern.exec(path);
+          if (!match) continue;
+          const body = await route.handler(match.groups ?? {}, event.queryStringParameters ?? {});
+          return jsonResponse(200, body, requestId);
         }
       }
 

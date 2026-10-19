@@ -3,6 +3,7 @@ import { CognitoJwtVerifier } from 'aws-jwt-verify';
 import { openValue, sealValue } from './lib/crypto';
 import { db } from './lib/db';
 import { createHandler } from './router';
+import { MAX_UPLOAD_BYTES } from './domain/uploads';
 
 const PORT = Number(process.env.PORT) || 4000;
 const COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID;
@@ -61,11 +62,13 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // Collect body
+    // Collect body. The ceiling leaves room for JSON escaping on top of a maximum-size
+    // CSV upload, so a file the API would accept is not rejected by the dev server.
+    const maxBodyBytes = MAX_UPLOAD_BYTES * 2;
     let body = '';
     for await (const chunk of req) {
       body += chunk;
-      if (body.length > 100000) { res.writeHead(413); res.end('Too large'); return; }
+      if (Buffer.byteLength(body, 'utf8') > maxBodyBytes) { res.writeHead(413); res.end('Too large'); return; }
     }
 
     // Parse query string
