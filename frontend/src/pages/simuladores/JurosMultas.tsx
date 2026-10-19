@@ -4,8 +4,11 @@ import { ArrowRight, Info, CheckCircle2 } from 'lucide-react';
 import { SimulatorLayout } from '../../components/simulators/SimulatorLayout';
 import { getSimulatorBySlug } from '../../components/simulators/simulatorCatalog';
 import { calcLineLabel, calcLineFormula } from '../../components/simulators/calcLines';
+import { buildSimulationReport, localizeCalcLines, totalFromLines } from '../../components/simulators/simulationReport';
+import { useSimulatorPrint } from '../../hooks/useSimulatorPrint';
+import { useSimulatorRules } from '../../hooks/useFiscalQueries';
 import { calculateJurosMultas } from '../../lib/calculations/mocambique';
-import { formatMZN } from '../../utils/formatters';
+import { formatMZN, formatDate } from '../../utils/formatters';
 
 interface Props {
   onNavigate: (path: string) => void;
@@ -23,16 +26,36 @@ export const JurosMultas: React.FC<Props> = ({ onNavigate }) => {
 
   const s = getSimulatorBySlug('juros-multas', t);
 
-  const result = calculateJurosMultas({
-    impostoAtraso: Number(impostoAtraso) || 0,
-    dataVencimento,
-    dataPagamento,
-    taxaMulta: Number(taxaMulta),
-  });
+  const { rules } = useSimulatorRules(['PENALTY_RATES']);
+
+  const result = calculateJurosMultas(
+    {
+      impostoAtraso: Number(impostoAtraso) || 0,
+      dataVencimento,
+      dataPagamento,
+      taxaMulta: Number(taxaMulta),
+    },
+    rules
+  );
+
+  const printReport = useSimulatorPrint();
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep(2);
+  };
+
+  const handlePrint = () => {
+    printReport(
+      buildSimulationReport({
+        slug: 'juros-multas',
+        title: s?.title ?? t('simuladores:simFinesTitle'),
+        meta: [{ label: t('simuladores:finesDueDateLabel'), value: formatDate(dataVencimento) }],
+        lines: localizeCalcLines(t, result.lines),
+        total: totalFromLines(result.lines, result.totalPagar),
+        totalLabel: t('simuladores:finesTotalToPayTitle'),
+      })
+    );
   };
 
   return (
@@ -42,6 +65,7 @@ export const JurosMultas: React.FC<Props> = ({ onNavigate }) => {
       nome={s?.title ?? ''}
       currentStep={currentStep}
       onStepChange={setCurrentStep}
+      onPrint={currentStep >= 2 ? handlePrint : undefined}
     >
       {currentStep === 1 && (
         <div className="card" style={{ padding: '32px' }}>

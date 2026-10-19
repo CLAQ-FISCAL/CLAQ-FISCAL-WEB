@@ -4,6 +4,9 @@ import { ArrowRight, Info, CheckCircle2 } from 'lucide-react';
 import { SimulatorLayout } from '../../components/simulators/SimulatorLayout';
 import { getSimulatorBySlug } from '../../components/simulators/simulatorCatalog';
 import { calcLineLabel, calcLineFormula } from '../../components/simulators/calcLines';
+import { buildSimulationReport, localizeCalcLines, totalFromLines } from '../../components/simulators/simulationReport';
+import { useSimulatorPrint } from '../../hooks/useSimulatorPrint';
+import { useSimulatorRules } from '../../hooks/useFiscalQueries';
 import { calculateHorasExtras } from '../../lib/calculations/mocambique';
 import { formatMZN } from '../../utils/formatters';
 
@@ -22,17 +25,36 @@ export const HorasExtras: React.FC<Props> = ({ onNavigate }) => {
 
   const s = getSimulatorBySlug('horas-extras', t);
 
-  const result = calculateHorasExtras({
-    salarioBase: Number(salarioBase) || 0,
-    horasNormaisMes: Number(horasNormaisMes) || 208,
-    horasDiurnas: Number(horasDiurnas) || 0,
-    horasNocturnas: Number(horasNocturnas) || 0,
-    horasFds: Number(horasFds) || 0,
-  });
+  const { rules } = useSimulatorRules(['OVERTIME_RATES']);
+
+  const result = calculateHorasExtras(
+    {
+      salarioBase: Number(salarioBase) || 0,
+      horasNormaisMes: Number(horasNormaisMes) || 208,
+      horasDiurnas: Number(horasDiurnas) || 0,
+      horasNocturnas: Number(horasNocturnas) || 0,
+      horasFds: Number(horasFds) || 0,
+    },
+    rules
+  );
+
+  const printReport = useSimulatorPrint();
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep(2);
+  };
+
+  const handlePrint = () => {
+    printReport(
+      buildSimulationReport({
+        slug: 'horas-extras',
+        title: s?.title ?? t('simuladores:simExtraHoursTitle'),
+        lines: localizeCalcLines(t, result.lines),
+        total: totalFromLines(result.lines, result.totalHorasExtras),
+        totalLabel: t('simuladores:reportTotalLabel'),
+      })
+    );
   };
 
   return (
@@ -42,6 +64,7 @@ export const HorasExtras: React.FC<Props> = ({ onNavigate }) => {
       nome={s?.title ?? ''}
       currentStep={currentStep}
       onStepChange={setCurrentStep}
+      onPrint={currentStep >= 2 ? handlePrint : undefined}
     >
       {currentStep === 1 && (
         <div className="card" style={{ padding: '32px' }}>

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../context/AppStateContext';
+import { useAudience } from '../../hooks/useAudience';
 import { LanguageToggle } from '../../i18n/LanguageToggle';
 
 interface HeaderProps {
@@ -41,17 +42,27 @@ export const Header: React.FC<HeaderProps> = ({
     setIsWhatsAppModalOpen,
     clients,
     activeClient,
-    setActiveClient
+    setActiveClient,
+    tenants,
+    activeTenantId,
+    setActiveTenantId
   } = useAppState();
+
+  const { isAccountant, subscription } = useAudience();
+  const canSwitchCompany = isAccountant || clients.length > 0;
+  const planLabel = subscription?.label || user?.plan;
+  const activeTenant = tenants.find(t => t.id === activeTenantId) ?? null;
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const [isCompanySelectOpen, setIsCompanySelectOpen] = useState(false);
+  const [isTenantSelectOpen, setIsTenantSelectOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const profileRef = useRef<HTMLDivElement>(null);
   const alertsRef = useRef<HTMLDivElement>(null);
   const companyRef = useRef<HTMLDivElement>(null);
+  const tenantRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -64,6 +75,9 @@ export const Header: React.FC<HeaderProps> = ({
       }
       if (companyRef.current && !companyRef.current.contains(e.target as Node)) {
         setIsCompanySelectOpen(false);
+      }
+      if (tenantRef.current && !tenantRef.current.contains(e.target as Node)) {
+        setIsTenantSelectOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -114,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Company Switcher Dropdown */}
         <div style={{ position: 'relative' }} ref={companyRef}>
           <button
-            onClick={() => setIsCompanySelectOpen(!isCompanySelectOpen)}
+            onClick={canSwitchCompany ? () => setIsCompanySelectOpen(!isCompanySelectOpen) : undefined}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -123,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
               border: '1px solid var(--slate-200)',
               padding: '6px 12px',
               borderRadius: '8px',
-              cursor: 'pointer',
+              cursor: canSwitchCompany ? 'pointer' : 'default',
               fontSize: '13.5px',
               fontWeight: 600,
               color: 'var(--slate-800)',
@@ -132,10 +146,10 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Building2 size={16} color="var(--gold-600)" />
             <span>{activeClient ? activeClient.name : (user?.companyName || t('header:companyDefault'))}</span>
-            <ChevronDown size={14} color="var(--slate-400)" />
+            {canSwitchCompany && <ChevronDown size={14} color="var(--slate-400)" />}
           </button>
 
-          {isCompanySelectOpen && (
+          {canSwitchCompany && isCompanySelectOpen && (
             <div
               style={{
                 position: 'absolute',
@@ -212,32 +226,109 @@ export const Header: React.FC<HeaderProps> = ({
               ))}
 
               <div style={{ height: '1px', backgroundColor: 'var(--slate-100)', margin: '6px 0' }} />
-              <button
-                onClick={() => {
-                  setIsCompanySelectOpen(false);
-                  onNavigate('/clientes');
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  width: '100%',
-                  padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  color: 'var(--gold-600)',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                <span>{t('header:manageAllClients')}</span>
-                <ExternalLink size={13} />
-              </button>
+              {isAccountant && (
+                <button
+                  onClick={() => {
+                    setIsCompanySelectOpen(false);
+                    onNavigate('/clientes');
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: 'var(--gold-600)',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>{t('header:manageAllClients')}</span>
+                  <ExternalLink size={13} />
+                </button>
+              )}
             </div>
           )}
         </div>
+
+        {/* Tenant Switcher (only when the user belongs to multiple tenants) */}
+        {tenants.length > 1 && (
+          <div style={{ position: 'relative' }} ref={tenantRef}>
+            <button
+              onClick={() => setIsTenantSelectOpen(!isTenantSelectOpen)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                backgroundColor: 'var(--slate-50)',
+                border: '1px solid var(--slate-200)',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '13.5px',
+                fontWeight: 600,
+                color: 'var(--slate-800)'
+              }}
+              title={t('header:tenantSwitchTitle')}
+            >
+              <Building2 size={16} color="var(--blue-600)" />
+              <span>{activeTenant?.name || t('header:tenantSwitchTitle')}</span>
+              <ChevronDown size={14} color="var(--slate-400)" />
+            </button>
+
+            {isTenantSelectOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '115%',
+                  left: 0,
+                  width: '260px',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '12px',
+                  boxShadow: 'var(--shadow-xl)',
+                  border: '1px solid var(--slate-200)',
+                  padding: '8px',
+                  zIndex: 50
+                }}
+              >
+                <div style={{ padding: '6px 8px', fontSize: '11px', fontWeight: 700, color: 'var(--slate-400)', textTransform: 'uppercase' }}>
+                  {t('header:tenantSwitchTitle')}
+                </div>
+                {tenants.map(tenant => (
+                  <button
+                    key={tenant.id}
+                    onClick={() => {
+                      setActiveTenantId(tenant.id);
+                      setIsTenantSelectOpen(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: activeTenantId === tenant.id ? 'var(--blue-50)' : 'transparent',
+                      color: activeTenantId === tenant.id ? 'var(--blue-600)' : 'var(--slate-700)',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <span>{tenant.name}</span>
+                    {activeTenantId === tenant.id && <CheckCircle2 size={15} color="var(--blue-600)" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <div style={{ height: '24px', width: '1px', backgroundColor: 'var(--slate-200)' }} />
         <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--slate-700)' }}>
@@ -517,7 +608,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {user?.name || t('header:userFallback')}
               </span>
               <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 500 }}>
-                {t('header:planLabel', { plan: user?.plan || 'PME' })}
+                {t('header:planLabel', { plan: planLabel || 'PME' })}
               </span>
             </div>
             <ChevronDown size={14} color="var(--slate-400)" />
@@ -544,7 +635,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <p style={{ fontSize: '11.5px', color: 'var(--slate-500)' }}>{user?.email}</p>
                 <div style={{ marginTop: '6px', display: 'flex', gap: '6px' }}>
                   <span className="badge badge-amber" style={{ fontSize: '10px' }}>
-                    {t('header:planLabel', { plan: user?.plan })}
+                    {t('header:planLabel', { plan: planLabel })}
                   </span>
                   <span className="badge badge-green" style={{ fontSize: '10px' }}>
                     {t('header:activeBadge')}

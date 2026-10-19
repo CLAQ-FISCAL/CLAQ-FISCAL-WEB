@@ -5,7 +5,9 @@ import {
   AlertItem,
   Client,
   SimulationRecord,
-  SystemSettings
+  SimulationReport,
+  SystemSettings,
+  Tenant
 } from '../types';
 import { NonResidentServiceResult } from '../data/taxEngine';
 import { CalendarEngine } from '../utils/calendarEngine';
@@ -48,6 +50,11 @@ interface AppStateContextType {
   registerUser: (userData: Partial<UserProfile> & { password?: string }) => Promise<void> | void;
   logout: () => void;
   updateUser: (data: Partial<UserProfile>) => void;
+
+  // Tenants (authoritative from /v1/me) — drives X-Tenant-Id for multi-tenant users
+  tenants: Tenant[];
+  activeTenantId: string | null;
+  setActiveTenantId: (id: string | null) => void;
 
   // Obligations (User-generated)
   obligations: FiscalObligation[];
@@ -100,8 +107,8 @@ interface AppStateContextType {
   openAIAssistantWithPrompt: (prompt: string) => void;
   isPDFModalOpen: boolean;
   setIsPDFModalOpen: (open: boolean) => void;
-  pdfSimulationData: SimulationRecord | null;
-  openPDFPreview: (sim: SimulationRecord) => void;
+  pdfSimulationData: SimulationReport | null;
+  openPDFPreview: (report: SimulationReport) => void;
 
   // Toast
   toasts: ToastMessage[];
@@ -333,8 +340,24 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
   const [aiAssistantPrompt, setAiAssistantPrompt] = useState('');
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
-  const [pdfSimulationData, setPdfSimulationData] = useState<SimulationRecord | null>(null);
+  const [pdfSimulationData, setPdfSimulationData] = useState<SimulationReport | null>(null);
   const [simulatorStep, setSimulatorStep] = useState(1);
+
+  // Tenant context (resolved from /v1/me after auth)
+  const [tenants, setTenants] = useState<Tenant[]>(() => {
+    const saved = localStorage.getItem('claq_tenants');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+  const [activeTenantId, setActiveTenantIdState] = useState<string | null>(() =>
+    localStorage.getItem('claq_active_tenant')
+  );
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -351,8 +374,33 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
+  // Resolve tenants from /v1/me and pick the active tenant (drives X-Tenant-Id)
+  const bootstrapTenants = async () => {
+    try {
+      const me = await ApiClient.getMe();
+      const list = me?.tenants ?? [];
+      setTenants(list);
+      localStorage.setItem('claq_tenants', JSON.stringify(list));
+
+      const stored = localStorage.getItem('claq_active_tenant');
+      const storedValid = stored && list.some(t => t.id === stored) ? stored : null;
+      const next = storedValid ?? list[0]?.id ?? null;
+
+      if (next) {
+        localStorage.setItem('claq_active_tenant', next);
+        setActiveTenantIdState(next);
+      } else {
+        localStorage.removeItem('claq_active_tenant');
+        setActiveTenantIdState(null);
+      }
+    } catch {
+      // Offline / endpoint unavailable — keep any previously stored tenant
+    }
+  };
+
   // Sync state to backend & localStorage
   const syncFromBackend = async () => {
+    await bootstrapTenants();
     try {
       const [oblsRes, clientsRes, simsRes] = await Promise.allSettled([
         ApiClient.get<{ data: FiscalObligation[] }>('/obligations'),
@@ -662,6 +710,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setObligations([]);
     setClients([]);
     setSimulations([]);
+    setTenants([]);
+    setActiveTenantIdState(null);
     localStorage.removeItem('claq_user');
     localStorage.removeItem('claq_is_auth');
     localStorage.removeItem('claq_cognito_idToken');
@@ -670,7 +720,18 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.removeItem('claq_obligations');
     localStorage.removeItem('claq_clients');
     localStorage.removeItem('claq_simulations');
+    localStorage.removeItem('claq_tenants');
+    localStorage.removeItem('claq_active_tenant');
     addToast('info', i18n.t('state:sessionEndedTitle'), i18n.t('state:sessionEndedMsg'));
+  };
+
+  const setActiveTenantId = (id: string | null) => {
+    setActiveTenantIdState(id);
+    if (id) {
+      localStorage.setItem('claq_active_tenant', id);
+    } else {
+      localStorage.removeItem('claq_active_tenant');
+    }
   };
 
   const updateUser = (data: Partial<UserProfile>) => {
@@ -962,8 +1023,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setIsAIAssistantOpen(true);
   };
 
-  const openPDFPreview = (sim: SimulationRecord) => {
-    setPdfSimulationData(sim);
+  const openPDFPreview = (report: SimulationReport) => {
+    setPdfSimulationData(report);
     setIsPDFModalOpen(true);
   };
 
@@ -976,6 +1037,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         registerUser,
         logout,
         updateUser,
+        tenants,
+        activeTenantId,
+        setActiveTenantId,
         obligations,
         markObligationPaid,
         addObligation,

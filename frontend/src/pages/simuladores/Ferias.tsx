@@ -4,6 +4,8 @@ import { ArrowRight, Info, CheckCircle2 } from 'lucide-react';
 import { SimulatorLayout } from '../../components/simulators/SimulatorLayout';
 import { getSimulatorBySlug } from '../../components/simulators/simulatorCatalog';
 import { calcLineLabel, calcLineFormula } from '../../components/simulators/calcLines';
+import { buildSimulationReport, localizeCalcLines, totalFromLines } from '../../components/simulators/simulationReport';
+import { useSimulatorPrint } from '../../hooks/useSimulatorPrint';
 import { calculateFerias } from '../../lib/calculations/mocambique';
 import { formatMZN } from '../../utils/formatters';
 
@@ -26,9 +28,23 @@ export const Ferias: React.FC<Props> = ({ onNavigate }) => {
     diasGozados: Number(diasGozados) || 0,
   });
 
+  const printReport = useSimulatorPrint();
+
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep(2);
+  };
+
+  const handlePrint = () => {
+    printReport(
+      buildSimulationReport({
+        slug: 'ferias',
+        title: s?.title ?? t('simuladores:simVacationsTitle'),
+        lines: localizeCalcLines(t, result.lines),
+        total: totalFromLines(result.lines, result.subsidioFerias),
+        totalLabel: t('simuladores:reportTotalLabel'),
+      })
+    );
   };
 
   return (
@@ -38,6 +54,7 @@ export const Ferias: React.FC<Props> = ({ onNavigate }) => {
       nome={s?.title ?? ''}
       currentStep={currentStep}
       onStepChange={setCurrentStep}
+      onPrint={currentStep >= 2 ? handlePrint : undefined}
     >
       {currentStep === 1 && (
         <div className="card" style={{ padding: '32px' }}>

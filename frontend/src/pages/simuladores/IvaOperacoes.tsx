@@ -4,6 +4,9 @@ import { ArrowRight, Info, CheckCircle2 } from 'lucide-react';
 import { SimulatorLayout } from '../../components/simulators/SimulatorLayout';
 import { getSimulatorBySlug } from '../../components/simulators/simulatorCatalog';
 import { calcLineLabel, calcLineFormula } from '../../components/simulators/calcLines';
+import { buildSimulationReport, localizeCalcLines } from '../../components/simulators/simulationReport';
+import { useSimulatorPrint } from '../../hooks/useSimulatorPrint';
+import { useSimulatorRules } from '../../hooks/useFiscalQueries';
 import { calculateIvaOperacoes } from '../../lib/calculations/mocambique';
 import { formatMZN } from '../../utils/formatters';
 
@@ -20,15 +23,37 @@ export const IvaOperacoes: React.FC<Props> = ({ onNavigate }) => {
 
   const s = getSimulatorBySlug('iva-operacoes', t);
 
-  const result = calculateIvaOperacoes({
-    baseTributavel: Number(baseTributavel) || 0,
-    taxaIva: Number(taxaIva),
-    ivaSuportado: Number(ivaSuportado) || 0,
-  });
+  const { rules } = useSimulatorRules(['IVA_RATE']);
+
+  const result = calculateIvaOperacoes(
+    {
+      baseTributavel: Number(baseTributavel) || 0,
+      taxaIva: Number(taxaIva),
+      ivaSuportado: Number(ivaSuportado) || 0,
+    },
+    rules
+  );
+
+  const printReport = useSimulatorPrint();
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep(2);
+  };
+
+  const handlePrint = () => {
+    printReport(
+      buildSimulationReport({
+        slug: 'iva-operacoes',
+        title: s?.title ?? t('simuladores:simIvaOpsTitle'),
+        lines: localizeCalcLines(t, result.lines),
+        total: Math.abs(result.ivaApurado),
+        totalLabel:
+          result.status === 'a_pagar'
+            ? t('simuladores:ivaOpsPayableTitle')
+            : t('simuladores:ivaOpsCreditTitle'),
+      })
+    );
   };
 
   return (
@@ -38,6 +63,7 @@ export const IvaOperacoes: React.FC<Props> = ({ onNavigate }) => {
       nome={s?.title ?? ''}
       currentStep={currentStep}
       onStepChange={setCurrentStep}
+      onPrint={currentStep >= 2 ? handlePrint : undefined}
     >
       {currentStep === 1 && (
         <div className="card" style={{ padding: '32px' }}>
@@ -63,9 +89,9 @@ export const IvaOperacoes: React.FC<Props> = ({ onNavigate }) => {
               <div className="form-group">
                 <label className="form-label">{t('simuladores:ivaOpsRateLabel')}</label>
                 <select className="form-control" value={taxaIva} onChange={(e) => setTaxaIva(e.target.value)}>
-                  <option value="0.16">{t('simuladores:ivaOpsRateNormal')}</option>
-                  <option value="0.05">{t('simuladores:ivaOpsRateReduced')}</option>
-                  <option value="0">{t('simuladores:ivaOpsRateExempt')}</option>
+                  <option value={String(rules.iva.standardRate)}>{t('simuladores:ivaOpsRateNormal')}</option>
+                  <option value={String(rules.iva.reducedRate)}>{t('simuladores:ivaOpsRateReduced')}</option>
+                  <option value={String(rules.iva.exemptRate)}>{t('simuladores:ivaOpsRateExempt')}</option>
                 </select>
               </div>
 

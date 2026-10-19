@@ -5,6 +5,7 @@ import ptHeader from './locales/pt/header.json';
 import ptSidebar from './locales/pt/sidebar.json';
 import ptLayout from './locales/pt/layout.json';
 import ptLogin from './locales/pt/login.json';
+import ptOnboarding from './locales/pt/onboarding.json';
 import ptState from './locales/pt/state.json';
 import ptDashboard from './locales/pt/dashboard.json';
 import ptCalendar from './locales/pt/calendar.json';
@@ -21,11 +22,13 @@ import ptAi from './locales/pt/ai.json';
 import ptCheckout from './locales/pt/checkout.json';
 import ptPdf from './locales/pt/pdf.json';
 import ptData from './locales/pt/data.json';
+import ptUploads from './locales/pt/uploads.json';
 import enCommon from './locales/en/common.json';
 import enHeader from './locales/en/header.json';
 import enSidebar from './locales/en/sidebar.json';
 import enLayout from './locales/en/layout.json';
 import enLogin from './locales/en/login.json';
+import enOnboarding from './locales/en/onboarding.json';
 import enState from './locales/en/state.json';
 import enDashboard from './locales/en/dashboard.json';
 import enCalendar from './locales/en/calendar.json';
@@ -42,6 +45,7 @@ import enAi from './locales/en/ai.json';
 import enCheckout from './locales/en/checkout.json';
 import enPdf from './locales/en/pdf.json';
 import enData from './locales/en/data.json';
+import enUploads from './locales/en/uploads.json';
 
 export type AppLanguage = 'pt' | 'en';
 
@@ -60,6 +64,7 @@ export const resources = {
     sidebar: ptSidebar,
     layout: ptLayout,
     login: ptLogin,
+    onboarding: ptOnboarding,
     state: ptState,
     dashboard: ptDashboard,
     calendar: ptCalendar,
@@ -75,7 +80,8 @@ export const resources = {
     ai: ptAi,
     checkout: ptCheckout,
     pdf: ptPdf,
-    data: ptData
+    data: ptData,
+    uploads: ptUploads
   },
   en: {
     common: enCommon,
@@ -83,6 +89,7 @@ export const resources = {
     sidebar: enSidebar,
     layout: enLayout,
     login: enLogin,
+    onboarding: enOnboarding,
     state: enState,
     dashboard: enDashboard,
     calendar: enCalendar,
@@ -98,7 +105,8 @@ export const resources = {
     ai: enAi,
     checkout: enCheckout,
     pdf: enPdf,
-    data: enData
+    data: enData,
+    uploads: enUploads
   }
 } as const;
 

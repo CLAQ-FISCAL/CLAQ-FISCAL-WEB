@@ -1,4 +1,5 @@
 {
+  "reportTotalLabel": "Total",
   "catalogCenterTitle": "Centro de Simuladores",
   "catalogIntro": "Escolha um simulador e obtenha cálculos automáticos com base na legislação moçambicana.",
   "myFavorites": "Meus Favoritos ({{count}})",

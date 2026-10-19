@@ -4,6 +4,9 @@ import { ArrowRight, Info, CheckCircle2 } from 'lucide-react';
 import { SimulatorLayout } from '../../components/simulators/SimulatorLayout';
 import { getSimulatorBySlug } from '../../components/simulators/simulatorCatalog';
 import { calcLineLabel, calcLineFormula } from '../../components/simulators/calcLines';
+import { buildSimulationReport, localizeCalcLines, totalFromLines } from '../../components/simulators/simulationReport';
+import { useSimulatorPrint } from '../../hooks/useSimulatorPrint';
+import { useSimulatorRules } from '../../hooks/useFiscalQueries';
 import { calculateIrpsRetencoes } from '../../lib/calculations/mocambique';
 import { formatMZN } from '../../utils/formatters';
 
@@ -20,18 +23,37 @@ export const IrpsRetencoes: React.FC<Props> = ({ onNavigate }) => {
 
   const s = getSimulatorBySlug('irps-retencoes', t);
 
-  const inssCalc = (Number(salarioBruto) || 0) * 0.03;
+  const { rules } = useSimulatorRules(['IRPS_BRACKETS', 'INSS_RATES']);
+
+  const inssCalc = (Number(salarioBruto) || 0) * rules.inss.employeeRate;
   const inssFinal = inssDescontado ? Number(inssDescontado) : inssCalc;
 
-  const result = calculateIrpsRetencoes({
-    salarioBruto: Number(salarioBruto) || 0,
-    outrosRendimentos: Number(outrosRendimentos) || 0,
-    inssDescontado: inssFinal,
-  });
+  const result = calculateIrpsRetencoes(
+    {
+      salarioBruto: Number(salarioBruto) || 0,
+      outrosRendimentos: Number(outrosRendimentos) || 0,
+      inssDescontado: inssFinal,
+    },
+    rules
+  );
+
+  const printReport = useSimulatorPrint();
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep(2);
+  };
+
+  const handlePrint = () => {
+    printReport(
+      buildSimulationReport({
+        slug: 'irps-retencoes',
+        title: s?.title ?? t('simuladores:simIrpsTitle'),
+        lines: localizeCalcLines(t, result.lines),
+        total: totalFromLines(result.lines, result.irpsFinal),
+        totalLabel: t('simuladores:irpsWithheldTitle'),
+      })
+    );
   };
 
   return (
@@ -41,6 +63,7 @@ export const IrpsRetencoes: React.FC<Props> = ({ onNavigate }) => {
       nome={s?.title ?? ''}
       currentStep={currentStep}
       onStepChange={setCurrentStep}
+      onPrint={currentStep >= 2 ? handlePrint : undefined}
     >
       {currentStep === 1 && (
         <div className="card" style={{ padding: '32px' }}>

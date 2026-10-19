@@ -1,5 +1,15 @@
 // Funções puras de cálculo fiscal para Moçambique
 // Cada função é independente — sem partilha de estado entre simuladores
+//
+// As taxas são injectadas via `CalcRules` (valores aprovados obtidos do
+// backend em `GET /v1/rules/{code}`). Quando nenhuma regra é fornecida,
+// recorre-se a DEFAULT_CALC_RULES como fallback offline.
+
+import {
+  DEFAULT_CALC_RULES,
+  type CalcRules,
+  type IrpsBracket,
+} from './calcRules';
 
 // Câmbios de referência (Banco de Moçambique)
 export const MOCK_EXCHANGE_RATES: Record<string, number> = {
@@ -16,6 +26,10 @@ export interface CalcLine {
   value: number;
   kind: 'info' | 'debit' | 'credit' | 'total';
 }
+
+// Formata uma taxa (0.16) como percentagem pt-MZ sem zeros supérfluos: "16", "17,25"
+const pct = (rate: number): string =>
+  (rate * 100).toLocaleString('pt-MZ', { maximumFractionDigits: 2 });
 
 // ─── A) Pagamento de Serviços a Não Residentes ──────────────────────────────
 // Ref: Lei n.º 1/2018 (IVA) e Lei n.º 34/2014 (IRPC)
@@ -41,12 +55,14 @@ export interface PagamentoNaoResidentesResult {
 }
 
 export function calculatePagamentoNaoResidentes(
-  input: PagamentoNaoResidentesInput
+  input: PagamentoNaoResidentesInput,
+  rules: CalcRules = DEFAULT_CALC_RULES
 ): PagamentoNaoResidentesResult {
+  const { grossUpFactor, vatRate, withholdingRate } = rules.nonResident;
   const valorMZN = input.valorFatura * input.cambiaDia;
-  const contraValor = valorMZN * 1.25;
-  const iva = contraValor * 0.16;
-  const irpcRetido = contraValor * 0.20;
+  const contraValor = valorMZN * grossUpFactor;
+  const iva = contraValor * vatRate;
+  const irpcRetido = contraValor * withholdingRate;
   const totalImposto = iva + irpcRetido;
   const custoTotal = valorMZN + totalImposto;
 
@@ -65,20 +81,20 @@ export function calculatePagamentoNaoResidentes(
         kind: 'info',
       },
       {
-        label: 'Contra-Valor (Fator 1,25)',
-        formula: `${valorMZN.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × 1,25`,
+        label: `Contra-Valor (Fator ${grossUpFactor.toLocaleString('pt-MZ')})`,
+        formula: `${valorMZN.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × ${grossUpFactor.toLocaleString('pt-MZ')}`,
         value: contraValor,
         kind: 'info',
       },
       {
-        label: 'IVA (16%)',
-        formula: `${contraValor.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × 16%`,
+        label: `IVA (${pct(vatRate)}%)`,
+        formula: `${contraValor.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × ${pct(vatRate)}%`,
         value: iva,
         kind: 'debit',
       },
       {
-        label: 'IRPC Retido (20%)',
-        formula: `${contraValor.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × 20%`,
+        label: `IRPC Retido (${pct(withholdingRate)}%)`,
+        formula: `${contraValor.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × ${pct(withholdingRate)}%`,
         value: irpcRetido,
         kind: 'debit',
       },
@@ -109,7 +125,8 @@ export interface IvaOperacoesResult {
 }
 
 export function calculateIvaOperacoes(
-  input: IvaOperacoesInput
+  input: IvaOperacoesInput,
+  _rules: CalcRules = DEFAULT_CALC_RULES
 ): IvaOperacoesResult {
   const ivaLiquidado = input.baseTributavel * input.taxaIva;
   const ivaDedutivel = input.ivaSuportado;
@@ -162,34 +179,34 @@ export interface IrpsRetencoesResult {
 }
 
 // Tabela progressiva mensal IRPS Moçambique (valores em MZN)
-const IRPS_BRACKETS = [
-  { min: 0, max: 20750, rate: 0 },
-  { min: 20750.01, max: 40999.99, rate: 0.10 },
-  { min: 41000, max: 80999.99, rate: 0.15 },
-  { min: 81000, max: 120999.99, rate: 0.20 },
-  { min: 121000, max: 160999.99, rate: 0.25 },
-  { min: 161000, max: null, rate: 0.32 },
-];
+// Valores por omissão vivem em calcRules.ts (DEFAULT_IRPS_BRACKETS).
 
-function computeIrpsProgressivo(base: number): number {
+export function computeIrpsProgressivo(
+  base: number,
+  brackets: IrpsBracket[] = DEFAULT_CALC_RULES.irpsBrackets
+): number {
   let irps = 0;
-  for (const bracket of IRPS_BRACKETS) {
-    if (base <= bracket.min) break;
-    const upper = bracket.max ?? Infinity;
-    const taxable = Math.min(base, upper) - bracket.min;
+  let lower = 0;
+  for (const bracket of brackets) {
+    if (base <= lower) break;
+    const upper = bracket.upto ?? Infinity;
+    const taxable = Math.min(base, upper) - lower;
     if (taxable > 0) irps += taxable * bracket.rate;
+    if (bracket.upto === null) break;
+    lower = bracket.upto;
   }
   return irps;
 }
 
 export function calculateIrpsRetencoes(
-  input: IrpsRetencoesInput
+  input: IrpsRetencoesInput,
+  rules: CalcRules = DEFAULT_CALC_RULES
 ): IrpsRetencoesResult {
   const materiaColetavel = Math.max(
     0,
     input.salarioBruto - input.inssDescontado
   );
-  const irpsBruto = computeIrpsProgressivo(materiaColetavel);
+  const irpsBruto = computeIrpsProgressivo(materiaColetavel, rules.irpsBrackets);
   // Dedução por dependentes: 250 MT por dependente (máx. IRPS)
   const deducao = Math.min(irpsBruto, 0); // sem dependentes no input simples
   const irpsFinal = Math.max(0, irpsBruto - deducao);
@@ -233,7 +250,8 @@ export interface IrpcEstimativaResult {
 }
 
 export function calculateIrpcEstimativa(
-  input: IrpcEstimativaInput
+  input: IrpcEstimativaInput,
+  _rules: CalcRules = DEFAULT_CALC_RULES
 ): IrpcEstimativaResult {
   const irpcEstimado = input.lucroTributavel * input.taxaIrpc;
   const irpcMensal = irpcEstimado / 12;
@@ -249,8 +267,8 @@ export function calculateIrpcEstimativa(
         kind: 'info',
       },
       {
-        label: `IRPC Estimado (${(input.taxaIrpc * 100).toFixed(0)}%)`,
-        formula: `${input.lucroTributavel.toLocaleString('pt-MZ')} × ${(input.taxaIrpc * 100).toFixed(0)}%`,
+        label: `IRPC Estimado (${pct(input.taxaIrpc)}%)`,
+        formula: `${input.lucroTributavel.toLocaleString('pt-MZ')} × ${pct(input.taxaIrpc)}%`,
         value: irpcEstimado,
         kind: 'debit',
       },
@@ -279,10 +297,12 @@ export interface InssContribuicoesResult {
 }
 
 export function calculateInssContribuicoes(
-  input: InssContribuicoesInput
+  input: InssContribuicoesInput,
+  rules: CalcRules = DEFAULT_CALC_RULES
 ): InssContribuicoesResult {
-  const inssTrabalhador = input.salarioBruto * 0.03;
-  const inssPatronal = input.salarioBruto * 0.04;
+  const { employeeRate, employerRate } = rules.inss;
+  const inssTrabalhador = input.salarioBruto * employeeRate;
+  const inssPatronal = input.salarioBruto * employerRate;
   const totalInss = inssTrabalhador + inssPatronal;
 
   return {
@@ -291,14 +311,14 @@ export function calculateInssContribuicoes(
     totalInss,
     lines: [
       {
-        label: 'INSS Trabalhador (3%)',
-        formula: `${input.salarioBruto.toLocaleString('pt-MZ')} × 3%`,
+        label: `INSS Trabalhador (${pct(employeeRate)}%)`,
+        formula: `${input.salarioBruto.toLocaleString('pt-MZ')} × ${pct(employeeRate)}%`,
         value: inssTrabalhador,
         kind: 'debit',
       },
       {
-        label: 'INSS Patronal (4%)',
-        formula: `${input.salarioBruto.toLocaleString('pt-MZ')} × 4%`,
+        label: `INSS Patronal (${pct(employerRate)}%)`,
+        formula: `${input.salarioBruto.toLocaleString('pt-MZ')} × ${pct(employerRate)}%`,
         value: inssPatronal,
         kind: 'debit',
       },
@@ -319,7 +339,7 @@ export interface JurosMultasInput {
   impostoAtraso: number;
   dataVencimento: string;
   dataPagamento: string;
-  taxaMulta: number;
+  taxaMulta?: number;
 }
 
 export interface JurosMultasResult {
@@ -332,19 +352,21 @@ export interface JurosMultasResult {
 }
 
 export function calculateJurosMultas(
-  input: JurosMultasInput
+  input: JurosMultasInput,
+  rules: CalcRules = DEFAULT_CALC_RULES
 ): JurosMultasResult {
+  const { annualInterestRate, fineRate: ruleFineRate } = rules.penalty;
+  const fineRate = input.taxaMulta ?? ruleFineRate;
   const dataVenc = new Date(input.dataVencimento);
   const dataPag = new Date(input.dataPagamento);
   const diffMs = dataPag.getTime() - dataVenc.getTime();
   const diasAtraso = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
   const mesesAtraso = Math.ceil(diasAtraso / 30);
 
-  // Multa: 2% ao mês sobre o imposto em atraso
-  const multa = input.impostoAtraso * 0.02 * mesesAtraso;
-  // Juros: Taxa BM (17.25% a.a.) / 360 × dias
-  const taxaBmAnual = 0.1725;
-  const juros = input.impostoAtraso * (taxaBmAnual / 360) * diasAtraso;
+  // Multa: taxa mensal sobre o imposto em atraso
+  const multa = input.impostoAtraso * fineRate * mesesAtraso;
+  // Juros: taxa anual / 360 × dias
+  const juros = input.impostoAtraso * (annualInterestRate / 360) * diasAtraso;
   const totalPagar = input.impostoAtraso + multa + juros;
 
   return {
@@ -361,14 +383,14 @@ export function calculateJurosMultas(
         kind: 'info',
       },
       {
-        label: `Multa (${mesesAtraso} meses × 2%)`,
-        formula: `${input.impostoAtraso.toLocaleString('pt-MZ')} × 2% × ${mesesAtraso}`,
+        label: `Multa (${mesesAtraso} meses × ${pct(fineRate)}%)`,
+        formula: `${input.impostoAtraso.toLocaleString('pt-MZ')} × ${pct(fineRate)}% × ${mesesAtraso}`,
         value: multa,
         kind: 'debit',
       },
       {
         label: `Juros de Mora (${diasAtraso} dias)`,
-        formula: `${input.impostoAtraso.toLocaleString('pt-MZ')} × (17,25% ÷ 360) × ${diasAtraso}`,
+        formula: `${input.impostoAtraso.toLocaleString('pt-MZ')} × (${pct(annualInterestRate)}% ÷ 360) × ${diasAtraso}`,
         value: juros,
         kind: 'debit',
       },
@@ -405,7 +427,7 @@ export const IMPOSTO_SELO_TAXAS: Record<
 
 export interface ImpostoSeloInput {
   valorActo: number;
-  tipo: ImpostoSeloTipo;
+  tipo: string;
 }
 
 export interface ImpostoSeloResult {
@@ -416,15 +438,20 @@ export interface ImpostoSeloResult {
 }
 
 export function calculateImpostoSelo(
-  input: ImpostoSeloInput
+  input: ImpostoSeloInput,
+  rules: CalcRules = DEFAULT_CALC_RULES
 ): ImpostoSeloResult {
-  const config = IMPOSTO_SELO_TAXAS[input.tipo];
-  const impostoSelo = input.valorActo * config.taxa;
+  const config = rules.stampDuty.find((entry) => entry.code === input.tipo);
+  const taxaAplicada =
+    config?.rate ?? IMPOSTO_SELO_TAXAS[input.tipo as ImpostoSeloTipo]?.taxa ?? 0;
+  const tipoLabel =
+    config?.label ?? IMPOSTO_SELO_TAXAS[input.tipo as ImpostoSeloTipo]?.label ?? input.tipo;
+  const impostoSelo = input.valorActo * taxaAplicada;
 
   return {
     impostoSelo,
-    taxaAplicada: config.taxa,
-    tipoLabel: config.label,
+    taxaAplicada,
+    tipoLabel,
     lines: [
       {
         label: 'Base Tributável',
@@ -433,8 +460,8 @@ export function calculateImpostoSelo(
         kind: 'info',
       },
       {
-        label: `Imposto do Selo (${config.label})`,
-        formula: `${input.valorActo.toLocaleString('pt-MZ')} × ${(config.taxa * 100).toFixed(1)}%`,
+        label: `Imposto do Selo (${tipoLabel})`,
+        formula: `${input.valorActo.toLocaleString('pt-MZ')} × ${(taxaAplicada * 100).toFixed(1)}%`,
         value: impostoSelo,
         kind: 'total',
       },
@@ -461,12 +488,14 @@ export interface SalarioLiquidoResult {
 }
 
 export function calculateSalarioLiquido(
-  input: SalarioLiquidoInput
+  input: SalarioLiquidoInput,
+  rules: CalcRules = DEFAULT_CALC_RULES
 ): SalarioLiquidoResult {
+  const { employeeRate } = rules.inss;
   const bruto = input.salarioBase + input.subsidios + input.horasExtras + input.bonus;
-  const inss = bruto * 0.03;
+  const inss = bruto * employeeRate;
   const materiaIrps = Math.max(0, bruto - inss);
-  const irps = computeIrpsProgressivo(materiaIrps);
+  const irps = computeIrpsProgressivo(materiaIrps, rules.irpsBrackets);
   const liquido = bruto - inss - irps;
 
   return {
@@ -483,8 +512,8 @@ export function calculateSalarioLiquido(
         kind: 'info',
       },
       {
-        label: 'INSS Trabalhador (3%)',
-        formula: `${bruto.toLocaleString('pt-MZ')} × 3%`,
+        label: `INSS Trabalhador (${pct(employeeRate)}%)`,
+        formula: `${bruto.toLocaleString('pt-MZ')} × ${pct(employeeRate)}%`,
         value: inss,
         kind: 'debit',
       },
@@ -530,13 +559,15 @@ export interface HorasExtrasResult {
 }
 
 export function calculateHorasExtras(
-  input: HorasExtrasInput
+  input: HorasExtrasInput,
+  rules: CalcRules = DEFAULT_CALC_RULES
 ): HorasExtrasResult {
+  const { weekday, night, weekend } = rules.overtime;
   const horasNormais = input.horasNormaisMes || 208;
   const valorHora = input.salarioBase / horasNormais;
-  const valorDiurno = valorHora * 1.25 * input.horasDiurnas;
-  const valorNocturno = valorHora * 1.50 * input.horasNocturnas;
-  const valorFds = valorHora * 2.00 * input.horasFds;
+  const valorDiurno = valorHora * weekday * input.horasDiurnas;
+  const valorNocturno = valorHora * night * input.horasNocturnas;
+  const valorFds = valorHora * weekend * input.horasFds;
   const totalHorasExtras = valorDiurno + valorNocturno + valorFds;
 
   return {
@@ -553,20 +584,20 @@ export function calculateHorasExtras(
         kind: 'info',
       },
       {
-        label: `Horas Extras Diurnas (${input.horasDiurnas}h × 1,25)`,
-        formula: `${valorHora.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × 1,25 × ${input.horasDiurnas}`,
+        label: `Horas Extras Diurnas (${input.horasDiurnas}h × ${weekday.toLocaleString('pt-MZ')})`,
+        formula: `${valorHora.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × ${weekday.toLocaleString('pt-MZ')} × ${input.horasDiurnas}`,
         value: valorDiurno,
         kind: 'debit',
       },
       {
-        label: `Horas Extras Nócturnas (${input.horasNocturnas}h × 1,50)`,
-        formula: `${valorHora.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × 1,50 × ${input.horasNocturnas}`,
+        label: `Horas Extras Nócturnas (${input.horasNocturnas}h × ${night.toLocaleString('pt-MZ')})`,
+        formula: `${valorHora.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × ${night.toLocaleString('pt-MZ')} × ${input.horasNocturnas}`,
         value: valorNocturno,
         kind: 'debit',
       },
       {
-        label: `Horas Extras Fim-de-Semana (${input.horasFds}h × 2,00)`,
-        formula: `${valorHora.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × 2,00 × ${input.horasFds}`,
+        label: `Horas Extras Fim-de-Semana (${input.horasFds}h × ${weekend.toLocaleString('pt-MZ')})`,
+        formula: `${valorHora.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} × ${weekend.toLocaleString('pt-MZ')} × ${input.horasFds}`,
         value: valorFds,
         kind: 'debit',
       },

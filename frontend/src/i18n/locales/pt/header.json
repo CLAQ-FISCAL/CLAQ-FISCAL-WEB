@@ -11,6 +11,7 @@
   "pageTitleSuporte": "Ajuda e Suporte",
   "toggleMenu": "Alternar Menu",
   "companySwitchTitle": "Alternar Empresa / Cliente",
+  "tenantSwitchTitle": "Organização",
   "companyDefault": "CLAQ Consultores, Lda.",
   "companySwitchItem": "CLAQ Consultores (Minha Empresa)",
   "nuitLabel": "NUIT: {{nuit}}",

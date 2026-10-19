@@ -4,6 +4,9 @@ import { ArrowRight, Info, CheckCircle2 } from 'lucide-react';
 import { SimulatorLayout } from '../../components/simulators/SimulatorLayout';
 import { getSimulatorBySlug } from '../../components/simulators/simulatorCatalog';
 import { calcLineLabel, calcLineFormula, translateSeloLabel } from '../../components/simulators/calcLines';
+import { buildSimulationReport, localizeCalcLines, totalFromLines } from '../../components/simulators/simulationReport';
+import { useSimulatorPrint } from '../../hooks/useSimulatorPrint';
+import { useSimulatorRules } from '../../hooks/useFiscalQueries';
 import {
   calculateImpostoSelo,
   IMPOSTO_SELO_TAXAS,
@@ -23,14 +26,35 @@ export const ImpostoSelo: React.FC<Props> = ({ onNavigate }) => {
 
   const s = getSimulatorBySlug('imposto-selo', t);
 
-  const result = calculateImpostoSelo({
-    valorActo: Number(valorActo) || 0,
-    tipo,
-  });
+  const { rules } = useSimulatorRules(['STAMP_DUTY']);
+  const stampDutyOptions = rules.stampDuty.length > 0 ? rules.stampDuty : Object.entries(IMPOSTO_SELO_TAXAS).map(([code, cfg]) => ({ code, label: cfg.label, rate: cfg.taxa }));
+
+  const result = calculateImpostoSelo(
+    {
+      valorActo: Number(valorActo) || 0,
+      tipo,
+    },
+    rules
+  );
+
+  const printReport = useSimulatorPrint();
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep(2);
+  };
+
+  const handlePrint = () => {
+    printReport(
+      buildSimulationReport({
+        slug: 'imposto-selo',
+        title: s?.title ?? t('simuladores:simStampTaxTitle'),
+        meta: [{ label: t('simuladores:seloActTypeLabel'), value: translateSeloLabel(t, result.tipoLabel) }],
+        lines: localizeCalcLines(t, result.lines),
+        total: totalFromLines(result.lines, result.impostoSelo),
+        totalLabel: t('simuladores:seloPayableTitle'),
+      })
+    );
   };
 
   return (
@@ -40,6 +64,7 @@ export const ImpostoSelo: React.FC<Props> = ({ onNavigate }) => {
       nome={s?.title ?? ''}
       currentStep={currentStep}
       onStepChange={setCurrentStep}
+      onPrint={currentStep >= 2 ? handlePrint : undefined}
     >
       {currentStep === 1 && (
         <div className="card" style={{ padding: '32px' }}>
@@ -69,9 +94,9 @@ export const ImpostoSelo: React.FC<Props> = ({ onNavigate }) => {
                   value={tipo}
                   onChange={(e) => setTipo(e.target.value as ImpostoSeloTipo)}
                 >
-                  {(Object.keys(IMPOSTO_SELO_TAXAS) as ImpostoSeloTipo[]).map((key) => (
-                    <option key={key} value={key}>
-                      {translateSeloLabel(t, IMPOSTO_SELO_TAXAS[key].label)}
+                  {stampDutyOptions.map((option) => (
+                    <option key={option.code} value={option.code}>
+                      {translateSeloLabel(t, option.label)}
                     </option>
                   ))}
                 </select>

@@ -4,6 +4,23 @@
 // Auth: Amplify Cognito SRP → Bearer IdToken on every request (Gateway Authorizer)
 // Fallback: localStorage claq_cognito_idToken for sync fast path; fetchAuthSession for refresh
 
+import type {
+  MeResponse,
+  Subscription,
+  PlanCatalog,
+  PlanDto,
+  RuleDto,
+  SimulatorCatalogItem,
+  SimulatorRunResult,
+  BackendCompany,
+  UploadBatchSummary,
+  StagedBatchView,
+  MatchStateName,
+  RowDecisionName,
+  DecideResult,
+  ApplyResult,
+} from '../types';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 // Helper to retrieve Cognito IdToken — tries Amplify session first, falls back to localStorage
@@ -35,6 +52,11 @@ async function getHeaders(): Promise<HeadersInit> {
   const token = await getAuthToken();
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+  }
+  // Active tenant (required by the Gateway when a user belongs to more than one tenant)
+  const tenantId = localStorage.getItem('claq_active_tenant');
+  if (tenantId) {
+    headers['X-Tenant-Id'] = tenantId;
   }
   return headers;
 }
@@ -116,5 +138,87 @@ export class ApiClient {
       headers,
     });
     return await handleResponse<T>(res, endpoint);
+  }
+
+  // ─── Typed convenience wrappers (audience / plans / simulators) ───────────
+
+  public static getMe(): Promise<MeResponse> {
+    return this.get<MeResponse>('/me');
+  }
+
+  public static getSubscription(): Promise<Subscription> {
+    return this.get<Subscription>('/subscription');
+  }
+
+  public static getPlans(): Promise<PlanCatalog> {
+    return this.get<PlanCatalog>('/plans');
+  }
+
+  public static suggestPlan(annualRevenueMzn: number): Promise<{ annualRevenueMzn: number; suggested: PlanDto }> {
+    return this.get<{ annualRevenueMzn: number; suggested: PlanDto }>(
+      `/plans/suggest?annualRevenueMzn=${encodeURIComponent(annualRevenueMzn)}`
+    );
+  }
+
+  public static listSimulators(): Promise<{ items: SimulatorCatalogItem[] }> {
+    return this.get<{ items: SimulatorCatalogItem[] }>('/simulators');
+  }
+
+  public static runSimulator(
+    code: string,
+    inputs: Record<string, number | string>,
+    options?: { at?: string; companyId?: string }
+  ): Promise<SimulatorRunResult> {
+    return this.post<SimulatorRunResult>(`/simulators/${encodeURIComponent(code)}`, {
+      inputs,
+      ...(options?.at ? { at: options.at } : {}),
+      ...(options?.companyId ? { companyId: options.companyId } : {}),
+    });
+  }
+
+  public static getExchangeRates(base = 'USD'): Promise<{ base: string; rates: { target: string; rate: string; source: string; fetchedAt: string }[] }> {
+    return this.get(`/exchange-rates?base=${encodeURIComponent(base)}`);
+  }
+
+  public static getRule(code: string): Promise<RuleDto> {
+    return this.get<RuleDto>(`/rules/${encodeURIComponent(code)}`);
+  }
+
+  // ─── Companies ────────────────────────────────────────────────────────────
+
+  public static listCompanies(): Promise<{ items: BackendCompany[] }> {
+    return this.get<{ items: BackendCompany[] }>('/companies');
+  }
+
+  // ─── Data uploads (staging + reconciliation) ──────────────────────────────
+
+  public static listUploads(): Promise<{ items: UploadBatchSummary[] }> {
+    return this.get<{ items: UploadBatchSummary[] }>('/uploads');
+  }
+
+  public static stageUpload(input: { companyId: string; fileName: string; content: string }): Promise<StagedBatchView> {
+    return this.post<StagedBatchView>('/uploads', input);
+  }
+
+  public static getUploadBatch(
+    id: string,
+    filters?: { matchState?: MatchStateName[]; decision?: RowDecisionName[] }
+  ): Promise<StagedBatchView> {
+    const params = new URLSearchParams();
+    if (filters?.matchState?.length) params.set('matchState', filters.matchState.join(','));
+    if (filters?.decision?.length) params.set('decision', filters.decision.join(','));
+    const qs = params.toString();
+    return this.get<StagedBatchView>(`/uploads/${encodeURIComponent(id)}${qs ? `?${qs}` : ''}`);
+  }
+
+  public static decideUploadRows(
+    id: string,
+    body: { decision: RowDecisionName; rowNumbers?: number[]; matchStates?: MatchStateName[] }
+  ): Promise<DecideResult> {
+    return this.post<DecideResult>(`/uploads/${encodeURIComponent(id)}/decisions`, body);
+  }
+
+  public static applyUpload(id: string): Promise<ApplyResult> {
+    return this.post<ApplyResult>(`/uploads/${encodeURIComponent(id)}/apply`, {});
   }
 }

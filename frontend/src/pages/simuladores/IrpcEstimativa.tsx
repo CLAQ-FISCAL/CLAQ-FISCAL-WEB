@@ -4,6 +4,9 @@ import { ArrowRight, Info, CheckCircle2 } from 'lucide-react';
 import { SimulatorLayout } from '../../components/simulators/SimulatorLayout';
 import { getSimulatorBySlug } from '../../components/simulators/simulatorCatalog';
 import { calcLineLabel, calcLineFormula } from '../../components/simulators/calcLines';
+import { buildSimulationReport, localizeCalcLines, totalFromLines } from '../../components/simulators/simulationReport';
+import { useSimulatorPrint } from '../../hooks/useSimulatorPrint';
+import { useSimulatorRules } from '../../hooks/useFiscalQueries';
 import { calculateIrpcEstimativa } from '../../lib/calculations/mocambique';
 import { formatMZN } from '../../utils/formatters';
 
@@ -20,15 +23,34 @@ export const IrpcEstimativa: React.FC<Props> = ({ onNavigate }) => {
 
   const s = getSimulatorBySlug('irpc-estimativa', t);
 
-  const result = calculateIrpcEstimativa({
-    volumeNegocios: Number(volumeNegocios) || 0,
-    lucroTributavel: Number(lucroTributavel) || 0,
-    taxaIrpc: Number(taxaIrpc),
-  });
+  const { rules } = useSimulatorRules(['IRPC_RATE']);
+
+  const result = calculateIrpcEstimativa(
+    {
+      volumeNegocios: Number(volumeNegocios) || 0,
+      lucroTributavel: Number(lucroTributavel) || 0,
+      taxaIrpc: Number(taxaIrpc),
+    },
+    rules
+  );
+
+  const printReport = useSimulatorPrint();
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep(2);
+  };
+
+  const handlePrint = () => {
+    printReport(
+      buildSimulationReport({
+        slug: 'irpc-estimativa',
+        title: s?.title ?? t('simuladores:simIrpcTitle'),
+        lines: localizeCalcLines(t, result.lines),
+        total: totalFromLines(result.lines, result.irpcEstimado),
+        totalLabel: t('simuladores:irpcAnnualTitle', { pct: (Number(taxaIrpc) * 100).toFixed(0) }),
+      })
+    );
   };
 
   return (
@@ -38,6 +60,7 @@ export const IrpcEstimativa: React.FC<Props> = ({ onNavigate }) => {
       nome={s?.title ?? ''}
       currentStep={currentStep}
       onStepChange={setCurrentStep}
+      onPrint={currentStep >= 2 ? handlePrint : undefined}
     >
       {currentStep === 1 && (
         <div className="card" style={{ padding: '32px' }}>
@@ -76,8 +99,8 @@ export const IrpcEstimativa: React.FC<Props> = ({ onNavigate }) => {
               <div className="form-group">
                 <label className="form-label">{t('simuladores:irpcRateLabel')}</label>
                 <select className="form-control" value={taxaIrpc} onChange={(e) => setTaxaIrpc(e.target.value)}>
-                  <option value="0.32">{t('simuladores:irpcRateGeneral')}</option>
-                  <option value="0.10">{t('simuladores:irpcRateAgriculture')}</option>
+                  <option value={String(rules.irpc.standardRate)}>{t('simuladores:irpcRateGeneral')}</option>
+                  <option value={String(rules.irpc.reducedRate)}>{t('simuladores:irpcRateAgriculture')}</option>
                 </select>
               </div>
             </div>

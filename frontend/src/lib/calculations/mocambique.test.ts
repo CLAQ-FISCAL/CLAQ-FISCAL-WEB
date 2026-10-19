@@ -12,6 +12,12 @@ import {
   calculateFerias,
   calculateIndemnizacao,
 } from './mocambique';
+import { DEFAULT_CALC_RULES, type CalcRules } from './calcRules';
+
+const withRules = (overrides: Partial<CalcRules>): CalcRules => ({
+  ...DEFAULT_CALC_RULES,
+  ...overrides,
+});
 
 describe('calculatePagamentoNaoResidentes', () => {
   // Ex: Fatura USD 10.000 × câmbio 63,75 = 637.500 MZN
@@ -276,5 +282,88 @@ describe('calculateIndemnizacao', () => {
     });
     expect(r.diasPorAno).toBe(0);
     expect(r.indemnizacao).toBe(0);
+  });
+});
+
+describe('regras aprovadas injectadas (rule-driven)', () => {
+  it('usa o factor de gross-up e taxas do NONRESIDENT_SERVICE', () => {
+    const r = calculatePagamentoNaoResidentes(
+      {
+        prestador: 'X',
+        pais: 'Portugal',
+        moeda: 'EUR',
+        valorFatura: 1000,
+        cambiaDia: 100,
+        dataPagamento: '2026-01-15',
+      },
+      withRules({
+        nonResident: { grossUpFactor: 1.5, vatRate: 0.1, withholdingRate: 0.15 },
+      })
+    );
+    expect(r.contraValor).toBe(150000);
+    expect(r.iva).toBe(15000);
+    expect(r.irpcRetido).toBe(22500);
+  });
+
+  it('usa as taxas de INSS aprovadas', () => {
+    const r = calculateInssContribuicoes(
+      { salarioBruto: 100000 },
+      withRules({ inss: { employeeRate: 0.05, employerRate: 0.08 } })
+    );
+    expect(r.inssTrabalhador).toBe(5000);
+    expect(r.inssPatronal).toBe(8000);
+  });
+
+  it('usa os escalões IRPS e a taxa INSS aprovados no salário líquido', () => {
+    const r = calculateSalarioLiquido(
+      { salarioBase: 1000, subsidios: 0, horasExtras: 0, bonus: 0 },
+      withRules({
+        inss: { employeeRate: 0.1, employerRate: 0.04 },
+        irpsBrackets: [{ upto: null, rate: 0.2 }],
+      })
+    );
+    expect(r.inss).toBe(100);
+    expect(r.materiaIrps).toBe(900);
+    expect(r.irps).toBeCloseTo(180, 6);
+    expect(r.liquido).toBeCloseTo(720, 6);
+  });
+
+  it('usa a tabela de imposto do selo aprovada', () => {
+    const r = calculateImpostoSelo(
+      { valorActo: 200000, tipo: 'arrendamento' },
+      withRules({
+        stampDuty: [{ code: 'arrendamento', label: 'Arrendamento (5%)', rate: 0.05 }],
+      })
+    );
+    expect(r.taxaAplicada).toBe(0.05);
+    expect(r.impostoSelo).toBe(10000);
+  });
+
+  it('usa a taxa de juros e multa aprovadas', () => {
+    const r = calculateJurosMultas(
+      {
+        impostoAtraso: 100000,
+        dataVencimento: '2026-01-01',
+        dataPagamento: '2026-04-01',
+      },
+      withRules({ penalty: { annualInterestRate: 0.36, fineRate: 0.05 } })
+    );
+    expect(r.multa).toBeCloseTo(100000 * 0.05 * 3, 6);
+    expect(r.juros).toBeCloseTo(100000 * (0.36 / 360) * 90, 6);
+  });
+
+  it('usa as majorações de horas extras aprovadas', () => {
+    const r = calculateHorasExtras(
+      {
+        salarioBase: 10000,
+        horasNormaisMes: 100,
+        horasDiurnas: 2,
+        horasNocturnas: 0,
+        horasFds: 0,
+      },
+      withRules({ overtime: { weekday: 2, night: 3, weekend: 4, holiday: 0 } })
+    );
+    expect(r.valorHora).toBe(100);
+    expect(r.valorDiurno).toBe(400);
   });
 });

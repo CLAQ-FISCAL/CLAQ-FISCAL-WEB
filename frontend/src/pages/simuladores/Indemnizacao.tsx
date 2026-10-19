@@ -4,6 +4,8 @@ import { ArrowRight, Info, CheckCircle2 } from 'lucide-react';
 import { SimulatorLayout } from '../../components/simulators/SimulatorLayout';
 import { getSimulatorBySlug } from '../../components/simulators/simulatorCatalog';
 import { calcLineLabel, calcLineFormula, translateIndemnityReason } from '../../components/simulators/calcLines';
+import { buildSimulationReport, localizeCalcLines, totalFromLines } from '../../components/simulators/simulationReport';
+import { useSimulatorPrint } from '../../hooks/useSimulatorPrint';
 import { calculateIndemnizacao, MotivoCessacao } from '../../lib/calculations/mocambique';
 import { formatMZN } from '../../utils/formatters';
 
@@ -28,9 +30,24 @@ export const Indemnizacao: React.FC<Props> = ({ onNavigate }) => {
     motivo,
   });
 
+  const printReport = useSimulatorPrint();
+
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep(2);
+  };
+
+  const handlePrint = () => {
+    printReport(
+      buildSimulationReport({
+        slug: 'indemnizacao',
+        title: s?.title ?? t('simuladores:simIndemnityTitle'),
+        meta: [{ label: t('simuladores:indemnityReasonRow'), value: translateIndemnityReason(t, result.motivoLabel) }],
+        lines: localizeCalcLines(t, result.lines),
+        total: totalFromLines(result.lines, result.indemnizacao),
+        totalLabel: t('simuladores:calclineEstimatedIndemnity'),
+      })
+    );
   };
 
   const motivos: { value: MotivoCessacao; label: string }[] = [
@@ -47,6 +64,7 @@ export const Indemnizacao: React.FC<Props> = ({ onNavigate }) => {
       nome={s?.title ?? ''}
       currentStep={currentStep}
       onStepChange={setCurrentStep}
+      onPrint={currentStep >= 2 ? handlePrint : undefined}
     >
       {currentStep === 1 && (
         <div className="card" style={{ padding: '32px' }}>

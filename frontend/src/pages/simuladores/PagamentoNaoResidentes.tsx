@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { ArrowRight, Info, CheckCircle2, DollarSign, TrendingUp, Percent, Briefcase } from 'lucide-react';
 import { useAppState } from '../../context/AppStateContext';
@@ -6,7 +6,9 @@ import { SimulatorLayout } from '../../components/simulators/SimulatorLayout';
 import { getSimulatorBySlug } from '../../components/simulators/simulatorCatalog';
 import { calcLineLabel, calcLineFormula } from '../../components/simulators/calcLines';
 import { calculatePagamentoNaoResidentes, MOCK_EXCHANGE_RATES } from '../../lib/calculations/mocambique';
+import { buildSimulationReport } from '../../components/simulators/simulationReport';
 import { formatMZN } from '../../utils/formatters';
+import { useExchangeRates, useSimulatorRules } from '../../hooks/useFiscalQueries';
 
 interface Props {
   onNavigate: (path: string) => void;
@@ -27,15 +29,37 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
   );
   const [descricao, setDescricao] = useState('');
 
-  const result = calculatePagamentoNaoResidentes({
-    prestador: prestador || 'Google LLC',
-    pais,
-    moeda,
-    valorFatura: Number(valorFatura) || 10000,
-    cambiaDia: Number(cambiaDia) || 63.75,
-    dataPagamento,
-    descricao,
-  });
+  // Official Banco de Moçambique rates (X-Tenant not required; public endpoint)
+  const ratesQuery = useExchangeRates(moeda, currentStep === 1);
+  const officialRate = (): number | null => {
+    const match = ratesQuery.data?.rates?.find(r => r.target === 'MZN');
+    const value = match ? Number(match.rate) : NaN;
+    return Number.isFinite(value) && value > 0 ? value : null;
+  };
+
+  // Auto-fill the daily rate from the official source when it becomes available
+  useEffect(() => {
+    const official = officialRate();
+    if (official && currentStep === 1) {
+      setCambiaDia(official.toFixed(2));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ratesQuery.data, moeda]);
+
+  const { rules } = useSimulatorRules(['NONRESIDENT_SERVICE']);
+
+  const result = calculatePagamentoNaoResidentes(
+    {
+      prestador: prestador || 'Google LLC',
+      pais,
+      moeda,
+      valorFatura: Number(valorFatura) || 10000,
+      cambiaDia: Number(cambiaDia) || 63.75,
+      dataPagamento,
+      descricao,
+    },
+    rules
+  );
 
   const s = getSimulatorBySlug('pagamento-nao-residentes', t);
 
@@ -50,7 +74,7 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
   };
 
   const handleFetchRate = () => {
-    const rate = MOCK_EXCHANGE_RATES[moeda] || 63.75;
+    const rate = officialRate() ?? MOCK_EXCHANGE_RATES[moeda] ?? 63.75;
     setCambiaDia(rate.toFixed(2));
     addToast(
       'info',
@@ -92,7 +116,7 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
   };
 
   const handlePrint = () => {
-    const rec = saveSimulation({
+    saveSimulation({
       simulatorId: 'pagamento-nao-residentes',
       simulatorTitle: t('simuladores:simNonResidentTitle'),
       date: dataPagamento,
@@ -113,7 +137,31 @@ export const PagamentoNaoResidentes: React.FC<Props> = ({ onNavigate }) => {
       status: 'concluido',
       responsibleName: user?.name || t('simuladores:administrator'),
     });
-    openPDFPreview(rec);
+    openPDFPreview(
+      buildSimulationReport({
+        slug: 'pagamento-nao-residentes',
+        title: t('simuladores:simNonResidentTitle'),
+        date: dataPagamento,
+        clientName: prestador || t('simuladores:administrator'),
+        responsibleName: user?.name || t('simuladores:administrator'),
+        currency: 'MZN',
+        meta: [
+          { label: t('simuladores:providerCountryLabel'), value: pais },
+          { label: t('simuladores:invoiceCurrencyLabel'), value: moeda },
+          { label: t('simuladores:invoiceAmountLabel'), value: formatMZN(Number(valorFatura) * Number(cambiaDia)) },
+          { label: t('simuladores:exchangeRateLabel'), value: cambiaDia },
+        ],
+        lines: result.lines.map((l) => ({
+          label: calcLineLabel(t, l.label),
+          formula: calcLineFormula(t, l.formula),
+          value: l.value,
+          kind: l.kind,
+        })),
+        total: result.totalImposto,
+        totalLabel: t('pdf:totalTaxes'),
+        legalBasis: [t('pdf:legalIVA'), t('pdf:legalIRPC'), t('pdf:legalCircular')],
+      })
+    );
   };
 
   return (

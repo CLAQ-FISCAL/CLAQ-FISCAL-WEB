@@ -3,11 +3,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppStateProvider, useAppState } from './context/AppStateContext';
 import { Layout } from './components/layout/Layout';
 import { Login } from './pages/Login';
+import { PlanSelect } from './pages/PlanSelect';
 import { Dashboard } from './pages/Dashboard';
+import { readAudience } from './lib/audience';
+import type { Audience } from './types';
 import { Calendario } from './pages/Calendario';
 import { Relatorios } from './pages/Relatorios';
 import { BibliotecaLegal } from './pages/BibliotecaLegal';
 import { Clientes } from './pages/Clientes';
+import { DataUpload } from './pages/DataUpload';
 import { Configuracoes } from './pages/Configuracoes';
 import { Alertas } from './pages/Alertas';
 import { Newsletter } from './pages/Newsletter';
@@ -49,9 +53,30 @@ const AppContent: React.FC = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  const storedAudience = readAudience();
+
+  const handleAudienceSelect = (_audience: Audience) => {
+    navigate(isAuthenticated ? '/dashboard' : '/login');
+  };
+
+  // Pre-auth onboarding: choose the audience pillar before signing in
+  if (currentPath === '/comecar') {
+    return <PlanSelect onSelect={handleAudienceSelect} />;
+  }
+
   // If not authenticated or explicitly at /login, render Login view
   if (!isAuthenticated || currentPath === '/login') {
-    return <Login onLoginSuccess={() => navigate('/dashboard')} />;
+    // First-time visitors without a stored audience go through the pillar selector
+    if (!isAuthenticated && !storedAudience && currentPath !== '/login') {
+      return <PlanSelect onSelect={handleAudienceSelect} />;
+    }
+    return (
+      <Login
+        audience={storedAudience ?? undefined}
+        onBack={() => navigate('/comecar')}
+        onLoginSuccess={() => navigate('/dashboard')}
+      />
+    );
   }
 
   const renderCurrentPage = () => {
@@ -72,6 +97,7 @@ const AppContent: React.FC = () => {
     if (currentPath === '/relatorios') return <Relatorios onNavigate={navigate} />;
     if (currentPath.startsWith('/biblioteca-legal')) return <BibliotecaLegal />;
     if (currentPath === '/clientes') return <Clientes onNavigate={navigate} />;
+    if (currentPath === '/dados') return <DataUpload />;
     if (currentPath === '/configuracoes') return <Configuracoes />;
     if (currentPath === '/alertas') return <Alertas onNavigate={navigate} />;
     if (currentPath === '/newsletter') return <Newsletter />;

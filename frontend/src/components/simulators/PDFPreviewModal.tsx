@@ -3,10 +3,7 @@ import {
   X,
   Download,
   Printer,
-  Share2,
-  CheckCircle2,
   ShieldCheck,
-  Building
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../context/AppStateContext';
@@ -21,14 +18,12 @@ export const PDFPreviewModal: React.FC = () => {
   if (!isPDFModalOpen || !pdfSimulationData) return null;
 
   const data = pdfSimulationData;
+  const totalLabel = data.totalLabel || t('pdf:totalTaxes');
+  const responsible = data.responsibleName || user?.name || t('pdf:taxAdministrator');
 
   const handleDownloadPDF = () => {
     try {
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
       // Header Brand
       doc.setFillColor(11, 19, 43);
@@ -52,7 +47,7 @@ export const PDFPreviewModal: React.FC = () => {
       doc.setTextColor(15, 23, 42);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
-      doc.text(t('pdf:simulationTitle', { title: data.simulatorTitle.toUpperCase() }), 20, 44);
+      doc.text(t('pdf:simulationTitle', { title: data.title.toUpperCase() }), 20, 44);
 
       // Metadata Box
       doc.setDrawColor(226, 232, 240);
@@ -66,13 +61,10 @@ export const PDFPreviewModal: React.FC = () => {
 
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(15, 23, 42);
-      doc.text(t('pdf:clientCompany', { client: data.clientName }), 26, 64);
-      doc.text(t('pdf:nuit', { nuit: data.nuit || '400889900' }), 26, 70);
-      doc.text(t('pdf:providerCountry', { country: data.providerCountry || t('pdf:unitedStates') }), 26, 76);
-
-doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
-      doc.text(t('pdf:technicalResponsible', { name: data.responsibleName || user?.name || t('pdf:taxAdministrator') }), 110, 70);
-      doc.text(t('pdf:originalCurrency', { amount: data.originalAmount.toLocaleString('pt-MZ'), currency: data.currency }), 110, 76);
+      doc.text(t('pdf:clientCompany', { client: data.clientName || user?.companyName || '—' }), 26, 64);
+      doc.text(t('pdf:nuit', { nuit: data.nuit || user?.companyNuit || '—' }), 26, 70);
+      doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
+      doc.text(t('pdf:technicalResponsible', { name: responsible }), 110, 70);
 
       // Calculation Breakdown Table
       doc.setFont('helvetica', 'bold');
@@ -81,15 +73,8 @@ doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
       doc.text(t('pdf:breakdownTitle'), 20, 92);
 
       let startY = 98;
-      const rows = [
-        [t('pdf:rowMznOfficial'), formatMZN(data.mznAmount)],
-        [t('pdf:rowIncidenceBase'), formatMZN(data.taxBase)],
-        [t('pdf:rowIVAPayOfficial'), formatMZN(data.ivaAmount)],
-        [t('pdf:rowIRPCWithheldOfficial'), formatMZN(data.irpcAmount)]
-      ];
-
       doc.setFontSize(9.5);
-      rows.forEach((r, idx) => {
+      data.lines.forEach((line, idx) => {
         doc.setFillColor(idx % 2 === 0 ? 255 : 248, idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252);
         doc.rect(20, startY, 170, 9, 'F');
         doc.setDrawColor(226, 232, 240);
@@ -97,11 +82,11 @@ doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
 
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(51, 65, 85);
-        doc.text(r[0], 26, startY + 6.5);
+        doc.text(line.label, 26, startY + 6.5);
 
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(15, 23, 42);
-        doc.text(r[1], 184, startY + 6.5, { align: 'right' });
+        doc.text(formatMZN(line.value), 184, startY + 6.5, { align: 'right' });
 
         startY += 9;
       });
@@ -114,8 +99,8 @@ doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(255, 255, 255);
-      doc.text(t('pdf:totalImposts'), 26, startY + 9);
-      doc.text(formatMZN(data.totalTax), 184, startY + 9, { align: 'right' });
+      doc.text(totalLabel, 26, startY + 9);
+      doc.text(formatMZN(data.total), 184, startY + 9, { align: 'right' });
 
       // Legal trace & notes
       startY += 24;
@@ -128,11 +113,13 @@ doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.5);
       doc.setTextColor(71, 85, 105);
-      doc.text(t('pdf:legalIVA'), 20, startY);
-      startY += 5;
-      doc.text(t('pdf:legalIRPC'), 20, startY);
-      startY += 5;
-      doc.text(t('pdf:legalCircular'), 20, startY);
+      const legalLines = data.legalBasis && data.legalBasis.length
+        ? data.legalBasis
+        : [t('pdf:legalIVA'), t('pdf:legalIRPC'), t('pdf:legalCircular')];
+      legalLines.forEach((entry) => {
+        doc.text(entry, 20, startY);
+        startY += 5;
+      });
 
       // Digital Seal & Signature
       startY += 20;
@@ -164,14 +151,9 @@ doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
       doc.text(t('pdf:footerMotto'), 105, 285, { align: 'center' });
 
       // Save file
-      doc.save(`CLAQ_${t('pdf:fileNameSimulation')}_${data.simulatorTitle.replace(/\s+/g, '_')}_${data.clientName.replace(/\s+/g, '_')}.pdf`);
+      doc.save(`CLAQ_${t('pdf:fileNameSimulation')}_${data.title.replace(/\s+/g, '_')}_${(data.clientName || 'CLAQ').replace(/\s+/g, '_')}.pdf`);
 
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.8 }
-      });
-
+      confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
       addToast('success', t('pdf:toastTitle'), t('pdf:toastMessage'));
     } catch (e) {
       console.error(e);
@@ -291,7 +273,7 @@ doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
                     {t('pdf:documentTitle')}
                   </h4>
                   <p style={{ fontSize: '11px', color: '#64748B' }}>
-                    {data.simulatorTitle}
+                    {data.title}
                   </p>
                   <p style={{ fontSize: '10.5px', color: '#94A3B8' }}>
                     Doc ID: CLAQ-MZ-{data.id.toUpperCase()}
@@ -315,16 +297,25 @@ doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
               >
                 <div>
                   <p style={{ color: '#64748B', fontSize: '11px', fontWeight: 600 }}>{t('pdf:clientSectionTitle')}</p>
-                  <p style={{ fontWeight: 700, color: '#0F172A', marginTop: '2px' }}>{data.clientName}</p>
-                  <p style={{ color: '#475569' }}>NUIT: {data.nuit || '400998822'}</p>
-                  <p style={{ color: '#475569' }}>{t('pdf:origin', { origin: data.providerCountry || t('pdf:unitedStates') })}</p>
+                  <p style={{ fontWeight: 700, color: '#0F172A', marginTop: '2px' }}>{data.clientName || user?.companyName || '—'}</p>
+                  <p style={{ color: '#475569' }}>NUIT: {data.nuit || user?.companyNuit || '—'}</p>
                 </div>
                 <div>
-<p style={{ color: '#64748B', fontSize: '11px', fontWeight: 600 }}>{t('pdf:sessionSectionTitle')}</p>
+                  <p style={{ color: '#64748B', fontSize: '11px', fontWeight: 600 }}>{t('pdf:sessionSectionTitle')}</p>
                   <p style={{ fontWeight: 600, color: '#0F172A', marginTop: '2px' }}>{t('pdf:sessionDate', { date: formatDate(data.date) })}</p>
-                  <p style={{ color: '#475569' }}>{t('pdf:responsible', { name: data.responsibleName || user?.name || t('pdf:taxAdministrator') })}</p>
-                  <p style={{ color: '#475569' }}>{t('pdf:exchangeRate', { rate: data.exchangeRate.toFixed(2) })}</p>
+                  <p style={{ color: '#475569' }}>{t('pdf:responsible', { name: responsible })}</p>
                 </div>
+
+                {data.meta && data.meta.length > 0 && (
+                  <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 12px', borderTop: '1px solid #E2E8F0', paddingTop: '10px' }}>
+                    {data.meta.map((item, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+                        <span style={{ color: '#64748B', fontSize: '11.5px' }}>{item.label}</span>
+                        <span style={{ color: '#0F172A', fontWeight: 600, fontSize: '11.5px', textAlign: 'right' }}>{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Calculation Summary Table */}
@@ -334,42 +325,25 @@ doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
 
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', marginBottom: '20px' }}>
                 <tbody>
-                  <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                    <td style={{ padding: '8px 4px', color: '#475569' }}>{t('pdf:rowInvoiceValue')}</td>
-                    <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 600 }}>
-                      {data.originalAmount.toLocaleString('pt-MZ', { minimumFractionDigits: 2 })} {data.currency}
-                    </td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                    <td style={{ padding: '8px 4px', color: '#475569' }}>{t('pdf:rowMznValue')}</td>
-                    <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 600 }}>
-                      {formatMZN(data.mznAmount)}
-                    </td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                    <td style={{ padding: '8px 4px', color: '#475569' }}>{t('pdf:rowCounterValue')}</td>
-                    <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 600 }}>
-                      {formatMZN(data.taxBase)}
-                    </td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                    <td style={{ padding: '8px 4px', color: '#475569' }}>{t('pdf:rowIVAPay')}</td>
-                    <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 600, color: '#2563EB' }}>
-                      {formatMZN(data.ivaAmount)}
-                    </td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                    <td style={{ padding: '8px 4px', color: '#475569' }}>{t('pdf:rowIRPCWithheld')}</td>
-                    <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 600, color: '#2563EB' }}>
-                      {formatMZN(data.irpcAmount)}
-                    </td>
-                  </tr>
+                  {data.lines.map((line, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                      <td style={{ padding: '8px 4px', color: '#475569' }}>
+                        {line.label}
+                        {line.formula && (
+                          <span style={{ display: 'block', fontSize: '10.5px', color: '#94A3B8' }}>{line.formula}</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: line.kind === 'total' ? 800 : 600, color: line.kind === 'total' ? '#1E40AF' : undefined }}>
+                        {formatMZN(line.value)}
+                      </td>
+                    </tr>
+                  ))}
                   <tr style={{ backgroundColor: '#EFF6FF', borderTop: '2px solid #2563EB' }}>
                     <td style={{ padding: '12px 8px', fontWeight: 800, color: '#1E40AF' }}>
-                      {t('pdf:totalTaxes')}
+                      {totalLabel}
                     </td>
                     <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 800, color: '#1E40AF', fontSize: '14px' }}>
-                      {formatMZN(data.totalTax)}
+                      {formatMZN(data.total)}
                     </td>
                   </tr>
                 </tbody>
@@ -377,7 +351,16 @@ doc.text(t('pdf:calculationDate', { date: formatDate(data.date) }), 110, 64);
 
               {/* Legal Notes */}
               <div style={{ backgroundColor: '#F8FAFC', padding: '12px 14px', borderRadius: '6px', fontSize: '11px', color: '#64748B', lineHeight: 1.5, marginBottom: '24px' }}>
-                <p><b>{t('pdf:legalBasisTitle')}</b> {t('pdf:legalBasisBody')}</p>
+                <p><b>{t('pdf:legalBasisTitle')}</b></p>
+                {data.legalBasis && data.legalBasis.length > 0 ? (
+                  <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px' }}>
+                    {data.legalBasis.map((entry, i) => (
+                      <li key={i} style={{ marginTop: '2px' }}>{entry}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p style={{ marginTop: '4px' }}>{t('pdf:legalBasisBody')}</p>
+                )}
                 <p style={{ marginTop: '4px' }}>{t('pdf:legalBasisGenerated')}</p>
               </div>
             </div>

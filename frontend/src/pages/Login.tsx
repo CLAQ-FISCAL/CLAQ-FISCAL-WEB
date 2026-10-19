@@ -10,6 +10,9 @@ import {
   ShieldCheck,
   Headphones,
   ArrowRight,
+  ArrowLeft,
+  Building2,
+  Briefcase,
   Check,
   Scale,
   Sparkles,
@@ -19,12 +22,15 @@ import { useTranslation } from 'react-i18next';
 import { ClaqLogo } from '../components/common/ClaqLogo';
 import { useAppState } from '../context/AppStateContext';
 import { LanguageToggle } from '../i18n/LanguageToggle';
+import type { Audience } from '../types';
 
 interface LoginProps {
   onLoginSuccess: () => void;
+  audience?: Audience;
+  onBack?: () => void;
 }
 
-export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
+export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onBack }) => {
   const { login, registerUser } = useAppState();
   const { t } = useTranslation();
 
@@ -505,6 +511,71 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             border: '1px solid #F1F5F9'
           }}
         >
+          {/* Audience context row: back to pillar selector + selected profile */}
+          {(onBack || audience) && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '10px',
+                marginBottom: '18px'
+              }}
+            >
+              {onBack ? (
+                <button
+                  type="button"
+                  onClick={onBack}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    color: '#64748B',
+                    fontSize: '12.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-sans)'
+                  }}
+                >
+                  <ArrowLeft size={14} />
+                  {t('onboarding:back')}
+                </button>
+              ) : (
+                <span />
+              )}
+
+              {audience && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    fontSize: '11.5px',
+                    fontWeight: 800,
+                    letterSpacing: '0.02em',
+                    color: '#78350F',
+                    backgroundColor: '#FEF3C7',
+                    border: '1px solid #FCD34D',
+                    borderRadius: '999px',
+                    padding: '4px 10px'
+                  }}
+                >
+                  {audience === 'empresa' ? (
+                    <Building2 size={13} />
+                  ) : (
+                    <Briefcase size={13} />
+                  )}
+                  {audience === 'empresa'
+                    ? t('onboarding:audienceCompany')
+                    : t('onboarding:audienceAccountant')}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Lock Badge Header */}
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
             <div

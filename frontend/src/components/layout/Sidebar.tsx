@@ -5,6 +5,7 @@ import {
   Bell,
   Calculator,
   FileSpreadsheet,
+  UploadCloud,
   BookOpen,
   Users,
   Mail,
@@ -17,6 +18,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { ClaqLogo } from '../common/ClaqLogo';
 import { useAppState } from '../../context/AppStateContext';
+import { useAudience } from '../../hooks/useAudience';
 
 interface SidebarProps {
   currentPath: string;
@@ -31,6 +33,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { t } = useTranslation();
   const { unreadAlertsCount, setIsAIAssistantOpen } = useAppState();
+  const { isCompany } = useAudience();
 
   const navItems = [
     { path: '/dashboard', label: t('sidebar:dashboard'), icon: LayoutDashboard },
@@ -39,11 +42,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { path: '/biblioteca-legal', label: t('sidebar:biblioteca'), icon: BookOpen },
     { path: '/simuladores', label: t('sidebar:simuladores'), icon: Calculator },
     { path: '/relatorios', label: t('sidebar:relatorios'), icon: FileSpreadsheet },
-    { path: '/clientes', label: t('sidebar:clientes'), icon: Users },
+    { path: '/clientes', label: t('sidebar:clientes'), icon: Users, accountantOnly: true },
+    { path: '/dados', label: t('sidebar:dados'), icon: UploadCloud },
     { path: '/newsletter', label: t('sidebar:newsletter'), icon: Mail },
     { path: '/configuracoes', label: t('sidebar:configuracoes'), icon: Settings },
     { path: '/suporte', label: t('sidebar:suporte'), icon: HelpCircle }
-  ];
+  ].filter(item => !(item.accountantOnly && isCompany));
 
   return (
     <aside
