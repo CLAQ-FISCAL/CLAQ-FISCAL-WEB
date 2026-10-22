@@ -191,6 +191,10 @@ export interface PlanDto {
   family: PlanFamily;
   description?: string;
   priceMzn?: number | null;
+  priceMznMonthly?: number | null;
+  priceMznAnnual?: number | null;
+  trialDays?: number;
+  customPricing?: boolean;
   limits: PlanLimits;
 }
 

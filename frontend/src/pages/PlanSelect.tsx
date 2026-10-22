@@ -7,6 +7,7 @@ import {
   Check,
   Loader2,
   RefreshCw,
+  Sparkles,
   TrendingUp
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,16 @@ const humanizeFeature = (feature: string): string =>
     .replace(/_/g, ' ')
     .replace(/\b\w/g, c => c.toUpperCase());
 
+const formatMzn = (value: number): string => `${new Intl.NumberFormat('pt-MZ').format(value)} MZN`;
+
+/** Annual saving as a whole percentage, e.g. 15 for a 15% discount. */
+const annualDiscountPercent = (monthly: number | null, annual: number | null): number | null => {
+  if (!monthly || !annual) return null;
+  const full = monthly * 12;
+  if (full <= 0 || annual >= full) return null;
+  return Math.round((1 - annual / full) * 100);
+};
+
 const PlanCard: React.FC<{
   plan: PlanDto;
   selected?: boolean;
@@ -36,7 +47,12 @@ const PlanCard: React.FC<{
 }> = ({ plan, selected, recommended, onSelect }) => {
   const { t } = useTranslation();
   const unlimited = plan.limits.maxCompanies >= UNLIMITED_THRESHOLD;
-  const isFree = !plan.priceMzn;
+  const monthly = plan.priceMznMonthly ?? plan.priceMzn ?? null;
+  const annual = plan.priceMznAnnual ?? null;
+  const trialDays = plan.trialDays ?? 0;
+  const customPricing = Boolean(plan.customPricing);
+  const discountPercent = annualDiscountPercent(monthly, annual);
+  const isFree = !monthly;
   const interactive = typeof onSelect === 'function';
 
   return (
@@ -83,12 +99,49 @@ const PlanCard: React.FC<{
         )}
       </div>
 
-      <div style={{ marginTop: '8px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+      <div style={{ marginTop: '8px', display: 'flex', alignItems: 'baseline', gap: '4px', flexWrap: 'wrap' }}>
+        {customPricing && (
+          <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 600 }}>{t('onboarding:startingFrom')}</span>
+        )}
         <span style={{ fontSize: '22px', fontWeight: 800, color: '#0F172A' }}>
-          {isFree ? t('onboarding:free') : `${new Intl.NumberFormat('pt-MZ').format(plan.priceMzn as number)} MZN`}
+          {isFree ? t('onboarding:free') : formatMzn(monthly as number)}
         </span>
         {!isFree && <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 600 }}>{t('onboarding:perMonth')}</span>}
       </div>
+
+      {trialDays > 0 && (
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            marginTop: '8px',
+            fontSize: '11px',
+            fontWeight: 800,
+            color: '#047857',
+            backgroundColor: '#D1FAE5',
+            border: '1px solid #6EE7B7',
+            borderRadius: '999px',
+            padding: '3px 9px'
+          }}
+        >
+          <Sparkles size={12} />
+          {t('onboarding:trialDays', { days: trialDays })}
+        </span>
+      )}
+
+      {annual !== null && (
+        <div style={{ marginTop: '6px', fontSize: '12.5px', color: '#334155', fontWeight: 600 }}>
+          {t('onboarding:annualPrice')}: <strong>{formatMzn(annual)}</strong>
+          {discountPercent !== null && (
+            <span style={{ color: '#047857', fontWeight: 800 }}> {t('onboarding:annualDiscount', { percent: discountPercent })}</span>
+          )}
+        </div>
+      )}
+
+      {customPricing && (
+        <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#64748B' }}>{t('onboarding:customPricing')}</p>
+      )}
 
       {plan.description && (
         <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#64748B', lineHeight: 1.5 }}>
