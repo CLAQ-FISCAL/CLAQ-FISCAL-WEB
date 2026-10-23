@@ -152,7 +152,7 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
               style={{ fontSize: '13px', padding: '9px 18px' }}
             >
               <Plus size={15} />
-              <span>{t('clientes:registerFirstClient')}</span>
+              <span>+ {t('clientes:registerFirstClient')}</span>
             </button>
           </div>
         ) : (

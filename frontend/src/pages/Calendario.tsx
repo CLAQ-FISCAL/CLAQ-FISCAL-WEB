@@ -157,7 +157,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
             style={{ padding: '9px 16px', fontSize: '13px' }}
           >
             <Plus size={15} />
-            <span>{t('calendar:newObligation')}</span>
+            <span>+ {t('calendar:newObligation')}</span>
           </button>
         </div>
       </div>

@@ -15,9 +15,6 @@ import { useTranslation } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
 import { useCompanies, useUploadBatch, useUploads, useStageUpload, useDecideUploadRows, useApplyUpload } from '../hooks/useUploads';
 import { formatDate, formatMZN } from '../utils/formatters';
-import { ApiClient } from '../api/client';
-import { useQueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS } from '../hooks/useFiscalQueries';
 import type {
   ApplyResult,
   MatchStateName,
@@ -72,33 +69,6 @@ export const DataUpload: React.FC = () => {
 
   const companiesQuery = useCompanies();
   const uploadsQuery = useUploads();
-  const queryClient = useQueryClient();
-  const [newCompanyName, setNewCompanyName] = useState('');
-  const [newCompanyRevenue, setNewCompanyRevenue] = useState('');
-  const [creatingCompany, setCreatingCompany] = useState(false);
-
-  const handleCreateCompany = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCompanyName.trim()) {
-      setErrorMsg(t('uploads:companyNameRequired'));
-      return;
-    }
-    setCreatingCompany(true);
-    try {
-      const created = await ApiClient.createCompany({ legalName: newCompanyName, annualRevenueMzn: newCompanyRevenue ? Number(newCompanyRevenue) : undefined });
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COMPANIES });
-      setCompanyId(created.id);
-      setNewCompanyName('');
-      setNewCompanyRevenue('');
-      addToast('success', t('uploads:toastCompanyCreatedTitle'), t('uploads:toastCompanyCreatedMsg', { name: created.legalName }));
-    } catch (err) {
-      const msg = errMessage(err, t('uploads:toastErrorMsg'));
-      setErrorMsg(msg);
-      addToast('error', t('uploads:toastErrorTitle'), msg);
-    } finally {
-      setCreatingCompany(false);
-    }
-  };
 
   const [companyId, setCompanyId] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -130,9 +100,6 @@ export const DataUpload: React.FC = () => {
   const clearSelection = () => {
     setSelectedBatchId(null);
     setApplyResult(null);
-    setFile(null);
-    setErrorMsg(null);
-    if (inputRef.current) inputRef.current.value = '';
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -255,8 +222,8 @@ export const DataUpload: React.FC = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 1fr) minmax(220px, 1fr) auto', gap: '14px', alignItems: 'end' }}>
           <div className="form-group">
             <label className="form-label">{t('uploads:companyLabel')}</label>
-            <select className="form-control" value={companyId} onChange={(e) => setCompanyId(e.target.value)} disabled={companiesQuery.isLoading}>
-              <option value="">{companiesQuery.isLoading ? t('uploads:loadingCompanies') : t('uploads:companyPlaceholder')}</option>
+            <select className="form-control" value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
+              <option value="">{t('uploads:companyPlaceholder')}</option>
               {companies.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.legalName}
@@ -279,7 +246,7 @@ export const DataUpload: React.FC = () => {
 
           <button
             onClick={handleAnalyze}
-            disabled={stageMutation.isPending || !companyId || !file || (!!file && file.size > MAX_UPLOAD_BYTES)}
+            disabled={stageMutation.isPending}
             className="btn btn-primary-blue"
             style={{ fontSize: '13px', height: '40px' }}
           >
@@ -287,24 +254,6 @@ export const DataUpload: React.FC = () => {
             <span>{stageMutation.isPending ? t('uploads:analyzing') : t('uploads:analyzeCta')}</span>
           </button>
         </div>
-
-        {file && file.size <= MAX_UPLOAD_BYTES && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px 12px', backgroundColor: 'var(--slate-50)', borderRadius: '8px', fontSize: '12.5px', color: 'var(--slate-700)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-              <FileSpreadsheet size={15} color="var(--slate-500)" />
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
-              <span style={{ color: 'var(--slate-400)' }}>({(file.size / 1024).toFixed(1)} KB)</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => { setFile(null); if (inputRef.current) inputRef.current.value = ''; }}
-              className="btn btn-ghost btn-sm"
-              style={{ padding: '4px 8px', fontSize: '11.5px' }}
-            >
-              {t('uploads:clearFile')}
-            </button>
-          </div>
-        )}
 
         {file && file.size > MAX_UPLOAD_BYTES && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--red-500)', fontSize: '12.5px' }}>
@@ -321,21 +270,12 @@ export const DataUpload: React.FC = () => {
         )}
 
         {companiesQuery.isSuccess && companies.length === 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px 14px', backgroundColor: 'var(--slate-50)', borderRadius: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Building2 size={16} color="var(--slate-400)" />
-              <div>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--slate-700)' }}>{t('uploads:noCompanies')}</span>
-                <span style={{ fontSize: '12.5px', color: 'var(--slate-500)', display: 'block' }}>{t('uploads:noCompaniesHint')}</span>
-              </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', backgroundColor: 'var(--slate-50)', borderRadius: '10px' }}>
+            <Building2 size={16} color="var(--slate-400)" />
+            <div>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--slate-700)' }}>{t('uploads:noCompanies')}</span>
+              <span style={{ fontSize: '12.5px', color: 'var(--slate-500)', display: 'block' }}>{t('uploads:noCompaniesHint')}</span>
             </div>
-            <form onSubmit={handleCreateCompany} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <input className="form-control" aria-label={t('uploads:companyNameLabel')} placeholder={t('uploads:companyNamePlaceholder')} value={newCompanyName} onChange={(e) => setNewCompanyName(e.target.value)} style={{ flex: '1 1 220px' }} />
-              <input className="form-control" aria-label={t('uploads:annualRevenueLabel')} placeholder={t('uploads:annualRevenuePlaceholder')} value={newCompanyRevenue} onChange={(e) => setNewCompanyRevenue(e.target.value)} style={{ flex: '1 1 160px' }} />
-              <button type="submit" className="btn btn-primary-blue btn-sm" disabled={creatingCompany}>
-                {creatingCompany ? t('uploads:creatingCompany') : t('uploads:createCompanyCta')}
-              </button>
-            </form>
           </div>
         )}
       </div>

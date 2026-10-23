@@ -1,6 +1,7 @@
 {
   "pageTitle": "Data Import",
   "pageSubtitle": "Upload the client obligation sheet, reconcile it against approved rules and apply the decisions.",
+
   "uploadCardTitle": "Upload CSV file",
   "uploadCardDesc": "The file is reconciled against approved obligation templates. Nothing is written until you confirm.",
   "companyLabel": "Company",
@@ -14,6 +15,7 @@
   "analyzeCta": "Analyze CSV",
   "analyzing": "Analyzing…",
   "duplicateWarning": "This file was already uploaded. Loading the existing batch.",
+
   "historyTitle": "Recent uploads",
   "historyEmpty": "No uploads yet",
   "historyEmptyDesc": "Files you upload appear here for review and follow-up.",
@@ -23,17 +25,20 @@
   "colValid": "Valid",
   "colExceptions": "Exceptions",
   "colCreated": "Uploaded",
+
   "summaryRows": "Rows",
   "summaryValid": "Matched",
   "summaryExceptions": "Exceptions",
   "summaryDuplicate": "Batch already exists (no changes)",
   "newUploadCta": "New upload",
+
   "reviewTitle": "Exception review",
   "reviewDesc": "Every flagged row needs a human decision before it can be applied.",
   "noExceptions": "No exceptions — fully reconciled",
   "noExceptionsDesc": "All rows were resolved automatically. You can apply the batch.",
   "allResolved": "All exceptions were decided. You can apply the batch.",
   "pendingCount": "{{count}} pending",
+
   "colTitle": "Obligation",
   "colDueDate": "Due date",
   "colAmount": "Amount (file)",
@@ -42,26 +47,31 @@
   "colMatchState": "State",
   "colDecision": "Decision",
   "colErrors": "Errors",
+
   "bulkTitle": "Bulk actions",
   "bulkHint": "Apply one decision to every row of a state.",
   "bulkApply": "Apply to all",
   "bulkNone": "Nothing pending",
+
   "applyCta": "Apply batch",
   "applying": "Applying…",
   "applyBlocked": "Resolve every exception before applying.",
   "applyAlreadyApplied": "This batch has already been applied.",
+
   "resultTitle": "Apply result",
   "resultUpdated": "Obligations updated",
   "resultCreated": "Obligations generated",
   "resultTemplates": "Templates created",
   "resultSkipped": "Rows skipped",
   "resultNoop": "Nothing to apply (batch already applied or no decisions).",
+
   "matchStateMATCHED": "Matched",
   "matchStateAMOUNT_MISMATCH": "Amount mismatch",
   "matchStateUNMATCHED": "Unmatched",
   "matchStateNOT_APPLICABLE": "Not applicable",
   "matchStateDUPLICATE": "Duplicate",
   "matchStateINVALID": "Invalid",
+
   "decisionADOPT": "Adopt",
   "decisionTRUST_RULE": "Trust rule",
   "decisionTRUST_UPLOAD": "Trust upload",
@@ -69,9 +79,11 @@
   "decisionCREATE_TEMPLATE": "Create template",
   "decisionREJECT": "Reject",
   "decisionPENDING": "Pending",
+
   "statusRECONCILED": "Reconciled",
   "statusDECIDED": "Decided",
   "statusAPPLIED": "Applied",
+
   "toastStagedTitle": "File analyzed",
   "toastStagedMsg": "{{count}} rows reconciled, {{exceptions}} exceptions.",
   "toastDecidedTitle": "Decision recorded",
@@ -79,16 +91,5 @@
   "toastAppliedTitle": "Batch applied",
   "toastAppliedMsg": "{{updated}} obligations updated, {{created}} generated.",
   "toastErrorTitle": "Import failed",
-  "toastErrorMsg": "The operation could not be completed. Please try again.",
-  "loadingCompanies": "Loading companies…",
-  "companyNameRequired": "Company name is required.",
-  "companyNameLabel": "Company legal name",
-  "companyNamePlaceholder": "Company legal name",
-  "annualRevenueLabel": "Annual revenue (MZN)",
-  "annualRevenuePlaceholder": "Annual revenue (MZN)",
-  "creatingCompany": "Creating…",
-  "createCompanyCta": "Create company",
-  "clearFile": "Clear",
-  "toastCompanyCreatedTitle": "Company created",
-  "toastCompanyCreatedMsg": "{{name}} is ready for import."
+  "toastErrorMsg": "The operation could not be completed. Please try again."
 }
