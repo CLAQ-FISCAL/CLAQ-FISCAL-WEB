@@ -230,7 +230,7 @@ export const PlanSelect: React.FC<PlanSelectProps> = ({ onSelect }) => {
   };
 
   const confirm = (planCode: string | null) => {
-    if (!audience) return;
+    if (!audience || !planCode) return;
     saveAudience(audience);
     saveIntentPlan(planCode);
     onSelect(audience, planCode);
@@ -486,6 +486,7 @@ export const PlanSelect: React.FC<PlanSelectProps> = ({ onSelect }) => {
             <button
               type="button"
               onClick={() => confirm(selectedPlan)}
+              disabled={!selectedPlan}
               style={{
                 marginTop: '26px',
                 width: '100%',
@@ -500,7 +501,8 @@ export const PlanSelect: React.FC<PlanSelectProps> = ({ onSelect }) => {
                 color: '#FFFFFF',
                 fontSize: '14.5px',
                 fontWeight: 800,
-                cursor: 'pointer',
+                cursor: selectedPlan ? 'pointer' : 'not-allowed',
+                opacity: selectedPlan ? 1 : 0.55,
                 fontFamily: 'var(--font-sans)'
               }}
             >
@@ -577,6 +579,7 @@ export const PlanSelect: React.FC<PlanSelectProps> = ({ onSelect }) => {
             <button
               type="button"
               onClick={() => confirm(selectedPlan)}
+              disabled={!selectedPlan}
               style={{
                 marginTop: '26px',
                 width: '100%',
@@ -591,7 +594,8 @@ export const PlanSelect: React.FC<PlanSelectProps> = ({ onSelect }) => {
                 color: '#FFFFFF',
                 fontSize: '14.5px',
                 fontWeight: 800,
-                cursor: 'pointer',
+                cursor: selectedPlan ? 'pointer' : 'not-allowed',
+                opacity: selectedPlan ? 1 : 0.55,
                 fontFamily: 'var(--font-sans)'
               }}
             >

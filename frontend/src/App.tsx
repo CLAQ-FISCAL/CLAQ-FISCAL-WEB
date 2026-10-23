@@ -4,6 +4,7 @@ import { AppStateProvider, useAppState } from './context/AppStateContext';
 import { Layout } from './components/layout/Layout';
 import { Login } from './pages/Login';
 import { PlanSelect } from './pages/PlanSelect';
+import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { readAudience } from './lib/audience';
 import type { Audience } from './types';
@@ -56,12 +57,16 @@ const AppContent: React.FC = () => {
   const storedAudience = readAudience();
 
   const handleAudienceSelect = (_audience: Audience) => {
-    navigate(isAuthenticated ? '/dashboard' : '/login');
+    navigate(isAuthenticated ? '/dashboard' : '/criar-conta');
   };
 
   // Pre-auth onboarding: choose the audience pillar before signing in
   if (currentPath === '/comecar') {
     return <PlanSelect onSelect={handleAudienceSelect} />;
+  }
+
+  if (currentPath === '/criar-conta') {
+    return <Register onBack={() => navigate('/comecar')} onRegistrationComplete={() => navigate('/login')} />;
   }
 
   // If not authenticated or explicitly at /login, render Login view
@@ -74,6 +79,7 @@ const AppContent: React.FC = () => {
       <Login
         audience={storedAudience ?? undefined}
         onBack={() => navigate('/comecar')}
+        onCreateAccount={() => navigate('/comecar')}
         onLoginSuccess={() => navigate('/dashboard')}
       />
     );

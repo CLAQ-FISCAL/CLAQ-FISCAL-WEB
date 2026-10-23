@@ -47,7 +47,7 @@ interface AppStateContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   login: (email: string, password?: string) => Promise<boolean> | boolean;
-  registerUser: (userData: Partial<UserProfile> & { password?: string }) => Promise<void> | void;
+  registerUser: (userData: Partial<UserProfile> & { password?: string }, options?: { signInAfterRegister?: boolean }) => Promise<boolean>;
   logout: () => void;
   updateUser: (data: Partial<UserProfile>) => void;
 
@@ -585,7 +585,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return false;
   };
 
-  const registerUser = async (userData: Partial<UserProfile> & { password?: string }) => {
+  const registerUser = async (userData: Partial<UserProfile> & { password?: string }, options: { signInAfterRegister?: boolean } = {}) => {
+    const signInAfterRegister = options.signInAfterRegister ?? true;
     const email = (userData.email || '').trim().toLowerCase();
     const password = userData.password || '';
     // Phase 1: Try Cognito signUp
@@ -625,6 +626,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             renewalDate: '31/12/2026'
           };
           localStorage.setItem('claq_pending_user', JSON.stringify(pendingUser));
+          if (!signInAfterRegister) return true;
           // Try auto sign-in if allowed (some pools allow autoSignIn)
           try {
             const session = await fetchAuthSession();
@@ -636,25 +638,27 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 localStorage.setItem('claq_user', JSON.stringify(cognitoUser));
                 localStorage.setItem('claq_is_auth', 'true');
                 addToast('success', i18n.t('state:accountCreatedTitle'), i18n.t('state:accountCreatedMsg', { companyName: cognitoUser.companyName }));
-                return;
+                return true;
               }
             }
           } catch {
             // ignore
           }
           // If not auto-signed in, inform user to login after confirmation
-          return;
+          return true;
         }
         if (signUpResult.nextStep?.signUpStep === 'DONE') {
           // Auto-confirmed — sign in immediately
-          return await login(email, password).then(() => {});
+          if (signInAfterRegister) return (await login(email, password)) === true;
+          addToast('success', i18n.t('state:accountCreatedTitle'), i18n.t('state:accountCreatedMsg', { companyName: userData.companyName || i18n.t('state:companyNewFallback') }));
+          return true;
         }
       }
     } catch (e: any) {
       const name = e?.name || '';
       if (name.includes('UsernameExistsException')) {
         addToast('error', i18n.t('state:emailExistsTitle'), i18n.t('state:emailExistsMsg'));
-        return;
+        return false;
       }
       console.warn('Cognito signUp failed, trying legacy backend:', e);
     }
@@ -669,13 +673,15 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }>('/auth/register', userData);
 
       if (res && res.user) {
-        setUser(res.user);
-        setIsAuthenticated(true);
-        localStorage.setItem('claq_user', JSON.stringify(res.user));
-        localStorage.setItem('claq_is_auth', 'true');
-        if (res.token) {
-          localStorage.setItem('claq_token', res.token);
-          localStorage.setItem('claq_cognito_idToken', res.token);
+        if (signInAfterRegister) {
+          setUser(res.user);
+          setIsAuthenticated(true);
+          localStorage.setItem('claq_user', JSON.stringify(res.user));
+          localStorage.setItem('claq_is_auth', 'true');
+          if (res.token) {
+            localStorage.setItem('claq_token', res.token);
+            localStorage.setItem('claq_cognito_idToken', res.token);
+          }
         }
         addToast('success', i18n.t('state:accountCreatedTitle'), i18n.t('state:accountCreatedMsg', { companyName: res.user.companyName }));
         setObligations([]);
@@ -684,7 +690,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         localStorage.removeItem('claq_obligations');
         localStorage.removeItem('claq_clients');
         localStorage.removeItem('claq_simulations');
-        return;
+        return true;
       }
     } catch (e: any) {
       const msg = e?.message || '';
@@ -695,7 +701,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
       setIsAuthenticated(false);
       setUser(null);
+      return false;
     }
+    return false;
   };
 
   const logout = async () => {

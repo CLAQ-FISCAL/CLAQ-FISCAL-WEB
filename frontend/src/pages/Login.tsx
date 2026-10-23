@@ -22,15 +22,17 @@ import { useTranslation } from 'react-i18next';
 import { ClaqLogo } from '../components/common/ClaqLogo';
 import { useAppState } from '../context/AppStateContext';
 import { LanguageToggle } from '../i18n/LanguageToggle';
+import { saveAudience } from '../lib/audience';
 import type { Audience } from '../types';
 
 interface LoginProps {
   onLoginSuccess: () => void;
   audience?: Audience;
+  onCreateAccount?: () => void;
   onBack?: () => void;
 }
 
-export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onBack }) => {
+export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onCreateAccount, onBack }) => {
   const { login, registerUser } = useAppState();
   const { t } = useTranslation();
 
@@ -40,6 +42,16 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onBack }
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedAudience, setSelectedAudience] = useState<Audience>(audience ?? 'empresa');
+
+  React.useEffect(() => {
+    if (audience) setSelectedAudience(audience);
+  }, [audience]);
+
+  const selectAudience = (next: Audience) => {
+    setSelectedAudience(next);
+    saveAudience(next);
+  };
 
   // Register Modal State (Preserving full registration capability)
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -547,7 +559,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onBack }
                 <span />
               )}
 
-              {audience && (
+              {selectedAudience && (
                 <span
                   style={{
                     display: 'inline-flex',
@@ -563,12 +575,12 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onBack }
                     padding: '4px 10px'
                   }}
                 >
-                  {audience === 'empresa' ? (
+                  {selectedAudience === 'empresa' ? (
                     <Building2 size={13} />
                   ) : (
                     <Briefcase size={13} />
                   )}
-                  {audience === 'empresa'
+                  {selectedAudience === 'empresa'
                     ? t('onboarding:audienceCompany')
                     : t('onboarding:audienceAccountant')}
                 </span>
@@ -619,6 +631,31 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onBack }
             >
               {t('login:loginSubtitle')}
             </p>
+          </div>
+
+          <div role="group" aria-label={t('login:accountType')} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '22px' }}>
+            {(['empresa', 'contabilidade'] as const).map(option => {
+              const selected = selectedAudience === option;
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => selectAudience(option)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                    padding: '11px 8px', borderRadius: '11px', cursor: 'pointer',
+                    border: selected ? '1.5px solid #F59E0B' : '1.5px solid #E2E8F0',
+                    color: selected ? '#78350F' : '#475569',
+                    background: selected ? '#FFFBEB' : '#FFFFFF',
+                    fontWeight: 700, fontSize: '13px', fontFamily: 'var(--font-sans)'
+                  }}
+                >
+                  {option === 'empresa' ? <Building2 size={16} /> : <Briefcase size={16} />}
+                  {option === 'empresa' ? t('onboarding:audienceCompany') : t('onboarding:audienceAccountant')}
+                </button>
+              );
+            })}
           </div>
 
           {/* Login Form */}
@@ -994,7 +1031,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onBack }
               {t('login:noAccount')}{' '}
               <button
                 type="button"
-                onClick={() => setShowRegisterModal(true)}
+                onClick={() => onCreateAccount ? onCreateAccount() : setShowRegisterModal(true)}
                 style={{
                   background: 'none',
                   border: 'none',
