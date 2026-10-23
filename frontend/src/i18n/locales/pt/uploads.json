@@ -1,7 +1,6 @@
 {
   "pageTitle": "Importação de Dados",
   "pageSubtitle": "Carregue a folha de obrigações do cliente, reconcilie com as regras aprovadas e aplique as decisões.",
-
   "uploadCardTitle": "Carregar ficheiro CSV",
   "uploadCardDesc": "O ficheiro é reconciliado contra os templates de obrigações aprovados. Nada é escrito até confirmar.",
   "companyLabel": "Empresa",
@@ -15,7 +14,6 @@
   "analyzeCta": "Analisar CSV",
   "analyzing": "A analisar…",
   "duplicateWarning": "Este ficheiro já tinha sido carregado. A carregar o lote existente.",
-
   "historyTitle": "Carregamentos recentes",
   "historyEmpty": "Ainda não há carregamentos",
   "historyEmptyDesc": "Os ficheiros que carregar aparecem aqui para consulta e revisão.",
@@ -25,20 +23,17 @@
   "colValid": "Válidas",
   "colExceptions": "Exceções",
   "colCreated": "Carregado",
-
   "summaryRows": "Linhas",
   "summaryValid": "Correspondidas",
   "summaryExceptions": "Exceções",
   "summaryDuplicate": "Lote já existente (nenhuma alteração)",
   "newUploadCta": "Novo carregamento",
-
   "reviewTitle": "Revisão das exceções",
   "reviewDesc": "Cada linha sinalizada precisa de uma decisão humana antes de aplicar.",
   "noExceptions": "Sem exceções — tudo reconciliado",
   "noExceptionsDesc": "Todas as linhas foram resolvidas automaticamente. Pode aplicar o lote.",
   "allResolved": "Todas as exceções foram decididas. Pode aplicar o lote.",
   "pendingCount": "{{count}} por decidir",
-
   "colTitle": "Obrigação",
   "colDueDate": "Vencimento",
   "colAmount": "Valor (ficheiro)",
@@ -47,31 +42,26 @@
   "colMatchState": "Estado",
   "colDecision": "Decisão",
   "colErrors": "Erros",
-
   "bulkTitle": "Ações em massa",
   "bulkHint": "Aplicar uma decisão a todas as linhas de um estado.",
   "bulkApply": "Aplicar a todas",
   "bulkNone": "Sem pendentes",
-
   "applyCta": "Aplicar lote",
   "applying": "A aplicar…",
   "applyBlocked": "Resolva todas as exceções antes de aplicar.",
   "applyAlreadyApplied": "Este lote já foi aplicado.",
-
   "resultTitle": "Resultado da aplicação",
   "resultUpdated": "Obrigações atualizadas",
   "resultCreated": "Obrigações geradas",
   "resultTemplates": "Templates criados",
   "resultSkipped": "Linhas ignoradas",
   "resultNoop": "Nada a aplicar (lote já aplicado ou sem decisões).",
-
   "matchStateMATCHED": "Correspondido",
   "matchStateAMOUNT_MISMATCH": "Valor divergente",
   "matchStateUNMATCHED": "Não correspondido",
   "matchStateNOT_APPLICABLE": "Não aplicável",
   "matchStateDUPLICATE": "Duplicado",
   "matchStateINVALID": "Inválido",
-
   "decisionADOPT": "Adotar",
   "decisionTRUST_RULE": "Confiar na regra",
   "decisionTRUST_UPLOAD": "Confiar no ficheiro",
@@ -79,11 +69,9 @@
   "decisionCREATE_TEMPLATE": "Criar template",
   "decisionREJECT": "Rejeitar",
   "decisionPENDING": "Por decidir",
-
   "statusRECONCILED": "Reconciliado",
   "statusDECIDED": "Decidido",
   "statusAPPLIED": "Aplicado",
-
   "toastStagedTitle": "Ficheiro analisado",
   "toastStagedMsg": "{{count}} linhas reconciliadas, {{exceptions}} exceções.",
   "toastDecidedTitle": "Decisão registada",
@@ -91,5 +79,16 @@
   "toastAppliedTitle": "Lote aplicado",
   "toastAppliedMsg": "{{updated}} obrigações atualizadas, {{created}} geradas.",
   "toastErrorTitle": "Falha na importação",
-  "toastErrorMsg": "Não foi possível concluir a operação. Tente novamente."
+  "toastErrorMsg": "Não foi possível concluir a operação. Tente novamente.",
+  "loadingCompanies": "A carregar empresas…",
+  "companyNameRequired": "O nome da empresa é obrigatório.",
+  "companyNameLabel": "Nome legal da empresa",
+  "companyNamePlaceholder": "Nome legal da empresa",
+  "annualRevenueLabel": "Receita anual (MZN)",
+  "annualRevenuePlaceholder": "Receita anual (MZN)",
+  "creatingCompany": "A criar…",
+  "createCompanyCta": "Criar empresa",
+  "clearFile": "Limpar",
+  "toastCompanyCreatedTitle": "Empresa criada",
+  "toastCompanyCreatedMsg": "{{name}} está pronta para importação."
 }

@@ -221,4 +221,8 @@ export class ApiClient {
   public static applyUpload(id: string): Promise<ApplyResult> {
     return this.post<ApplyResult>(`/uploads/${encodeURIComponent(id)}/apply`, {});
   }
+
+  public static createCompany(body: { legalName: string; nuit?: string; municipality?: string; taxRegime?: string; annualRevenueMzn?: number }): Promise<BackendCompany> {
+    return this.post<BackendCompany>('/companies', body);
+  }
 }

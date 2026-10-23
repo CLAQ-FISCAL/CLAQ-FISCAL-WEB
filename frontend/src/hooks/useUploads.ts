@@ -70,6 +70,9 @@ export function useDecideUploadRows(uploadId: string | null) {
     mutationFn: (body) => ApiClient.decideUploadRows(uploadId as string, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.UPLOADS });
+      if (uploadId) {
+        queryClient.refetchQueries({ queryKey: [...QUERY_KEYS.UPLOADS, uploadId] });
+      }
     }
   });
 }
@@ -81,6 +84,9 @@ export function useApplyUpload(uploadId: string | null) {
     mutationFn: () => ApiClient.applyUpload(uploadId as string),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.UPLOADS });
+      if (uploadId) {
+        queryClient.refetchQueries({ queryKey: [...QUERY_KEYS.UPLOADS, uploadId] });
+      }
     }
   });
 }

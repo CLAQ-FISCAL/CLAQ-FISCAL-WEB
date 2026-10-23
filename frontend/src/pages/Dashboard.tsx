@@ -340,7 +340,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               style={{ padding: '6px 12px', fontSize: '12px' }}
             >
               <Plus size={14} />
-              <span>+ {t('dashboard:newObligation')}</span>
+              <span>{t('dashboard:newObligation')}</span>
             </button>
           </div>
         </div>
