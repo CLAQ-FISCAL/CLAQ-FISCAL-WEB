@@ -200,9 +200,6 @@ export class ClaqStack extends Stack {
     // Declared explicitly so these paths are not captured by the JWT-protected catch-all below.
     api.addRoutes({ path: '/v1/plans', methods: [apigwv2.HttpMethod.GET], integration: new integrations.HttpLambdaIntegration('PlansIntegration', apiFn) });
     api.addRoutes({ path: '/v1/plans/suggest', methods: [apigwv2.HttpMethod.GET], integration: new integrations.HttpLambdaIntegration('PlansSuggestIntegration', apiFn) });
-    // Browsers send OPTIONS before cross-origin requests with JSON or bearer headers.
-    // Keep preflight outside the JWT-protected catch-all; the handler returns no data.
-    api.addRoutes({ path: '/v1/{proxy+}', methods: [apigwv2.HttpMethod.OPTIONS], integration: new integrations.HttpLambdaIntegration('CorsPreflightIntegration', apiFn) });
     // Stripe authenticates with a signature over the raw body, so this route carries no JWT authorizer.
     api.addRoutes({ path: '/v1/billing/webhook', methods: [apigwv2.HttpMethod.POST], integration: new integrations.HttpLambdaIntegration('StripeWebhookIntegration', apiFn) });
     api.addRoutes({ path: '/v1/{proxy+}', methods: [apigwv2.HttpMethod.ANY], integration: new integrations.HttpLambdaIntegration('Integration', apiFn), authorizer: jwt });
