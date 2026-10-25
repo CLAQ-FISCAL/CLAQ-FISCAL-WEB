@@ -87,6 +87,13 @@ async function handleResponse<T>(res: Response, endpoint: string): Promise<T> {
 }
 
 export class ApiClient {
+  private static async getPublic<T>(endpoint: string): Promise<T> {
+    // Public catalog endpoints are needed before sign-in. Keep this a simple
+    // cross-origin GET so browsers do not send an authenticated CORS preflight.
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, { method: 'GET' });
+    return await handleResponse<T>(res, endpoint);
+  }
+
   public static async get<T>(endpoint: string): Promise<T> {
     try {
       const headers = await getHeaders();
@@ -157,11 +164,11 @@ export class ApiClient {
   }
 
   public static getPlans(): Promise<PlanCatalog> {
-    return this.get<PlanCatalog>('/plans');
+    return this.getPublic<PlanCatalog>('/plans');
   }
 
   public static suggestPlan(annualRevenueMzn: number): Promise<{ annualRevenueMzn: number; suggested: PlanDto }> {
-    return this.get<{ annualRevenueMzn: number; suggested: PlanDto }>(
+    return this.getPublic<{ annualRevenueMzn: number; suggested: PlanDto }>(
       `/plans/suggest?annualRevenueMzn=${encodeURIComponent(annualRevenueMzn)}`
     );
   }
