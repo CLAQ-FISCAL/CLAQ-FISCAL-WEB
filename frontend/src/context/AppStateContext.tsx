@@ -268,6 +268,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           dueDate: obl.dueDate,
           daysRemaining: days,
           read: readAlertIds.includes(`alert-overdue-${obl.id}`),
+          actionUrl: `/obrigacoes/${obl.id}`,
           actionLabel: i18n.t('state:payNow')
         });
       } else if (days <= 3) {
@@ -286,6 +287,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           dueDate: obl.dueDate,
           daysRemaining: days,
           read: readAlertIds.includes(`alert-imminent-${obl.id}`),
+          actionUrl: `/obrigacoes/${obl.id}`,
           actionLabel: i18n.t('state:viewDetails')
         });
       } else if (days <= 7) {
@@ -300,13 +302,14 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           dueDate: obl.dueDate,
           daysRemaining: days,
           read: readAlertIds.includes(`alert-upcoming-${obl.id}`),
+          actionUrl: `/obrigacoes/${obl.id}`,
           actionLabel: i18n.t('state:consultCalendar')
         });
       }
     });
 
     setAlerts(generatedAlerts);
-  }, [obligations, readAlertIds]);
+  }, [obligations, readAlertIds, i18n.language]);
 
   const unreadAlertsCount = alerts.filter(a => !a.read && (a.companyId ?? null) === (activeClient?.id ?? null)).length;
 

@@ -131,7 +131,13 @@ export class ClaqStack extends Stack {
     new CustomResource(this, 'DatabaseMigrations', {
       serviceToken: migrationProvider.serviceToken,
       resourceType: 'Custom::ClaqDatabaseMigration',
-      properties: { SecretArn: foundation.database.secret!.secretArn, MigrationHash: migrationsHash() },
+      properties: {
+        SecretArn: foundation.database.secret!.secretArn,
+        MigrationHash: migrationsHash(),
+        ...(props.stage === 'demo' && process.env.CLAQ_DEMO_BILLING_RECOVERY_HOST
+          ? { BillingRecoveryHost: process.env.CLAQ_DEMO_BILLING_RECOVERY_HOST }
+          : {}),
+      },
     });
 
     // ---------- API ----------

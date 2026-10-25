@@ -101,12 +101,14 @@ export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
           const textColor = isCritical ? 'var(--red-600)' : isWarning ? 'var(--gold-700)' : 'var(--blue-600)';
 
           return (
-            <div
+            <button
+              type="button"
               key={alt.id}
               onClick={() => {
                 markAlertAsRead(alt.id);
                 if (alt.actionUrl) onNavigate(alt.actionUrl);
               }}
+              aria-label={`${alt.title}. ${t('alerts:viewObligationDetails')}`}
               className="card card-hover"
               style={{
                 padding: '20px 24px',
@@ -116,7 +118,10 @@ export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                gap: '16px'
+                gap: '16px',
+                width: '100%',
+                textAlign: 'left',
+                font: 'inherit'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
@@ -158,7 +163,7 @@ export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
 
                 <ChevronRight size={18} color="var(--slate-400)" />
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

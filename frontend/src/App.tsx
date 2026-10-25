@@ -18,6 +18,7 @@ import { Alertas } from './pages/Alertas';
 import { Newsletter } from './pages/Newsletter';
 import { Suporte } from './pages/Suporte';
 import { PaymentInstructions } from './pages/PaymentInstructions';
+import { ObligationDetails } from './pages/ObligationDetails';
 
 import { SimuladoresHub } from './pages/simuladores/SimuladoresHub';
 import { PagamentoNaoResidentes } from './pages/simuladores/PagamentoNaoResidentes';
@@ -135,6 +136,10 @@ const AppContent: React.FC = () => {
     if (currentPath === '/dados') return <DataUpload />;
     if (currentPath === '/configuracoes') return <Configuracoes onNavigate={navigate} />;
     if (currentPath === '/alertas') return <Alertas onNavigate={navigate} />;
+    if (currentPath.startsWith('/obrigacoes/')) {
+      const obligationId = decodeURIComponent(currentPath.slice('/obrigacoes/'.length));
+      return <ObligationDetails obligationId={obligationId} onNavigate={navigate} />;
+    }
     if (currentPath === '/newsletter') return <Newsletter />;
     if (currentPath === '/suporte') return <Suporte />;
     return <Dashboard onNavigate={navigate} />;

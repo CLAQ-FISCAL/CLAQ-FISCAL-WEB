@@ -1,2 +1,2 @@
 ALTER TABLE "BillingSubscription"
-ADD COLUMN "billingInterval" TEXT;
+ADD COLUMN IF NOT EXISTS "billingInterval" TEXT;

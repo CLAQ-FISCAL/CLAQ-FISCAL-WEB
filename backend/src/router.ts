@@ -107,6 +107,10 @@ function planDto(planCode: PlanCode) {
     family: limits.family,
     description: limits.description,
     priceMzn: limits.priceMzn,
+    priceMznMonthly: limits.priceMznMonthly,
+    priceMznAnnual: limits.priceMznAnnual,
+    trialDays: limits.trialDays,
+    customPricing: limits.customPricing,
     limits: limitsDto(planCode),
   };
 }

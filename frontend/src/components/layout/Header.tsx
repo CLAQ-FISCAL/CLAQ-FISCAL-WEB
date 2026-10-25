@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Menu,
   Search,
-  MessageSquare,
   HelpCircle,
   Bell,
   ChevronDown,
@@ -25,6 +24,13 @@ interface HeaderProps {
   onNavigate: (path: string) => void;
   currentPath: string;
 }
+
+const WhatsAppMark: React.FC<{ size?: number }> = ({ size = 18 }) => (
+  <svg aria-hidden="true" width={size} height={size} viewBox="0 0 32 32" fill="none">
+    <path d="M16 2.2A13.7 13.7 0 0 0 4.2 22.9L2.5 29.5l6.8-1.8A13.8 13.8 0 1 0 16 2.2Z" fill="#25D366" />
+    <path d="M23.1 19.4c-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.3-.8.1-.4-.2-1.5-.6-2.9-1.8-1.1-1-1.8-2.1-2-2.5-.2-.4 0-.6.2-.8l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.3 1.4 3.5c.2.2 2.4 3.7 5.8 5.2.8.3 1.4.6 1.9.7.8.3 1.6.3 2.2.2.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.5.2-1.7-.1-.2-.3-.3-.6-.5Z" fill="#fff" />
+  </svg>
+);
 
 export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
@@ -388,17 +394,17 @@ export const Header: React.FC<HeaderProps> = ({
             alignItems: 'center',
             gap: '7px',
             padding: '7px 14px',
-            backgroundColor: settings.isWhatsAppConnected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(37, 99, 235, 0.08)',
-            border: `1px solid ${settings.isWhatsAppConnected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(37, 99, 235, 0.2)'}`,
+            backgroundColor: 'rgba(37, 211, 102, 0.10)',
+            border: '1px solid rgba(37, 211, 102, 0.35)',
             borderRadius: '8px',
-            color: settings.isWhatsAppConnected ? '#059669' : '#2563EB',
+            color: '#128C7E',
             fontSize: '13px',
             fontWeight: 600,
             cursor: 'pointer',
             transition: 'all 0.2s ease'
           }}
         >
-          <MessageSquare size={16} color={settings.isWhatsAppConnected ? '#10B981' : '#2563EB'} />
+          <WhatsAppMark size={18} />
           <span>{settings.isWhatsAppConnected ? t('header:whatsappActive') : t('header:whatsappConnect')}</span>
           <span
             style={{

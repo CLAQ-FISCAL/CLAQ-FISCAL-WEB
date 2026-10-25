@@ -25,7 +25,7 @@ export const PLAN_LABELS: Record<PlanCode, string> = {
 
 export const PLAN_DESCRIPTIONS: Record<PlanCode, string> = {
   DEMO: 'Acesso completo para avaliação, com dados sintéticos.',
-  ACCOUNTANT_FREE: 'Porta de entrada gratuita para até 3 clientes.',
+  ACCOUNTANT_FREE: '30 dias grátis para até 3 clientes; depois 1.500 MZN/mês.',
   ACCOUNTANT_PRO: 'Carteira até 20 clientes, calendário fiscal consolidado e relatórios por cliente.',
   ACCOUNTANT_PREMIUM: 'Carteira alargada (60+ clientes) ou vários contabilistas num escritório.',
   COMPANY_MICRO: 'Calendário fiscal, alertas e simuladores essenciais para EI e microempresas.',
@@ -53,6 +53,10 @@ export type PlanLimits = {
   label: string;
   description: string;
   priceMzn: number | null;
+  priceMznMonthly: number | null;
+  priceMznAnnual: number | null;
+  trialDays: number;
+  customPricing: boolean;
   maxCompanies: number;
   maxUsers: number;
   simulatorAccess: 'all' | 'core';
@@ -87,6 +91,10 @@ function plan(
     label: PLAN_LABELS[code],
     description: PLAN_DESCRIPTIONS[code],
     priceMzn: null,
+    priceMznMonthly: null,
+    priceMznAnnual: null,
+    trialDays: 0,
+    customPricing: false,
     maxCompanies: Infinity,
     maxUsers: Infinity,
     simulatorAccess: 'all',
@@ -103,17 +111,30 @@ function plan(
 const PLAN_LIMITS: Record<PlanCode, PlanLimits> = {
   DEMO: plan('DEMO', 'DEMO', {}),
   ACCOUNTANT_FREE: plan('ACCOUNTANT_FREE', 'ACCOUNTANT', {
+    priceMzn: 1_500,
+    priceMznMonthly: 1_500,
+    priceMznAnnual: 15_300,
+    trialDays: 30,
     maxCompanies: 3,
     features: ACCOUNTANT_FEATURES,
   }),
   ACCOUNTANT_PRO: plan('ACCOUNTANT_PRO', 'ACCOUNTANT', {
+    priceMzn: 4_500,
+    priceMznMonthly: 4_500,
+    priceMznAnnual: 45_900,
     maxCompanies: 20,
     features: ACCOUNTANT_FEATURES,
   }),
   ACCOUNTANT_PREMIUM: plan('ACCOUNTANT_PREMIUM', 'ACCOUNTANT', {
+    priceMzn: 12_500,
+    priceMznMonthly: 12_500,
+    priceMznAnnual: 127_500,
     features: ACCOUNTANT_FEATURES,
   }),
   COMPANY_MICRO: plan('COMPANY_MICRO', 'COMPANY', {
+    priceMzn: 1_200,
+    priceMznMonthly: 1_200,
+    priceMznAnnual: 12_240,
     maxCompanies: 1,
     maxUsers: 1,
     storageLimitBytes: 0,
@@ -121,6 +142,9 @@ const PLAN_LIMITS: Record<PlanCode, PlanLimits> = {
     annualRevenueMaxMzn: 2_500_000,
   }),
   COMPANY_PEQUENA: plan('COMPANY_PEQUENA', 'COMPANY', {
+    priceMzn: 3_500,
+    priceMznMonthly: 3_500,
+    priceMznAnnual: 35_700,
     maxCompanies: 1,
     maxUsers: 3,
     storageLimitBytes: 5 * GB,
@@ -128,12 +152,18 @@ const PLAN_LIMITS: Record<PlanCode, PlanLimits> = {
     annualRevenueMaxMzn: 25_000_000,
   }),
   COMPANY_MEDIA: plan('COMPANY_MEDIA', 'COMPANY', {
+    priceMzn: 8_500,
+    priceMznMonthly: 8_500,
+    priceMznAnnual: 86_700,
     maxCompanies: 1,
     maxUsers: 15,
     features: MEDIA_FEATURES,
     annualRevenueMaxMzn: 100_000_000,
   }),
   COMPANY_GRANDE: plan('COMPANY_GRANDE', 'COMPANY', {
+    priceMzn: 25_000,
+    priceMznMonthly: 25_000,
+    customPricing: true,
     features: GRANDE_FEATURES,
   }),
 };
