@@ -832,6 +832,12 @@ export function createHandler(db: PrismaClient, crypto: CryptoDeps): (event: API
     const method = event.requestContext.http.method;
     const path = event.rawPath;
     try {
+      // CORS preflight carries no user data and must pass before the browser
+      // can send either public onboarding requests or authenticated API calls.
+      if (method === 'OPTIONS') {
+        return jsonResponse(204, {}, requestId);
+      }
+
       if (path === '/v1/health') {
         try {
           await db.$queryRaw`SELECT 1`;
