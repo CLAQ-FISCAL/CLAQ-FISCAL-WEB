@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -62,10 +62,15 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
 
   // Filter Obligations
   const filteredObligations = obligations.filter(obl => {
+    if ((obl.companyId ?? null) !== (activeClient?.id ?? null)) return false;
     if (filterCategory !== 'all' && obl.category !== filterCategory) return false;
     if (filterAuthority !== 'all' && obl.authority !== filterAuthority) return false;
     return true;
   });
+
+  useEffect(() => {
+    setSelectedDayObligation(null);
+  }, [activeClient?.id]);
 
   const handleCreateObligation = (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,7 +162,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
             style={{ padding: '9px 16px', fontSize: '13px' }}
           >
             <Plus size={15} />
-            <span>+ {t('calendar:newObligation')}</span>
+            <span>{t('calendar:newObligation')}</span>
           </button>
         </div>
       </div>
@@ -237,6 +242,7 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
       </div>
 
       {/* Main Full-Month Calendar Grid */}
+      <div className={`calendar-workspace${isAddModalOpen ? ' calendar-workspace--with-form' : ''}`}>
       <div className="card" style={{ padding: '24px' }}>
         {/* Days of Week Header */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: '12px', fontSize: '12px', fontWeight: 700, color: 'var(--slate-400)' }}>
@@ -343,6 +349,77 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
         </div>
       </div>
 
+      {isAddModalOpen && (
+        <aside className="card calendar-obligation-form" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)', margin: 0 }}>
+              {t('calendar:registerNewObligation')}
+            </h3>
+            <button
+              type="button"
+              aria-label={t('common:close')}
+              onClick={() => setIsAddModalOpen(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--slate-400)', padding: '4px' }}
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <form onSubmit={handleCreateObligation}>
+            <div className="form-group">
+              <label className="form-label">{t('calendar:obligationTitle')}</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder={t('calendar:titlePlaceholder')}
+                value={newTitle}
+                onChange={e => setNewTitle(e.target.value)}
+                required
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="form-group">
+                <label className="form-label">{t('calendar:categoryLabel')}</label>
+                <select className="form-control" value={newCategory} onChange={e => setNewCategory(e.target.value as ObligationCategory)}>
+                  <option value="IVA">IVA</option><option value="INSS">INSS</option><option value="IRPS">IRPS</option>
+                  <option value="IRPC">IRPC</option><option value="TAE">TAE</option><option value="Alvara">{t('calendar:optAlvara')}</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('calendar:taxEntity')}</label>
+                <select className="form-control" value={newAuthority} onChange={e => setNewAuthority(e.target.value as TaxAuthority)}>
+                  <option value="AT">{t('calendar:optAT')}</option><option value="INSS">INSS</option>
+                  <option value="Municipio">{t('calendar:optMunicipioShort')}</option><option value="BAU">BAU</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="form-group">
+                <label className="form-label">{t('calendar:dueDateLabel')}</label>
+                <input type="date" className="form-control" value={newDueDate} onChange={e => setNewDueDate(e.target.value)} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('calendar:estimatedAmountMZN')}</label>
+                <input type="number" className="form-control" value={newAmount} onChange={e => setNewAmount(e.target.value)} required />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">{t('calendar:notesDescription')}</label>
+              <textarea className="form-control" rows={3} placeholder={t('calendar:notesPlaceholder')} value={newDescription} onChange={e => setNewDescription(e.target.value)} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', flexWrap: 'wrap' }}>
+              <button type="button" onClick={() => setIsAddModalOpen(false)} className="btn btn-secondary">{t('common:cancel')}</button>
+              <button type="submit" className="btn btn-primary-gold">{t('calendar:saveObligation')}</button>
+            </div>
+          </form>
+        </aside>
+      )}
+      </div>
+
       {/* Selected Day Obligation Drawer / Detail Card */}
       {selectedDayObligation && (
         <div className="card" style={{ padding: '24px', borderLeft: '4px solid var(--blue-600)' }}>
@@ -425,118 +502,6 @@ export const Calendario: React.FC<CalendarioProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Add Obligation Modal */}
-      {isAddModalOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px', width: '90%', padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)' }}>
-                {t('calendar:registerNewObligation')}
-              </h3>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--slate-400)' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateObligation}>
-              <div className="form-group">
-                <label className="form-label">{t('calendar:obligationTitle')}</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder={t('calendar:titlePlaceholder')}
-                  value={newTitle}
-                  onChange={e => setNewTitle(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div className="form-group">
-                  <label className="form-label">{t('calendar:categoryLabel')}</label>
-                  <select
-                    className="form-control"
-                    value={newCategory}
-                    onChange={e => setNewCategory(e.target.value as ObligationCategory)}
-                  >
-                    <option value="IVA">IVA</option>
-                    <option value="INSS">INSS</option>
-                    <option value="IRPS">IRPS</option>
-                    <option value="IRPC">IRPC</option>
-                    <option value="TAE">TAE</option>
-                    <option value="Alvara">{t('calendar:optAlvara')}</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">{t('calendar:taxEntity')}</label>
-                  <select
-                    className="form-control"
-                    value={newAuthority}
-                    onChange={e => setNewAuthority(e.target.value as TaxAuthority)}
-                  >
-                    <option value="AT">{t('calendar:optAT')}</option>
-                    <option value="INSS">INSS</option>
-                    <option value="Municipio">{t('calendar:optMunicipioShort')}</option>
-                    <option value="BAU">BAU</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div className="form-group">
-                  <label className="form-label">{t('calendar:dueDateLabel')}</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={newDueDate}
-                    onChange={e => setNewDueDate(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">{t('calendar:estimatedAmountMZN')}</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={newAmount}
-                    onChange={e => setNewAmount(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{t('calendar:notesDescription')}</label>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  placeholder={t('calendar:notesPlaceholder')}
-                  value={newDescription}
-                  onChange={e => setNewDescription(e.target.value)}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="btn btn-secondary"
-                >
-                  {t('common:cancel')}
-                </button>
-                <button type="submit" className="btn btn-primary-gold">
-                  {t('calendar:saveObligation')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

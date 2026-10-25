@@ -14,7 +14,7 @@ import { CalendarEngine } from '../utils/calendarEngine';
 import { ApiClient } from '../api/client';
 import i18n, { AppLanguage, isSupportedLanguage } from '../i18n';
 import '../config/cognito';
-import { signIn, signUp, signOut, fetchAuthSession, getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
+import { signIn, signUp, confirmSignUp as cognitoConfirmSignUp, resendSignUpCode, signOut, fetchAuthSession, getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 
 const DEFAULT_SETTINGS: SystemSettings = {
   notifications: {
@@ -47,7 +47,9 @@ interface AppStateContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   login: (email: string, password?: string) => Promise<boolean> | boolean;
-  registerUser: (userData: Partial<UserProfile> & { password?: string }, options?: { signInAfterRegister?: boolean }) => Promise<boolean>;
+  registerUser: (userData: Partial<UserProfile> & { password?: string; selectedPlanCode?: string }, options?: { signInAfterRegister?: boolean }) => Promise<boolean | 'confirmation-required'>;
+  confirmRegistration: (email: string, code: string) => Promise<boolean>;
+  resendRegistrationCode: (email: string) => Promise<boolean>;
   logout: () => void;
   updateUser: (data: Partial<UserProfile>) => void;
 
@@ -68,7 +70,7 @@ interface AppStateContextType {
   alerts: AlertItem[];
   unreadAlertsCount: number;
   markAlertAsRead: (id: string) => void;
-  markAllAlertsAsRead: () => void;
+  markAllAlertsAsRead: (companyId?: string | null) => void;
   dispatchTestAlert: (channel: 'whatsapp' | 'email' | 'sms' | 'system') => void;
 
   // Simulations (User-generated)
@@ -133,11 +135,15 @@ const buildUserFromCognito = async (): Promise<UserProfile | null> => {
     const payload: any = (idToken as any).payload || {};
     // Try to restore company info from localStorage first (since Cognito custom attrs may not contain all)
     const saved = localStorage.getItem('claq_user');
-    const savedUser: Partial<UserProfile> = saved ? JSON.parse(saved) : {};
+    const pending = localStorage.getItem('claq_pending_user');
+    const parsedSaved: Partial<UserProfile> = saved ? JSON.parse(saved) : {};
+    const parsedPending: Partial<UserProfile> = pending ? JSON.parse(pending) : {};
+    const cognitoEmail = (attrs as any).email || payload.email || '';
+    const savedUser = parsedPending.email?.toLowerCase() === cognitoEmail.toLowerCase() ? parsedPending : parsedSaved;
     return {
       id: cognitoUser?.userId || payload.sub || savedUser.id || `usr_${Date.now()}`,
       name: (attrs as any).name || payload.name || savedUser.name || i18n.t('state:userFallback'),
-      email: (attrs as any).email || payload.email || savedUser.email || '',
+      email: cognitoEmail || savedUser.email || '',
       phone: (attrs as any).phone_number || payload.phone_number || savedUser.phone || '+258 84 000 0000',
       role: (payload['cognito:groups']?.[0] as string) || savedUser.role || 'ACCOUNTING_ADMIN',
       avatarUrl: savedUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
@@ -201,7 +207,22 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return [];
   });
 
-  const [activeClient, setActiveClient] = useState<Client | null>(null);
+  const [activeClient, setActiveClientState] = useState<Client | null>(() => {
+    const activeId = localStorage.getItem('claq_active_client');
+    const saved = localStorage.getItem('claq_clients');
+    if (!activeId || !saved) return null;
+    try {
+      return (JSON.parse(saved) as Client[]).find(client => client.id === activeId) ?? null;
+    } catch {
+      return null;
+    }
+  });
+
+  const setActiveClient = (client: Client | null) => {
+    setActiveClientState(client);
+    if (client) localStorage.setItem('claq_active_client', client.id);
+    else localStorage.removeItem('claq_active_client');
+  };
 
   // 4. User-generated Simulations
   const [simulations, setSimulations] = useState<SimulationRecord[]>(() => {
@@ -242,6 +263,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           message: i18n.t('state:alertOverdueMsg', { dueDate: obl.dueDate }),
           severity: 'critical',
           category: obl.category,
+          companyId: obl.companyId ?? null,
           date: obl.dueDate,
           dueDate: obl.dueDate,
           daysRemaining: days,
@@ -259,6 +281,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }),
           severity: 'critical',
           category: obl.category,
+          companyId: obl.companyId ?? null,
           date: obl.dueDate,
           dueDate: obl.dueDate,
           daysRemaining: days,
@@ -272,6 +295,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           message: i18n.t('state:alertUpcomingMsg', { days, dueDate: obl.dueDate }),
           severity: 'warning',
           category: obl.category,
+          companyId: obl.companyId ?? null,
           date: obl.dueDate,
           dueDate: obl.dueDate,
           daysRemaining: days,
@@ -284,7 +308,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setAlerts(generatedAlerts);
   }, [obligations, readAlertIds]);
 
-  const unreadAlertsCount = alerts.filter(a => !a.read).length;
+  const unreadAlertsCount = alerts.filter(a => !a.read && (a.companyId ?? null) === (activeClient?.id ?? null)).length;
 
   // 6. Settings
   const [settings, setSettings] = useState<SystemSettings>(() => {
@@ -498,6 +522,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           // Build user profile from Cognito
           const cognitoUser = await buildUserFromCognito();
           if (cognitoUser) {
+            localStorage.removeItem('claq_pending_user');
             setUser(cognitoUser);
             setIsAuthenticated(true);
             localStorage.setItem('claq_user', JSON.stringify(cognitoUser));
@@ -585,7 +610,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return false;
   };
 
-  const registerUser = async (userData: Partial<UserProfile> & { password?: string }, options: { signInAfterRegister?: boolean } = {}) => {
+  const registerUser = async (userData: Partial<UserProfile> & { password?: string; selectedPlanCode?: string }, options: { signInAfterRegister?: boolean } = {}) => {
     const signInAfterRegister = options.signInAfterRegister ?? true;
     const email = (userData.email || '').trim().toLowerCase();
     const password = userData.password || '';
@@ -599,22 +624,21 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             userAttributes: {
               email,
               name: userData.name || i18n.t('state:adminFiscalDefault'),
-              ...(userData.phone ? { phone_number: userData.phone } : {}),
-              // Custom attributes must be pre-created in User Pool; we send what we can
-            } as any,
+                // Phone is intentionally not sent to Cognito: demo signup uses email confirmation only.
+                // Custom attributes must be pre-created in the User Pool before they can be sent.
+              } as any,
           },
         });
         // If autoConfirm or CONFIRM_SIGN_UP step
         if (signUpResult.nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
           addToast('info', i18n.t('state:confirmEmailTitle'), i18n.t('state:confirmEmailMsg', { email }));
-          // Auto sign-in after confirmation would happen on next login; for now fallback to legacy if needed
-          // Store pending user locally for UX
+          // Retain the profile locally until the user confirms their email and completes payment.
           const pendingUser: UserProfile = {
             id: `usr_${Date.now()}`,
             name: userData.name || i18n.t('state:adminFiscalDefault'),
             email,
             phone: userData.phone || '+258 84 000 0000',
-            role: 'ACCOUNTING_ADMIN',
+            role: (userData.role as UserProfile['role']) || 'ACCOUNTING_ADMIN',
             avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
             companyName: userData.companyName || i18n.t('state:companyNewFallback'),
             companyNuit: userData.companyNuit || '400000000',
@@ -626,26 +650,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             renewalDate: '31/12/2026'
           };
           localStorage.setItem('claq_pending_user', JSON.stringify(pendingUser));
-          if (!signInAfterRegister) return true;
-          // Try auto sign-in if allowed (some pools allow autoSignIn)
-          try {
-            const session = await fetchAuthSession();
-            if (session.tokens?.idToken) {
-              const cognitoUser = await buildUserFromCognito();
-              if (cognitoUser) {
-                setUser(cognitoUser);
-                setIsAuthenticated(true);
-                localStorage.setItem('claq_user', JSON.stringify(cognitoUser));
-                localStorage.setItem('claq_is_auth', 'true');
-                addToast('success', i18n.t('state:accountCreatedTitle'), i18n.t('state:accountCreatedMsg', { companyName: cognitoUser.companyName }));
-                return true;
-              }
-            }
-          } catch {
-            // ignore
-          }
-          // If not auto-signed in, inform user to login after confirmation
-          return true;
+          return 'confirmation-required';
         }
         if (signUpResult.nextStep?.signUpStep === 'DONE') {
           // Auto-confirmed — sign in immediately
@@ -658,52 +663,38 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const name = e?.name || '';
       if (name.includes('UsernameExistsException')) {
         addToast('error', i18n.t('state:emailExistsTitle'), i18n.t('state:emailExistsMsg'));
-        return false;
-      }
-      console.warn('Cognito signUp failed, trying legacy backend:', e);
-    }
-
-    // Phase 2: Legacy backend fallback
-    try {
-      const res = await ApiClient.post<{
-        success: boolean;
-        token: string;
-        user: UserProfile;
-        company: any;
-      }>('/auth/register', userData);
-
-      if (res && res.user) {
-        if (signInAfterRegister) {
-          setUser(res.user);
-          setIsAuthenticated(true);
-          localStorage.setItem('claq_user', JSON.stringify(res.user));
-          localStorage.setItem('claq_is_auth', 'true');
-          if (res.token) {
-            localStorage.setItem('claq_token', res.token);
-            localStorage.setItem('claq_cognito_idToken', res.token);
-          }
-        }
-        addToast('success', i18n.t('state:accountCreatedTitle'), i18n.t('state:accountCreatedMsg', { companyName: res.user.companyName }));
-        setObligations([]);
-        setClients([]);
-        setSimulations([]);
-        localStorage.removeItem('claq_obligations');
-        localStorage.removeItem('claq_clients');
-        localStorage.removeItem('claq_simulations');
-        return true;
-      }
-    } catch (e: any) {
-      const msg = e?.message || '';
-      if (msg.includes('409')) {
-        addToast('error', i18n.t('state:emailExistsTitle'), i18n.t('state:emailExistsMsgShort'));
       } else {
-        addToast('error', i18n.t('state:registerErrorTitle'), i18n.t('state:registerErrorMsg'));
+        console.error('Cognito signUp failed:', e);
+        addToast('error', i18n.t('state:registerErrorTitle'), e?.message || i18n.t('state:registerErrorMsg'));
       }
-      setIsAuthenticated(false);
-      setUser(null);
       return false;
     }
+
     return false;
+  };
+
+  const confirmRegistration = async (emailInput: string, code: string) => {
+    try {
+      await cognitoConfirmSignUp({ username: emailInput.trim().toLowerCase(), confirmationCode: code.trim() });
+      addToast('success', i18n.t('state:emailVerifiedTitle'), i18n.t('state:emailVerifiedMsg'));
+      return true;
+    } catch (e: any) {
+      console.error('Cognito email confirmation failed:', e);
+      addToast('error', i18n.t('state:confirmEmailTitle'), e?.message || i18n.t('state:confirmEmailErrorMsg'));
+      return false;
+    }
+  };
+
+  const resendRegistrationCode = async (emailInput: string) => {
+    try {
+      await resendSignUpCode({ username: emailInput.trim().toLowerCase() });
+      addToast('info', i18n.t('state:confirmEmailTitle'), i18n.t('state:confirmationCodeResentMsg'));
+      return true;
+    } catch (e: any) {
+      console.error('Cognito confirmation code resend failed:', e);
+      addToast('error', i18n.t('state:confirmEmailTitle'), e?.message || i18n.t('state:confirmEmailErrorMsg'));
+      return false;
+    }
   };
 
   const logout = async () => {
@@ -782,6 +773,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const addObligation = (obl: Omit<FiscalObligation, 'id'>) => {
     const newObl: FiscalObligation = {
       ...obl,
+      companyId: obl.companyId ?? activeClient?.id ?? null,
       id: `obl_${Date.now()}`
     };
     ApiClient.post('/obligations', newObl).catch(() => addToast('error', i18n.t('state:obligationNotSavedTitle'), i18n.t('state:settleNotConfirmedMsg')));
@@ -902,11 +894,18 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  const markAllAlertsAsRead = () => {
-    ApiClient.patch('/alerts/mark-read').catch(() => {});
-    const allIds = alerts.map(a => a.id);
-    setReadAlertIds(allIds);
-    localStorage.setItem('claq_read_alerts', JSON.stringify(allIds));
+  const markAllAlertsAsRead = (companyId?: string | null) => {
+    const affectedAlerts = companyId === undefined
+      ? alerts
+      : alerts.filter(alert => (alert.companyId ?? null) === companyId);
+    if (companyId === undefined) ApiClient.patch('/alerts/mark-read').catch(() => {});
+    else affectedAlerts.forEach(alert => ApiClient.patch(`/alerts/${alert.id}/read`).catch(() => {}));
+    const affectedIds = affectedAlerts.map(alert => alert.id);
+    setReadAlertIds(prev => {
+      const updated = Array.from(new Set([...prev, ...affectedIds]));
+      localStorage.setItem('claq_read_alerts', JSON.stringify(updated));
+      return updated;
+    });
     addToast('info', i18n.t('state:alertsReadTitle'), i18n.t('state:alertsReadMsg'));
   };
 
@@ -1043,6 +1042,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isAuthenticated,
         login,
         registerUser,
+        confirmRegistration,
+        resendRegistrationCode,
         logout,
         updateUser,
         tenants,

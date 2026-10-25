@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ClaqLogo } from '../components/common/ClaqLogo';
 import { LanguageToggle } from '../i18n/LanguageToggle';
 import { useAppState } from '../context/AppStateContext';
-import { readAudience } from '../lib/audience';
+import { readAudience, readIntentPlan } from '../lib/audience';
 import type { Audience } from '../types';
 
 interface RegisterProps {
@@ -19,7 +19,7 @@ const inputStyle: React.CSSProperties = {
 
 export const Register: React.FC<RegisterProps> = ({ onBack, onRegistrationComplete }) => {
   const { t } = useTranslation();
-  const { registerUser } = useAppState();
+  const { registerUser, confirmRegistration, resendRegistrationCode } = useAppState();
   const audience: Audience = readAudience() ?? 'empresa';
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -28,12 +28,14 @@ export const Register: React.FC<RegisterProps> = ({ onBack, onRegistrationComple
   const [nuit, setNuit] = useState('');
   const [province, setProvince] = useState('Maputo Cidade');
   const [password, setPassword] = useState('');
+  const [confirmationRequired, setConfirmationRequired] = useState(false);
+  const [confirmationCode, setConfirmationCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
-    const success = await registerUser({
+    const result = await registerUser({
       name: fullName,
       email,
       phone: phone || '+258 84 000 0000',
@@ -43,10 +45,20 @@ export const Register: React.FC<RegisterProps> = ({ onBack, onRegistrationComple
       companyCity: province.includes('Maputo') ? 'Maputo' : province,
       role: audience === 'contabilidade' ? 'ACCOUNTING_ADMIN' : 'COMPANY_ADMIN',
       plan: audience === 'contabilidade' ? 'Contabilidade' : 'PME',
+      selectedPlanCode: readIntentPlan() ?? undefined,
       password
     }, { signInAfterRegister: false });
     setIsLoading(false);
-    if (success) onRegistrationComplete();
+    if (result === 'confirmation-required') setConfirmationRequired(true);
+    else if (result) onRegistrationComplete();
+  };
+
+  const submitConfirmation = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsLoading(true);
+    const confirmed = await confirmRegistration(email, confirmationCode);
+    setIsLoading(false);
+    if (confirmed) onRegistrationComplete();
   };
 
   return (
@@ -62,10 +74,23 @@ export const Register: React.FC<RegisterProps> = ({ onBack, onRegistrationComple
             {audience === 'empresa' ? <Building2 size={16} /> : <Briefcase size={16} />}
             {audience === 'empresa' ? t('onboarding:audienceCompany') : t('onboarding:audienceAccountant')}
           </div>
-          <h1 style={{ margin: '12px 0 4px', color: '#0F172A', fontSize: 25, fontWeight: 800 }}>{t('login:registerTitle')}</h1>
-          <p style={{ margin: 0, color: '#64748B', fontSize: 14 }}>{t('login:registerSubtitle')}</p>
+          <h1 style={{ margin: '12px 0 4px', color: '#0F172A', fontSize: 25, fontWeight: 800 }}>{confirmationRequired ? t('login:verifyEmailTitle') : t('login:registerTitle')}</h1>
+          <p style={{ margin: 0, color: '#64748B', fontSize: 14 }}>{confirmationRequired ? t('login:verifyEmailSubtitle', { email }) : t('login:registerSubtitle')}</p>
 
-          <form onSubmit={submit} style={{ display: 'grid', gap: 14, marginTop: 24 }}>
+          {confirmationRequired ? (
+            <form onSubmit={submitConfirmation} style={{ display: 'grid', gap: 14, marginTop: 24 }}>
+              <label style={{ display: 'grid', gap: 5, color: '#334155', fontSize: 13, fontWeight: 600 }}>
+                {t('login:emailConfirmationCode')}
+                <input style={inputStyle} value={confirmationCode} onChange={e => setConfirmationCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" placeholder="000000" required />
+              </label>
+              <button type="submit" disabled={isLoading || confirmationCode.length < 6} style={{ width: '100%', padding: 13, border: 0, borderRadius: 11, background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#FFFFFF', fontSize: 14, fontWeight: 800, cursor: isLoading ? 'wait' : 'pointer', opacity: isLoading ? .7 : 1 }}>
+                {isLoading ? t('login:verifyingEmail') : t('login:verifyEmailContinue')}
+              </button>
+              <button type="button" disabled={isLoading} onClick={() => void resendRegistrationCode(email)} style={{ padding: 8, border: 0, background: 'transparent', color: '#2563EB', fontWeight: 700, cursor: 'pointer' }}>
+                {t('login:resendConfirmationCode')}
+              </button>
+            </form>
+          ) : <form onSubmit={submit} style={{ display: 'grid', gap: 14, marginTop: 24 }}>
             <label style={{ display: 'grid', gap: 5, color: '#334155', fontSize: 13, fontWeight: 600 }}>
               {t('login:fullName')}
               <input style={inputStyle} value={fullName} onChange={e => setFullName(e.target.value)} placeholder={t('login:fullNamePlaceholder')} required autoComplete="name" />
@@ -102,12 +127,12 @@ export const Register: React.FC<RegisterProps> = ({ onBack, onRegistrationComple
             </label>
             <label style={{ display: 'grid', gap: 5, color: '#334155', fontSize: 13, fontWeight: 600 }}>
               {t('login:accessPassword')}
-              <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={t('login:passwordPlaceholderMin')} minLength={8} required autoComplete="new-password" />
+              <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={t('login:passwordPlaceholderMin')} minLength={12} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}" title={t('login:passwordRequirements')} required autoComplete="new-password" />
             </label>
             <button type="submit" disabled={isLoading} style={{ marginTop: 4, width: '100%', padding: 13, border: 0, borderRadius: 11, background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#FFFFFF', fontSize: 14, fontWeight: 800, cursor: isLoading ? 'wait' : 'pointer', opacity: isLoading ? .7 : 1 }}>
               {isLoading ? t('login:creatingAccount') : t('login:createAccountStart')}
             </button>
-          </form>
+          </form>}
         </section>
       </div>
     </main>

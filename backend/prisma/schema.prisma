@@ -282,6 +282,7 @@ model BillingSubscription {
   stripeSubscriptionId String   @unique
   status               String
   priceId              String
+  billingInterval      String?
   currentPeriodStart   DateTime
   currentPeriodEnd     DateTime
   cancelAtPeriodEnd    Boolean  @default(false)

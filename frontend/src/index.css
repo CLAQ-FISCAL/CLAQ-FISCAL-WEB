@@ -381,6 +381,37 @@ h1, h2, h3, h4, h5, h6 {
   animation: claqSpin 0.9s linear infinite;
 }
 
+/* Keep the obligation editor beside the calendar when it is open. */
+.calendar-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.calendar-workspace--with-form {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+}
+
+.calendar-workspace > .card:first-child {
+  min-width: 0;
+}
+
+.calendar-obligation-form {
+  position: sticky;
+  top: 96px;
+}
+
+@media (max-width: 1100px) {
+  .calendar-workspace--with-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calendar-obligation-form {
+    position: static;
+  }
+}
+
 /* Toast notifications */
 .toast-container {
   position: fixed;

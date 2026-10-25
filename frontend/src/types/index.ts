@@ -12,6 +12,8 @@ export interface FiscalObligation {
   amount?: number;
   authority: TaxAuthority;
   description: string;
+  /** Client/company that owns this obligation; null is the accountant's own workspace. */
+  companyId?: string | null;
   penaltyRisk?: string;
   daysRemaining?: number;
 }
@@ -28,6 +30,7 @@ export interface AlertItem {
   dueDate: string;
   daysRemaining: number;
   read: boolean;
+  companyId?: string | null;
   actionUrl?: string;
   actionLabel?: string;
 }
@@ -219,6 +222,17 @@ export interface Subscription {
   tenantType: TenantType;
   limits: PlanLimits;
   usage: { companies: number; users: number };
+  billingPeriodEnd?: string | null;
+  billingInterval?: 'day' | 'week' | 'month' | 'year' | null;
+}
+
+export interface PaymentTransactionSummary {
+  id: string;
+  provider: 'MPESA' | 'EMOLA' | 'SIMO' | 'BANK_TRANSFER' | string;
+  amount: number | string;
+  currency: string;
+  status: string;
+  createdAt: string;
 }
 
 export interface Tenant {

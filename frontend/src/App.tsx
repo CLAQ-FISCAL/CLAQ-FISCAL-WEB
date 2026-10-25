@@ -17,6 +17,7 @@ import { Configuracoes } from './pages/Configuracoes';
 import { Alertas } from './pages/Alertas';
 import { Newsletter } from './pages/Newsletter';
 import { Suporte } from './pages/Suporte';
+import { PaymentInstructions } from './pages/PaymentInstructions';
 
 import { SimuladoresHub } from './pages/simuladores/SimuladoresHub';
 import { PagamentoNaoResidentes } from './pages/simuladores/PagamentoNaoResidentes';
@@ -56,9 +57,22 @@ const AppContent: React.FC = () => {
 
   const storedAudience = readAudience();
 
-  const handleAudienceSelect = (_audience: Audience) => {
-    navigate(isAuthenticated ? '/dashboard' : '/criar-conta');
+  const handleAudienceSelect = (_audience: Audience, _planCode: string | null) => {
+    if (isAuthenticated) {
+      localStorage.setItem('claq_payment_flow', 'upgrade');
+      navigate('/pagamento');
+    } else {
+      localStorage.setItem('claq_payment_flow', 'signup');
+      navigate('/criar-conta');
+    }
   };
+
+  if (currentPath === '/comecar/upgrade') {
+    return <PlanSelect initialAudience="contabilidade" onSelect={handleAudienceSelect} />;
+  }
+  if (currentPath === '/comecar/upgrade-company') {
+    return <PlanSelect initialAudience="empresa" onSelect={handleAudienceSelect} />;
+  }
 
   // Pre-auth onboarding: choose the audience pillar before signing in
   if (currentPath === '/comecar') {
@@ -66,7 +80,22 @@ const AppContent: React.FC = () => {
   }
 
   if (currentPath === '/criar-conta') {
-    return <Register onBack={() => navigate('/comecar')} onRegistrationComplete={() => navigate('/login')} />;
+    return <Register onBack={() => navigate('/comecar')} onRegistrationComplete={() => navigate('/pagamento')} />;
+  }
+
+  if (currentPath === '/pagamento') {
+    return (
+      <PaymentInstructions
+        onBack={() => navigate(localStorage.getItem('claq_payment_flow') === 'upgrade'
+          ? (storedAudience === 'empresa' ? '/comecar/upgrade-company' : '/comecar/upgrade')
+          : '/criar-conta')}
+        onContinue={() => {
+          const isUpgrade = localStorage.getItem('claq_payment_flow') === 'upgrade';
+          localStorage.removeItem('claq_payment_flow');
+          navigate(isUpgrade && isAuthenticated ? '/dashboard' : '/login');
+        }}
+      />
+    );
   }
 
   // If not authenticated or explicitly at /login, render Login view
@@ -104,7 +133,7 @@ const AppContent: React.FC = () => {
     if (currentPath.startsWith('/biblioteca-legal')) return <BibliotecaLegal />;
     if (currentPath === '/clientes') return <Clientes onNavigate={navigate} />;
     if (currentPath === '/dados') return <DataUpload />;
-    if (currentPath === '/configuracoes') return <Configuracoes />;
+    if (currentPath === '/configuracoes') return <Configuracoes onNavigate={navigate} />;
     if (currentPath === '/alertas') return <Alertas onNavigate={navigate} />;
     if (currentPath === '/newsletter') return <Newsletter />;
     if (currentPath === '/suporte') return <Suporte />;

@@ -38,11 +38,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     user,
     obligations,
     alerts,
+    activeClient,
     unreadAlertsCount,
     setIsWhatsAppModalOpen,
     setIsAIAssistantOpen,
     openAIAssistantWithPrompt
   } = useAppState();
+
+  const selectedCompanyId = activeClient?.id ?? null;
+  const clientObligations = obligations.filter(o => (o.companyId ?? null) === selectedCompanyId);
+  const clientAlerts = alerts.filter(alert => (alert.companyId ?? null) === selectedCompanyId);
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -64,15 +69,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const calendarDays = CalendarEngine.getMonthGrid(currentYear, currentMonthIndex);
 
   // Dynamic KPIs
-  const activeObligations = obligations.filter(o => o.status !== 'pago');
-  const paidObligations = obligations.filter(o => o.status === 'pago');
+  const activeObligations = clientObligations.filter(o => o.status !== 'pago');
+  const paidObligations = clientObligations.filter(o => o.status === 'pago');
   const overdueObligations = activeObligations.filter(o => CalendarEngine.getDaysRemaining(o.dueDate) < 0);
 
   const nextObligation = [...activeObligations].sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
-  const inssObligation = obligations.find(o => o.category === 'INSS');
-  const licensesCount = obligations.filter(o => o.category === 'Alvara' || o.category === 'TAE').length;
+  const inssObligation = clientObligations.find(o => o.category === 'INSS');
+  const licensesCount = clientObligations.filter(o => o.category === 'Alvara' || o.category === 'TAE').length;
 
-  const totalCount = obligations.length;
+  const totalCount = clientObligations.length;
   const complianceRate = totalCount === 0 ? 100 : Math.round((paidObligations.length / totalCount) * 100);
   const isFiscalRegular = overdueObligations.length === 0;
 
@@ -198,7 +203,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 {t('dashboard:fiscalSituation')}
               </p>
               <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-800)', marginTop: '4px' }}>
-                {user?.companyName || t('dashboard:companyFallback')}
+                {activeClient?.name || user?.companyName || t('dashboard:companyFallback')}
               </h4>
               <p style={{ fontSize: '22px', fontWeight: 800, color: isFiscalRegular ? '#059669' : '#DC2626', marginTop: '8px' }}>
                 {isFiscalRegular ? t('common:statusRegular') : t('dashboard:fiscalAttention')}
@@ -257,7 +262,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           {/* Calendar Grid Cells */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
             {calendarDays.slice(0, 28).map((dayInfo, idx) => {
-              const dayObligations = obligations.filter(o => o.dueDate === dayInfo.dateString);
+              const dayObligations = clientObligations.filter(o => o.dueDate === dayInfo.dateString);
               const hasTax = dayObligations.length > 0 ? dayObligations[0].category : null;
               const isSelected = selectedCalDate === dayInfo.dateString;
 
@@ -340,7 +345,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               style={{ padding: '6px 12px', fontSize: '12px' }}
             >
               <Plus size={14} />
-              <span>+ {t('dashboard:newObligation')}</span>
+              <span>{t('dashboard:newObligation')}</span>
             </button>
           </div>
         </div>
@@ -349,7 +354,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="card" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)' }}>
-              {t('dashboard:importantAlerts')} ({alerts.length})
+              {t('dashboard:importantAlerts')} ({clientAlerts.length})
             </h3>
             <button
               onClick={() => onNavigate('/alertas')}
@@ -360,7 +365,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </button>
           </div>
 
-          {alerts.length === 0 ? (
+          {clientAlerts.length === 0 ? (
             <div style={{ padding: '32px 16px', textAlign: 'center' }}>
               <CheckCircle2 size={36} color="var(--emerald-500)" style={{ margin: '0 auto 10px' }} />
               <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-800)' }}>{t('dashboard:allUpToDate')}!</h4>
@@ -370,7 +375,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {alerts.slice(0, 4).map(alert => (
+              {clientAlerts.slice(0, 4).map(alert => (
                 <div
                   key={alert.id}
                   onClick={() => onNavigate('/calendario')}

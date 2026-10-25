@@ -192,6 +192,11 @@ const routes: Route[] = [
       const tenant = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { plan: true, type: true } });
       if (!tenant) throw new AppError(404, 'TENANT_NOT_FOUND', 'Tenant not found.');
       const limits = getPlanLimits(tenant.plan);
+      const billing = await ctx.db.billingSubscription.findFirst({
+        where: { tenantId: ctx.tenantId, status: 'active' },
+        orderBy: { updatedAt: 'desc' },
+        select: { currentPeriodEnd: true, billingInterval: true },
+      });
       const [companyCount, userCount] = await Promise.all([
         ctx.db.company.count({ where: { tenantId: ctx.tenantId } }),
         ctx.db.membership.count({ where: { tenantId: ctx.tenantId } }),
@@ -201,6 +206,8 @@ const routes: Route[] = [
         label: limits.label,
         family: getPlanFamily(tenant.plan),
         tenantType: tenant.type,
+        billingPeriodEnd: billing?.currentPeriodEnd ?? null,
+        billingInterval: billing?.billingInterval ?? null,
         limits: limitsDto(tenant.plan),
         usage: { companies: companyCount, users: userCount },
       };

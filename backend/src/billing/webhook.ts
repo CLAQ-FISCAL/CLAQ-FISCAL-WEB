@@ -52,6 +52,7 @@ export async function handleStripeWebhook(body: string, signature: string): Prom
         stripeSubscriptionId: sub.id,
         status: sub.status,
         priceId,
+        billingInterval: sub.items.data[0]?.price?.recurring?.interval ?? null,
         currentPeriodStart: new Date(sub.current_period_start * 1000),
         currentPeriodEnd: new Date(sub.current_period_end * 1000),
         cancelAtPeriodEnd: sub.cancel_at_period_end,

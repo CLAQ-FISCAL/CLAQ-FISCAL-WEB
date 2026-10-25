@@ -17,6 +17,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../context/AppStateContext';
 import { useAudience } from '../../hooks/useAudience';
+import { getPlanDisplayName } from '../../lib/planDisplay';
 import { LanguageToggle } from '../../i18n/LanguageToggle';
 
 interface HeaderProps {
@@ -50,7 +51,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const { isAccountant, subscription } = useAudience();
   const canSwitchCompany = isAccountant || clients.length > 0;
-  const planLabel = subscription?.label || user?.plan;
+  const planLabel = getPlanDisplayName(subscription?.plan, subscription?.label || user?.plan, key => t(key));
   const activeTenant = tenants.find(t => t.id === activeTenantId) ?? null;
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -487,7 +488,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
                 {unreadAlertsCount > 0 && (
                   <button
-                    onClick={markAllAlertsAsRead}
+                    onClick={() => markAllAlertsAsRead(activeClient?.id ?? null)}
                     style={{
                       border: 'none',
                       background: 'none',

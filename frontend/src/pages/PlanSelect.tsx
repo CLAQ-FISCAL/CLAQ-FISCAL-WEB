@@ -14,11 +14,13 @@ import { useTranslation } from 'react-i18next';
 import { ClaqLogo } from '../components/common/ClaqLogo';
 import { LanguageToggle } from '../i18n/LanguageToggle';
 import { usePlans, useSuggestPlan } from '../hooks/useFiscalQueries';
+import { getPlanDisplayName } from '../lib/planDisplay';
 import { saveAudience, saveIntentPlan } from '../lib/audience';
 import type { Audience, PlanDto } from '../types';
 
 interface PlanSelectProps {
   onSelect: (audience: Audience, planCode: string | null) => void;
+  initialAudience?: Audience;
 }
 
 const UNLIMITED_THRESHOLD = 999999;
@@ -76,7 +78,9 @@ const PlanCard: React.FC<{
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-        <span style={{ fontSize: '17px', fontWeight: 800, color: '#0F172A' }}>{plan.label}</span>
+        <span style={{ fontSize: '17px', fontWeight: 800, color: '#0F172A' }}>
+          {getPlanDisplayName(plan.code, plan.label, key => t(key))}
+        </span>
         {recommended && (
           <span
             style={{
@@ -195,10 +199,10 @@ const PlanCard: React.FC<{
   );
 };
 
-export const PlanSelect: React.FC<PlanSelectProps> = ({ onSelect }) => {
+export const PlanSelect: React.FC<PlanSelectProps> = ({ onSelect, initialAudience }) => {
   const { t } = useTranslation();
 
-  const [audience, setAudience] = useState<Audience | null>(null);
+  const [audience, setAudience] = useState<Audience | null>(initialAudience ?? null);
   const [revenueInput, setRevenueInput] = useState('');
   const [debouncedRevenue, setDebouncedRevenue] = useState<number | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);

@@ -23,6 +23,7 @@ import ptCheckout from './locales/pt/checkout.json';
 import ptPdf from './locales/pt/pdf.json';
 import ptData from './locales/pt/data.json';
 import ptUploads from './locales/pt/uploads.json';
+import ptPayment from './locales/pt/payment.json';
 import enCommon from './locales/en/common.json';
 import enHeader from './locales/en/header.json';
 import enSidebar from './locales/en/sidebar.json';
@@ -46,6 +47,7 @@ import enCheckout from './locales/en/checkout.json';
 import enPdf from './locales/en/pdf.json';
 import enData from './locales/en/data.json';
 import enUploads from './locales/en/uploads.json';
+import enPayment from './locales/en/payment.json';
 
 export type AppLanguage = 'pt' | 'en';
 
@@ -81,7 +83,8 @@ export const resources = {
     checkout: ptCheckout,
     pdf: ptPdf,
     data: ptData,
-    uploads: ptUploads
+    uploads: ptUploads,
+    payment: ptPayment
   },
   en: {
     common: enCommon,
@@ -106,7 +109,8 @@ export const resources = {
     checkout: enCheckout,
     pdf: enPdf,
     data: enData,
-    uploads: enUploads
+    uploads: enUploads,
+    payment: enPayment
   }
 } as const;
 

@@ -20,6 +20,7 @@ export async function syncStripeSubscription(
     stripeSubscriptionId: string;
     status: string;
     priceId: string;
+    billingInterval?: string | null;
     currentPeriodStart: Date;
     currentPeriodEnd: Date;
     cancelAtPeriodEnd: boolean;
@@ -40,6 +41,7 @@ export async function syncStripeSubscription(
       update: {
         status: args.status,
         priceId: args.priceId,
+        billingInterval: args.billingInterval,
         currentPeriodStart: args.currentPeriodStart,
         currentPeriodEnd: args.currentPeriodEnd,
         cancelAtPeriodEnd: args.cancelAtPeriodEnd,
@@ -50,6 +52,7 @@ export async function syncStripeSubscription(
         stripeSubscriptionId: args.stripeSubscriptionId,
         status: args.status,
         priceId: args.priceId,
+        billingInterval: args.billingInterval,
         currentPeriodStart: args.currentPeriodStart,
         currentPeriodEnd: args.currentPeriodEnd,
         cancelAtPeriodEnd: args.cancelAtPeriodEnd,

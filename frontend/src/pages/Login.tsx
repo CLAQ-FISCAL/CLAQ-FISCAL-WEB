@@ -83,7 +83,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onCreate
     if (!regEmail || !regCompanyName || !regCompanyNuit) return;
 
     setIsLoading(true);
-    await registerUser({
+    const registration = await registerUser({
         name: regFullName || t('login:adminDefault'),
         email: regEmail,
         phone: regPhone || '+258 84 000 0000',
@@ -95,8 +95,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onCreate
         password: regPassword
       });
     setIsLoading(false);
-    setShowRegisterModal(false);
-    onLoginSuccess();
+    if (registration === true) {
+      setShowRegisterModal(false);
+      onLoginSuccess();
+    }
   };
 
   return (
@@ -1343,6 +1345,9 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onCreate
                   placeholder={t('login:passwordPlaceholderMin')}
                   value={regPassword}
                   onChange={e => setRegPassword(e.target.value)}
+                  minLength={12}
+                  pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}"
+                  title={t('login:passwordRequirements')}
                   required
                   style={{
                     width: '100%',

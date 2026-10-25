@@ -22,11 +22,12 @@ interface AlertasProps {
 
 export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
   const { t } = useTranslation();
-  const { alerts, markAllAlertsAsRead, markAlertAsRead, setIsWhatsAppModalOpen } = useAppState();
+  const { alerts, activeClient, markAllAlertsAsRead, markAlertAsRead } = useAppState();
 
   const [activeFilter, setActiveFilter] = useState<'todos' | 'pendentes' | 'vencidos' | 'informativos' | 'pagos'>('todos');
 
-  const filteredAlerts = alerts.filter(alt => {
+  const clientAlerts = alerts.filter(alt => (alt.companyId ?? null) === (activeClient?.id ?? null));
+  const filteredAlerts = clientAlerts.filter(alt => {
     if (activeFilter === 'pendentes') return alt.severity === 'critical' || alt.severity === 'warning';
     if (activeFilter === 'vencidos') return alt.daysRemaining < 0;
     if (activeFilter === 'informativos') return alt.severity === 'info';
@@ -48,7 +49,7 @@ export const Alertas: React.FC<AlertasProps> = ({ onNavigate }) => {
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={markAllAlertsAsRead} className="btn btn-secondary btn-sm">
+          <button onClick={() => markAllAlertsAsRead(activeClient?.id ?? null)} className="btn btn-secondary btn-sm">
             <CheckCircle2 size={15} />
             <span>{t('alerts:markAllAsRead')}</span>
           </button>

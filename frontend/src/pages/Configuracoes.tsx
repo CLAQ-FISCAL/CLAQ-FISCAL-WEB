@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Check, X } from 'lucide-react';
 import {
   User,
   Bell,
@@ -17,9 +18,20 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
+import { useAudience } from '../hooks/useAudience';
+import { usePaymentHistory, usePlans } from '../hooks/useFiscalQueries';
+import { getPlanDisplayName } from '../lib/planDisplay';
 
-export const Configuracoes: React.FC = () => {
-  const { t } = useTranslation();
+interface ConfiguracoesProps {
+  onNavigate: (path: string) => void;
+}
+
+export const Configuracoes: React.FC<ConfiguracoesProps> = ({ onNavigate }) => {
+  const { t, i18n } = useTranslation();
+  const { subscription, isAccountant } = useAudience();
+  const plansQuery = usePlans();
+  const { activeTenantId } = useAppState();
+  const paymentsQuery = usePaymentHistory(Boolean(subscription), activeTenantId);
   const {
     user,
     updateUser,
@@ -31,6 +43,7 @@ export const Configuracoes: React.FC = () => {
   } = useAppState();
 
   const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'alerts' | 'security' | 'plan' | 'integrations'>('preferences');
+  const [showPlanDetails, setShowPlanDetails] = useState(false);
 
   // Profile fields state
   const [name, setName] = useState(user?.name || '');
@@ -40,6 +53,21 @@ export const Configuracoes: React.FC = () => {
   const [companyName, setCompanyName] = useState(user?.companyName || '');
   const [companyNuit, setCompanyNuit] = useState(user?.companyNuit || '');
   const [companyAddress, setCompanyAddress] = useState(user?.companyAddress || '');
+  const currentPlanName = getPlanDisplayName(
+    subscription?.plan,
+    subscription?.label || user?.plan,
+    key => t(key)
+  );
+  const currentPlan = [...(plansQuery.data?.families.ACCOUNTANT ?? []), ...(plansQuery.data?.families.COMPANY ?? [])]
+    .find(plan => plan.code === subscription?.plan);
+  const latestPayment = paymentsQuery.data?.items?.[0];
+  const paymentMethodKey: Record<string, string> = {
+    MPESA: 'M-Pesa', EMOLA: 'e-Mola', SIMO: 'SIMO card', BANK_TRANSFER: 'Bank transfer'
+  };
+  const formattedDueDate = subscription?.billingPeriodEnd
+    ? new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(new Date(subscription.billingPeriodEnd))
+    : t('payment:noDueDate');
+  const humanizeFeature = (feature: string) => feature.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -350,18 +378,80 @@ export const Configuracoes: React.FC = () => {
                   {t('config:planBadge')}
                 </span>
                 <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--slate-900)' }}>
-                  {t('config:planName')}
+                  {currentPlanName}
                 </h3>
                 <p style={{ fontSize: '13px', color: 'var(--slate-500)', marginTop: '2px' }}>
                   {t('config:planRenewal')}
                 </p>
               </div>
 
-              <button className="btn btn-primary-gold">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setShowPlanDetails(true)}>
+                {t('config:viewMyPlan')}
+              </button>
+              <button type="button" className="btn btn-primary-gold" onClick={() => {
+                localStorage.setItem('claq_payment_flow', 'upgrade');
+                onNavigate(isAccountant ? '/comecar/upgrade' : '/comecar/upgrade-company');
+              }}>
                 {t('config:planUpgrade')}
               </button>
+              </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {showPlanDetails && (
+        <div className="modal-overlay" role="presentation" onClick={() => setShowPlanDetails(false)}>
+          <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="current-plan-title" onClick={event => event.stopPropagation()} style={{ maxWidth: 650, padding: 26, maxHeight: '85vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+              <div>
+                <span className="badge badge-amber" style={{ marginBottom: 8 }}>{t('config:planBadge')}</span>
+                <h2 id="current-plan-title" style={{ margin: 0, fontSize: 21, fontWeight: 800, color: 'var(--slate-900)' }}>{currentPlanName}</h2>
+              </div>
+              <button type="button" onClick={() => setShowPlanDetails(false)} aria-label={t('common:close')} style={{ border: 0, background: 'none', color: 'var(--slate-500)', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 12, marginTop: 20 }}>
+              <div style={{ padding: 14, borderRadius: 12, background: 'var(--slate-50)' }}>
+                <div style={{ fontSize: 12, color: 'var(--slate-500)' }}>{t('payment:monthlyPrice')}</div>
+                <strong style={{ display: 'block', marginTop: 4, color: 'var(--slate-900)' }}>{currentPlan?.priceMznMonthly == null ? t('payment:notSet') : `${new Intl.NumberFormat('pt-MZ').format(currentPlan.priceMznMonthly)} MZN`}</strong>
+              </div>
+              <div style={{ padding: 14, borderRadius: 12, background: 'var(--slate-50)' }}>
+                <div style={{ fontSize: 12, color: 'var(--slate-500)' }}>{t('payment:annualPrice')}</div>
+                <strong style={{ display: 'block', marginTop: 4, color: 'var(--slate-900)' }}>{currentPlan?.priceMznAnnual == null ? t('payment:notSet') : `${new Intl.NumberFormat('pt-MZ').format(currentPlan.priceMznAnnual)} MZN`}</strong>
+              </div>
+              <div style={{ padding: 14, borderRadius: 12, background: 'var(--slate-50)' }}>
+                <div style={{ fontSize: 12, color: 'var(--slate-500)' }}>{t('payment:paymentMethod')}</div>
+                <strong style={{ display: 'block', marginTop: 4, color: 'var(--slate-900)' }}>{latestPayment ? paymentMethodKey[latestPayment.provider] ?? latestPayment.provider : t('payment:noPaymentRecorded')}</strong>
+              </div>
+              <div style={{ padding: 14, borderRadius: 12, background: 'var(--slate-50)' }}>
+                <div style={{ fontSize: 12, color: 'var(--slate-500)' }}>{t('payment:billingFrequency')}</div>
+                <strong style={{ display: 'block', marginTop: 4, color: 'var(--slate-900)' }}>{subscription?.billingInterval === 'year' ? t('payment:annual') : subscription?.billingInterval === 'month' ? t('payment:monthly') : t('payment:notSet')}</strong>
+              </div>
+              <div style={{ padding: 14, borderRadius: 12, background: 'var(--slate-50)' }}>
+                <div style={{ fontSize: 12, color: 'var(--slate-500)' }}>{t('payment:nextDueDate')}</div>
+                <strong style={{ display: 'block', marginTop: 4, color: 'var(--slate-900)' }}>{formattedDueDate}</strong>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 22 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 800, color: 'var(--slate-800)', marginBottom: 10 }}>{t('payment:planServices')}</h3>
+              <div style={{ display: 'grid', gap: 8 }}>
+                {(subscription?.limits.features ?? currentPlan?.limits.features ?? []).map(feature => (
+                  <div key={feature} style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--slate-700)', fontSize: 13 }}><Check size={15} color="var(--emerald-500)" />{humanizeFeature(feature)}</div>
+                ))}
+                {(subscription?.limits.features ?? currentPlan?.limits.features ?? []).length === 0 && <span style={{ color: 'var(--slate-500)', fontSize: 13 }}>{t('common:notAvailable')}</span>}
+              </div>
+              {subscription && (
+                <p style={{ marginTop: 12, color: 'var(--slate-500)', fontSize: 12 }}>
+                  {t('onboarding:maxCompaniesLabel')}: {subscription.limits.maxCompanies >= 999999 ? t('onboarding:noLimit') : subscription.limits.maxCompanies}
+                  {' · '}{t('onboarding:maxUsersLabel')}: {subscription.limits.maxUsers >= 999999 ? t('onboarding:noLimit') : subscription.limits.maxUsers}
+                </p>
+              )}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}><button type="button" className="btn btn-secondary" onClick={() => setShowPlanDetails(false)}>{t('common:close')}</button></div>
+          </section>
         </div>
       )}
 

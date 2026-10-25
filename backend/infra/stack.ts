@@ -43,10 +43,10 @@ export class ClaqStack extends Stack {
 
     // ---------- Auth ----------
     const pool = new cognito.UserPool(this, 'Users', {
-      selfSignUpEnabled: false,
+      selfSignUpEnabled: true,
       signInAliases: { email: true },
-      mfa: cognito.Mfa.OPTIONAL,
-      mfaSecondFactor: { otp: true, sms: false },
+      autoVerify: { email: true },
+      mfa: cognito.Mfa.OFF,
       passwordPolicy: { minLength: 12, requireDigits: true, requireLowercase: true, requireUppercase: true, requireSymbols: true },
     });
 

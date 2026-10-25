@@ -7,6 +7,7 @@ import {
   AlertItem,
   PlanCatalog,
   Subscription,
+  PaymentTransactionSummary,
   MeResponse,
   RuleDto,
   SimulatorCatalogItem,
@@ -138,6 +139,17 @@ export function useSubscription(enabled = true, tenantId?: string | null) {
     queryFn: () => ApiClient.getSubscription(),
     enabled,
     staleTime: 1000 * 60 * 10,
+    retry: 1
+  });
+}
+
+/** Recent payment records for the active tenant, used for billing details. */
+export function usePaymentHistory(enabled = true, tenantId?: string | null) {
+  return useQuery<{ items: PaymentTransactionSummary[] }>({
+    queryKey: ['payments', tenantId ?? 'auto'],
+    queryFn: () => ApiClient.get<{ items: PaymentTransactionSummary[] }>('/payments?limit=20'),
+    enabled,
+    staleTime: 1000 * 60,
     retry: 1
   });
 }

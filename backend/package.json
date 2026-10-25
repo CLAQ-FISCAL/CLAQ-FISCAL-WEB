@@ -32,7 +32,8 @@
     "bcrypt": "^5.1.1",
     "decimal.js": "^10.5.0",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.0"
+    "pg": "^8.16.0",
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.150",
