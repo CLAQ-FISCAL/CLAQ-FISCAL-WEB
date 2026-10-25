@@ -21,7 +21,10 @@ import type {
   ApplyResult,
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/v1';
+// Production fallback for Vercel and other static hosts. A relative `/v1`
+// points back to the frontend host, where no API route exists. Local builds
+// can still override this with VITE_API_URL (for example, http://localhost:4000/api/v1).
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://wajcsa99fc.execute-api.af-south-1.amazonaws.com/v1';
 
 // Helper to retrieve Cognito IdToken — tries Amplify session first, falls back to localStorage
 async function getAuthToken(): Promise<string | null> {
