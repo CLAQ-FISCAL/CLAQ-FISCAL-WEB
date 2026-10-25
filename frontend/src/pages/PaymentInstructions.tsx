@@ -46,7 +46,6 @@ export const PaymentInstructions: React.FC<PaymentInstructionsProps> = ({ onBack
   );
   const [receipt, setReceipt] = useState<File | null>(null);
   const [receiptError, setReceiptError] = useState('');
-  const [contactStarted, setContactStarted] = useState(false);
   const [copiedValue, setCopiedValue] = useState('');
 
   const plan = useMemo(() => {
@@ -76,7 +75,6 @@ export const PaymentInstructions: React.FC<PaymentInstructionsProps> = ({ onBack
       amount: price === null ? t('common:notAvailable') : formatMzn(price)
     });
     window.open(`https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
-    setContactStarted(true);
   };
 
   const handleReceiptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,10 +162,10 @@ export const PaymentInstructions: React.FC<PaymentInstructionsProps> = ({ onBack
             <button type="button" onClick={startWhatsAppPayment} disabled={!receipt} className="btn btn-primary-gold">
               {t('payment:sendProofWhatsApp')}
             </button>
-            <a href={`tel:+${SUPPORT_PHONE}`} onClick={() => setContactStarted(true)} className="btn btn-secondary" style={{ textDecoration: 'none' }}>
+            <a href={`tel:+${SUPPORT_PHONE}`} className="btn btn-secondary" style={{ textDecoration: 'none' }}>
               <Phone size={15} />{t('payment:callAgent')}
             </a>
-            <button type="button" disabled={!contactStarted} onClick={onContinue} className="btn btn-secondary" style={{ marginLeft: 'auto' }}>
+            <button type="button" onClick={onContinue} className="btn btn-secondary" style={{ marginLeft: 'auto' }}>
               {flow === 'upgrade' ? t('payment:returnToAccount') : t('payment:continueToLogin')}
             </button>
           </div>
