@@ -29,5 +29,13 @@
   "formSector": "Activity Sector",
   "sectorPlaceholder": "Trade, IT, Logistics",
   "formCity": "City",
-  "saveClient": "Save Client"
+  "saveClient": "Save Client",
+  "planUsage": "{{count}} of {{limit}} client slots used on your current plan.",
+  "unlimited": "unlimited",
+  "loadingClients": "Loading clients and plan limits…",
+  "limitReachedTitle": "Client limit reached",
+  "limitReachedMessage": "Your current plan allows up to {{limit}} clients. Upgrade your plan to add more.",
+  "addFailedTitle": "Could not add client",
+  "addFailedMessage": "Please try again. Your client was not saved.",
+  "loadFailedMessage": "Could not load your clients or plan limit. Adding clients is paused until this connection is restored."
 }

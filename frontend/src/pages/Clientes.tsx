@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Users,
   Plus,
@@ -17,6 +18,9 @@ import {
 import { useAppState } from '../context/AppStateContext';
 import { useTranslation } from 'react-i18next';
 import { Client } from '../types';
+import { useCompanies } from '../hooks/useUploads';
+import { useSubscription } from '../hooks/useFiscalQueries';
+import { ApiClient } from '../api/client';
 
 interface ClientesProps {
   onNavigate: (path: string) => void;
@@ -24,7 +28,29 @@ interface ClientesProps {
 
 export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
   const { t } = useTranslation();
-  const { clients, addClient, deleteClient, setActiveClient, addToast } = useAppState();
+  const { clients: localClients, addClient, deleteClient, setActiveClient, addToast, isAuthenticated } = useAppState();
+  const queryClient = useQueryClient();
+  const companiesQuery = useCompanies(isAuthenticated);
+  const subscriptionQuery = useSubscription(isAuthenticated);
+  const backendLimit = subscriptionQuery.data?.limits.maxCompanies ?? null;
+  const unlimited = backendLimit !== null && backendLimit >= 999999;
+  const backendClients: Client[] = (companiesQuery.data ?? []).map((company) => ({
+    id: company.id,
+    name: company.legalName,
+    nuit: company.hasNuit ? '•••••••••' : '—',
+    plan: 'PME',
+    status: 'regular',
+    nextObligation: '—',
+    nextObligationDate: '',
+    contactEmail: '',
+    contactPhone: '',
+    activitySector: company.taxRegime || t('clientes:defaultSector'),
+    city: company.municipality || '—',
+  }));
+  const clients = isAuthenticated ? backendClients : localClients;
+  const canAddClient = !isAuthenticated || (
+    subscriptionQuery.isSuccess && (unlimited || (backendLimit !== null && (subscriptionQuery.data?.usage.companies ?? 0) < backendLimit))
+  );
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -51,9 +77,9 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
     return true;
   });
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    addClient({
+    const newClient = {
       name,
       nuit,
       plan,
@@ -64,11 +90,44 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
       contactPhone: phone,
       activitySector: sector,
       city
-    });
+    };
+    if (isAuthenticated) {
+      if (!subscriptionQuery.isSuccess || !canAddClient) {
+        addToast('warning', t('clientes:limitReachedTitle'), t('clientes:limitReachedMessage', {
+          limit: backendLimit === null || unlimited ? '—' : backendLimit,
+        }));
+        return;
+      }
+      try {
+        await ApiClient.createCompany({ legalName: name, nuit, municipality: city, taxRegime: sector });
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['companies'] }),
+          queryClient.invalidateQueries({ queryKey: ['subscription'] }),
+        ]);
+        addToast('success', t('state:clientAddedTitle'), t('state:clientAddedMsg', { name }));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const isLimitError = message.includes('PLAN_LIMIT_EXCEEDED');
+        addToast('error', isLimitError ? t('clientes:limitReachedTitle') : t('clientes:addFailedTitle'),
+          isLimitError ? t('clientes:limitReachedMessage', { limit: backendLimit }) : t('clientes:addFailedMessage'));
+        return;
+      }
+    } else {
+      addClient(newClient);
+    }
     setIsAddModalOpen(false);
     setName('');
     setNuit('');
     setEmail('');
+  };
+
+  const addButtonDisabled = isAuthenticated && !canAddClient;
+  const openAddModal = () => {
+    if (addButtonDisabled) {
+      addToast('warning', t('clientes:limitReachedTitle'), t('clientes:limitReachedMessage', { limit: unlimited ? '—' : backendLimit }));
+      return;
+    }
+    setIsAddModalOpen(true);
   };
 
   return (
@@ -85,14 +144,35 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
         </div>
 
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={openAddModal}
           className="btn btn-primary-blue"
           style={{ fontSize: '13px' }}
+          disabled={addButtonDisabled}
         >
           <Plus size={16} />
           <span>{t('clientes:addClient')}</span>
         </button>
       </div>
+
+      {isAuthenticated && subscriptionQuery.isSuccess && (
+        <div className="card" style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--slate-600)' }}>
+          {t('clientes:planUsage', {
+            count: subscriptionQuery.data.usage.companies,
+            limit: unlimited ? t('clientes:unlimited') : backendLimit,
+          })}
+        </div>
+      )}
+      {isAuthenticated && (subscriptionQuery.isLoading || companiesQuery.isLoading) && (
+        <div role="status" style={{ fontSize: '13px', color: 'var(--slate-500)' }}>{t('clientes:loadingClients')}</div>
+      )}
+      {isAuthenticated && (subscriptionQuery.isError || companiesQuery.isError) && (
+        <div className="card" style={{ padding: '12px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', color: 'var(--red-600)' }}>
+          <span>{t('clientes:loadFailedMessage')}</span>
+          <button className="btn btn-secondary" onClick={() => { void subscriptionQuery.refetch(); void companiesQuery.refetch(); }}>
+            {t('common:retry')}
+          </button>
+        </div>
+      )}
 
       {/* Filter Bar */}
       <div className="card" style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
@@ -147,9 +227,10 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
               {t('clientes:noClientsDesc')}
             </p>
             <button
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={openAddModal}
               className="btn btn-primary-gold"
               style={{ fontSize: '13px', padding: '9px 18px' }}
+              disabled={addButtonDisabled}
             >
               <Plus size={15} />
               <span>{t('clientes:registerFirstClient')}</span>
@@ -208,14 +289,16 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
                         >
                           <Eye size={16} />
                         </button>
-                        <button
-                          onClick={() => deleteClient(cli.id)}
-                          className="btn btn-ghost btn-sm"
-                          title={t('clientes:deleteClient')}
-                          style={{ color: 'var(--red-500)' }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {!isAuthenticated && (
+                          <button
+                            onClick={() => deleteClient(cli.id)}
+                            className="btn btn-ghost btn-sm"
+                            title={t('clientes:deleteClient')}
+                            style={{ color: 'var(--red-500)' }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

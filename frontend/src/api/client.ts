@@ -203,6 +203,10 @@ export class ApiClient {
     return this.get<{ items: BackendCompany[] }>('/companies');
   }
 
+  public static createCompany(input: { legalName: string; nuit?: string; municipality?: string; taxRegime?: string }): Promise<BackendCompany> {
+    return this.post<BackendCompany>('/companies', input);
+  }
+
   // ─── Data uploads (staging + reconciliation) ──────────────────────────────
 
   public static listUploads(): Promise<{ items: UploadBatchSummary[] }> {

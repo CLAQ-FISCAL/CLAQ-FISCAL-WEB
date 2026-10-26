@@ -29,5 +29,13 @@
   "formSector": "Sector de Actividade",
   "sectorPlaceholder": "Comércio, TI, Logística",
   "formCity": "Cidade",
-  "saveClient": "Guardar Cliente"
+  "saveClient": "Guardar Cliente",
+  "planUsage": "{{count}} de {{limit}} vagas de clientes utilizadas no seu plano actual.",
+  "unlimited": "ilimitadas",
+  "loadingClients": "A carregar clientes e limites do plano…",
+  "limitReachedTitle": "Limite de clientes atingido",
+  "limitReachedMessage": "O seu plano actual permite até {{limit}} clientes. Faça upgrade do plano para adicionar mais.",
+  "addFailedTitle": "Não foi possível adicionar o cliente",
+  "addFailedMessage": "Tente novamente. O cliente não foi guardado.",
+  "loadFailedMessage": "Não foi possível carregar os clientes ou o limite do plano. A adição de clientes está pausada até restabelecer a ligação."
 }
