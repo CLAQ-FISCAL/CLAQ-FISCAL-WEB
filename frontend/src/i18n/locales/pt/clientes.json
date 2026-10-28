@@ -49,6 +49,8 @@
   "addFailedTitle": "Não foi possível adicionar o cliente",
   "addFailedMessage": "Tente novamente. O cliente não foi guardado.",
   "loadFailedMessage": "Não foi possível carregar os clientes ou o limite do plano. A adição de clientes está pausada até restabelecer a ligação.",
+  "companiesRequestFailed": "Pedido da lista de clientes: {{error}}",
+  "subscriptionRequestFailed": "Pedido do limite do plano: {{error}}",
   "demoActivationTitle": "Active o seu espaço de demonstração",
   "demoActivationDescription": "Esta conta ainda não tem um espaço de trabalho. Escolha o plano de contabilista para activar o limite correspondente. Não será cobrado qualquer pagamento na demonstração.",
   "demoActivateButton": "Activar plano de demonstração",

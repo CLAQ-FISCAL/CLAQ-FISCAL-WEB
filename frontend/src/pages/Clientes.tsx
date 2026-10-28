@@ -316,7 +316,15 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
       )}
       {isAuthenticated && (subscriptionQuery.isError || companiesQuery.isError) && (
         <div className="card" style={{ padding: '12px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', color: 'var(--red-600)' }}>
-          <span>{t('clientes:loadFailedMessage')}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span>{t('clientes:loadFailedMessage')}</span>
+            {companiesQuery.isError && (
+              <small>{t('clientes:companiesRequestFailed', { error: companiesQuery.error instanceof Error ? companiesQuery.error.message : String(companiesQuery.error) })}</small>
+            )}
+            {subscriptionQuery.isError && (
+              <small>{t('clientes:subscriptionRequestFailed', { error: subscriptionQuery.error instanceof Error ? subscriptionQuery.error.message : String(subscriptionQuery.error) })}</small>
+            )}
+          </div>
           <button className="btn btn-secondary" onClick={() => { attemptedDemoProvision.current = false; void subscriptionQuery.refetch(); void companiesQuery.refetch(); }}>
             {t('common:retry')}
           </button>

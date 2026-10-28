@@ -49,6 +49,8 @@
   "addFailedTitle": "Could not add client",
   "addFailedMessage": "Please try again. Your client was not saved.",
   "loadFailedMessage": "Could not load your clients or plan limit. Adding clients is paused until this connection is restored.",
+  "companiesRequestFailed": "Client list request: {{error}}",
+  "subscriptionRequestFailed": "Plan limit request: {{error}}",
   "demoActivationTitle": "Activate your demo workspace",
   "demoActivationDescription": "This account has no workspace yet. Choose its accountant plan to activate the matching client limit. No payment is collected in the demo.",
   "demoActivateButton": "Activate demo plan",
