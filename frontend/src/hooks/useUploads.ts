@@ -12,9 +12,12 @@ import type {
 } from '../types';
 
 /** Companies belonging to the active tenant (source of the upload companyId). */
-export function useCompanies(enabled = true) {
+export function useCompanies(enabled = true, tenantId?: string | null) {
   return useQuery<BackendCompany[]>({
-    queryKey: QUERY_KEYS.COMPANIES,
+    // Keep company results isolated by the selected tenant. Otherwise an early
+    // request made with a stale tenant selector can leave the shared query in
+    // an error state after `/me` has resolved the correct tenant.
+    queryKey: [...QUERY_KEYS.COMPANIES, tenantId ?? 'none'],
     queryFn: async () => (await ApiClient.listCompanies()).items,
     enabled,
     staleTime: 1000 * 60 * 5,

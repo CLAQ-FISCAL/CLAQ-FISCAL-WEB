@@ -32,7 +32,7 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
   const { t } = useTranslation();
   const { clients: localClients, obligations, addClient, deleteClient, activeClient, setActiveClient, addToast, isAuthenticated, activeTenantId, setActiveTenantId, user } = useAppState();
   const queryClient = useQueryClient();
-  const companiesQuery = useCompanies(isAuthenticated);
+  const companiesQuery = useCompanies(isAuthenticated && !!activeTenantId, activeTenantId);
   const subscriptionQuery = useSubscription(isAuthenticated, activeTenantId);
   const plansQuery = usePlans();
   const intendedPlanCode = readIntentPlan();
