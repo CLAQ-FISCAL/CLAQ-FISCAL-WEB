@@ -2169,7 +2169,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-794813216328-af-south-1",
-     "S3Key": "8f15544b0c5ac76bd4df3df07beb9fc4d9af8b523dd8c04b65703d07f5b50dcc.zip"
+     "S3Key": "be2f8a7e7b54e32079d7177bdfa6eac832ae74558590a739cd7b614d13821dbf.zip"
     },
     "Description": "CLAQ HTTP API (Prisma + RLS tenant guard)",
     "Environment": {
@@ -2264,7 +2264,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "claq-demo/ApiFunction/Resource",
-    "aws:asset:path": "asset.8f15544b0c5ac76bd4df3df07beb9fc4d9af8b523dd8c04b65703d07f5b50dcc",
+    "aws:asset:path": "asset.be2f8a7e7b54e32079d7177bdfa6eac832ae74558590a739cd7b614d13821dbf",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -3092,6 +3092,81 @@
    },
    "Metadata": {
     "aws:cdk:path": "claq-demo/HttpApi/POST--v1--billing--webhook/Resource"
+   }
+  },
+  "HttpApiOPTIONSv1proxyCorsPreflightIntegration234C0A9D": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/OPTIONS--v1--{proxy+}/CorsPreflightIntegration/Resource"
+   }
+  },
+  "HttpApiOPTIONSv1proxyCorsPreflightIntegrationPermission3AA07555": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:af-south-1:794813216328:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/v1/{proxy+}"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/OPTIONS--v1--{proxy+}/CorsPreflightIntegration-Permission"
+   }
+  },
+  "HttpApiOPTIONSv1proxy13057780": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "OPTIONS /v1/{proxy+}",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "HttpApiOPTIONSv1proxyCorsPreflightIntegration234C0A9D"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/OPTIONS--v1--{proxy+}/Resource"
    }
   },
   "HttpApiANYv1proxyIntegration18FBFE30": {

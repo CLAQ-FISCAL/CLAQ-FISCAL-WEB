@@ -857,6 +857,24 @@ export function createHandler(db: PrismaClient, crypto: CryptoDeps): (event: API
     const method = event.requestContext.http.method;
     const path = event.rawPath;
     try {
+      // Browser preflight is deliberately unauthenticated. API Gateway has a
+      // protected ANY proxy route, so this explicit route must answer before
+      // any Cognito claims or tenant context are read.
+      if (method === 'OPTIONS') {
+        return {
+          statusCode: 204,
+          headers: {
+            'access-control-allow-origin': '*',
+            'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
+            'access-control-allow-headers': 'authorization,content-type,x-tenant-id',
+            'access-control-max-age': '86400',
+            'cache-control': 'no-store',
+            'x-request-id': requestId,
+          },
+          body: '',
+        };
+      }
+
       if (path === '/v1/health') {
         try {
           await db.$queryRaw`SELECT 1`;

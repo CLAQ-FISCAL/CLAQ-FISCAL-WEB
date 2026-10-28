@@ -202,6 +202,9 @@ export class ClaqStack extends Stack {
     api.addRoutes({ path: '/v1/plans/suggest', methods: [apigwv2.HttpMethod.GET], integration: new integrations.HttpLambdaIntegration('PlansSuggestIntegration', apiFn) });
     // Stripe authenticates with a signature over the raw body, so this route carries no JWT authorizer.
     api.addRoutes({ path: '/v1/billing/webhook', methods: [apigwv2.HttpMethod.POST], integration: new integrations.HttpLambdaIntegration('StripeWebhookIntegration', apiFn) });
+    // The authenticated ANY proxy route would otherwise capture browser OPTIONS
+    // preflights and require a Cognito token before the actual request is sent.
+    api.addRoutes({ path: '/v1/{proxy+}', methods: [apigwv2.HttpMethod.OPTIONS], integration: new integrations.HttpLambdaIntegration('CorsPreflightIntegration', apiFn) });
     api.addRoutes({ path: '/v1/{proxy+}', methods: [apigwv2.HttpMethod.ANY], integration: new integrations.HttpLambdaIntegration('Integration', apiFn), authorizer: jwt });
 
     // ---------- Reminder scheduler + notifier ----------
