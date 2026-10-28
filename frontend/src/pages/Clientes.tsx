@@ -30,10 +30,11 @@ interface ClientesProps {
 
 export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
   const { t } = useTranslation();
-  const { clients: localClients, obligations, addClient, deleteClient, activeClient, setActiveClient, addToast, isAuthenticated, activeTenantId, setActiveTenantId, user } = useAppState();
+  const { clients: localClients, obligations, addClient, deleteClient, activeClient, setActiveClient, addToast, isAuthenticated, isAuthReady, activeTenantId, setActiveTenantId, user } = useAppState();
   const queryClient = useQueryClient();
-  const companiesQuery = useCompanies(isAuthenticated && !!activeTenantId, activeTenantId);
-  const subscriptionQuery = useSubscription(isAuthenticated, activeTenantId);
+  const tenantQueriesEnabled = isAuthenticated && isAuthReady && !!activeTenantId;
+  const companiesQuery = useCompanies(tenantQueriesEnabled, activeTenantId);
+  const subscriptionQuery = useSubscription(tenantQueriesEnabled, activeTenantId);
   const plansQuery = usePlans();
   const intendedPlanCode = readIntentPlan();
   const pendingPlanForUser = isAuthenticated ? readPendingDemoPlanFor(user?.email) : null;
@@ -94,6 +95,15 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
   // API deployments may not yet include the public demoMode flag.
   const isDemoMode = plansQuery.data?.demoMode === true || import.meta.env.DEV;
   const subscriptionError = subscriptionQuery.error instanceof Error ? subscriptionQuery.error.message : '';
+  useEffect(() => {
+    if (!companiesQuery.isError && !subscriptionQuery.isError) return;
+    // Keep the visible message simple, but retain the exact API failure for
+    // troubleshooting without ever logging credentials or request headers.
+    console.error('Client page data request failed', {
+      companies: companiesQuery.error instanceof Error ? companiesQuery.error.message : null,
+      subscription: subscriptionQuery.error instanceof Error ? subscriptionQuery.error.message : null,
+    });
+  }, [companiesQuery.error, companiesQuery.isError, subscriptionQuery.error, subscriptionQuery.isError]);
   const missingDemoTenant = isAuthenticated
     && isDemoMode
     && subscriptionQuery.isError
@@ -301,7 +311,7 @@ export const Clientes: React.FC<ClientesProps> = ({ onNavigate }) => {
           })}
         </div>
       )}
-      {isAuthenticated && (subscriptionQuery.isLoading || companiesQuery.isLoading) && (
+      {isAuthenticated && (!isAuthReady || subscriptionQuery.isLoading || companiesQuery.isLoading) && (
         <div role="status" style={{ fontSize: '13px', color: 'var(--slate-500)' }}>{t('clientes:loadingClients')}</div>
       )}
       {isAuthenticated && (subscriptionQuery.isError || companiesQuery.isError) && (

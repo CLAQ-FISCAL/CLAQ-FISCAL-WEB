@@ -51,6 +51,7 @@ export const Header: React.FC<HeaderProps> = ({
     settings,
     setIsWhatsAppModalOpen,
     isAuthenticated,
+    isAuthReady,
     clients,
     activeClient,
     setActiveClient,
@@ -60,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
   } = useAppState();
 
   const { isAccountant, subscription } = useAudience();
-  const companiesQuery = useCompanies(isAuthenticated && !!activeTenantId, activeTenantId);
+  const companiesQuery = useCompanies(isAuthenticated && isAuthReady && !!activeTenantId, activeTenantId);
   const switchableClients: Client[] = isAuthenticated
     ? (companiesQuery.data ?? []).map(company => ({
       id: company.id,

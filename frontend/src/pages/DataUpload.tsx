@@ -65,9 +65,9 @@ const fmtAmount = (value: string | null | undefined): string =>
 
 export const DataUpload: React.FC = () => {
   const { t } = useTranslation();
-  const { addToast, isAuthenticated, activeTenantId } = useAppState();
+  const { addToast, isAuthenticated, isAuthReady, activeTenantId } = useAppState();
 
-  const companiesQuery = useCompanies(isAuthenticated && !!activeTenantId, activeTenantId);
+  const companiesQuery = useCompanies(isAuthenticated && isAuthReady && !!activeTenantId, activeTenantId);
   const uploadsQuery = useUploads();
 
   const [companyId, setCompanyId] = useState('');

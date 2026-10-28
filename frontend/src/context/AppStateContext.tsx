@@ -47,6 +47,8 @@ interface AppStateContextType {
   // User & Auth
   user: UserProfile | null;
   isAuthenticated: boolean;
+  /** True after the persisted Cognito session and tenant selector have been restored. */
+  isAuthReady: boolean;
   login: (email: string, password?: string) => Promise<boolean> | boolean;
   registerUser: (userData: Partial<UserProfile> & { password?: string; selectedPlanCode?: string }, options?: { signInAfterRegister?: boolean }) => Promise<boolean | 'confirmation-required'>;
   confirmRegistration: (email: string, code: string) => Promise<boolean>;
@@ -181,6 +183,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const token = localStorage.getItem('claq_cognito_idToken') || localStorage.getItem('claq_token');
     return Boolean(userSaved && token);
   });
+  // Do not let tenant-scoped queries race Amplify's persisted-session refresh on
+  // a cold page load. A cached ID token can be expired while Cognito is refreshing it.
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
   // 2. User-generated Obligations
   const [obligations, setObligations] = useState<FiscalObligation[]>(() => {
@@ -497,6 +502,10 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       } catch {
         // No session — remains in offline/local mode
+      } finally {
+        // Tenant resolution is attempted inside syncFromBackend before protected
+        // queries are enabled. A failed lookup still lets the UI show its retry state.
+        setIsAuthReady(true);
       }
     };
     restoreSession();
@@ -1097,6 +1106,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       value={{
         user,
         isAuthenticated,
+        isAuthReady,
         login,
         registerUser,
         confirmRegistration,

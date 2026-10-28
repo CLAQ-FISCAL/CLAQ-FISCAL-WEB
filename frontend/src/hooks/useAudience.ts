@@ -18,10 +18,10 @@ export interface AudienceContext {
  * choice is only an optimistic fallback (e.g. when the API is unreachable).
  */
 export function useAudience(): AudienceContext {
-  const { isAuthenticated, activeTenantId, tenants } = useAppState();
+  const { isAuthenticated, isAuthReady, activeTenantId, tenants } = useAppState();
   const audience = readAudience();
   const tenantResolved = tenants.length <= 1 || !!activeTenantId;
-  const subscriptionQuery = useSubscription(isAuthenticated && tenantResolved, activeTenantId);
+  const subscriptionQuery = useSubscription(isAuthenticated && isAuthReady && tenantResolved, activeTenantId);
   const subscription = subscriptionQuery.data ?? null;
 
   const family: PlanFamily | null =
