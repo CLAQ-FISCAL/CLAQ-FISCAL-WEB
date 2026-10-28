@@ -80,6 +80,12 @@ export const Header: React.FC<HeaderProps> = ({
   const canSwitchCompany = isAccountant || switchableClients.length > 0;
   const planLabel = getPlanDisplayName(subscription?.plan ?? readIntentPlan(), subscription?.label || user?.plan, key => t(key));
   const activeTenant = tenants.find(t => t.id === activeTenantId) ?? null;
+  const avatarInitials = (user?.name || t('header:userFallback'))
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part[0]?.toUpperCase() ?? '')
+    .join('') || 'C';
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
@@ -120,7 +126,7 @@ export const Header: React.FC<HeaderProps> = ({
     if (currentPath === '/relatorios') return t('header:pageTitleRelatorios');
     if (currentPath === '/clientes') return t('header:pageTitleClientes');
     if (currentPath === '/newsletter') return t('header:pageTitleNewsletter');
-    if (currentPath === '/configuracoes') return t('header:pageTitleConfig');
+    if (currentPath.startsWith('/configuracoes')) return t('header:pageTitleConfig');
     if (currentPath === '/suporte') return t('header:pageTitleSuporte');
     return t('header:pageTitleDashboard');
   };
@@ -619,18 +625,41 @@ export const Header: React.FC<HeaderProps> = ({
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--slate-100)'; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
           >
-            <img
-              src={user?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
-              alt={user?.name || t('header:userFallback')}
-              style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: '2px solid #FFFFFF',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-              }}
-            />
+            {user?.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user?.name || t('header:userFallback')}
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: '2px solid #FFFFFF',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                }}
+              />
+            ) : (
+              <span
+                role="img"
+                aria-label={user?.name || t('header:userFallback')}
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '50%',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#DBEAFE',
+                  color: '#1D4ED8',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  border: '2px solid #FFFFFF',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                }}
+              >
+                {avatarInitials}
+              </span>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', lineHeight: 1.2 }}>
               <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--slate-900)' }}>
                 {user?.name || t('header:userFallback')}
@@ -675,7 +704,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   onClick={() => {
                     setIsProfileOpen(false);
-                    onNavigate('/configuracoes');
+                    onNavigate('/configuracoes/perfil');
                   }}
                   style={{
                     display: 'flex',

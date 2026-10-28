@@ -149,7 +149,7 @@ const buildUserFromCognito = async (): Promise<UserProfile | null> => {
       email: cognitoEmail || savedUser.email || '',
       phone: (attrs as any).phone_number || payload.phone_number || savedUser.phone || '+258 84 000 0000',
       role: (payload['cognito:groups']?.[0] as string) || savedUser.role || 'ACCOUNTING_ADMIN',
-      avatarUrl: savedUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+      avatarUrl: (savedUser.avatarUrl && savedUser.avatarUrl !== 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80') ? savedUser.avatarUrl : '',
       companyName: (attrs as any)['custom:companyName'] || payload['custom:companyName'] || savedUser.companyName || i18n.t('state:companyFallback'),
       companyNuit: (attrs as any)['custom:nuit'] || payload['custom:nuit'] || savedUser.companyNuit || '400000000',
       companyAddress: savedUser.companyAddress || i18n.t('state:country'),
@@ -170,7 +170,13 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const saved = localStorage.getItem('claq_user');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        const legacyPhoto = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+        if (parsed && typeof parsed === 'object' && parsed.avatarUrl === legacyPhoto) {
+          parsed.avatarUrl = '';
+          try { localStorage.setItem('claq_user', JSON.stringify(parsed)); } catch { /* ignore */ }
+        }
+        return parsed;
       } catch (e) {
         return null;
       }
@@ -585,7 +591,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             email,
             phone: '+258 84 000 0000',
             role: 'ACCOUNTING_ADMIN',
-            avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+            avatarUrl: '',
             companyName: i18n.t('state:companyFallback'),
             companyNuit: '400000000',
             companyAddress: i18n.t('state:country'),
@@ -703,7 +709,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             email,
             phone: userData.phone || '+258 84 000 0000',
             role: (userData.role as UserProfile['role']) || 'ACCOUNTING_ADMIN',
-            avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+            avatarUrl: '',
             companyName: userData.companyName || i18n.t('state:companyNewFallback'),
             companyNuit: userData.companyNuit || '400000000',
             companyAddress: (userData as any).companyAddress || i18n.t('state:country'),
@@ -802,8 +808,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const updateUser = (data: Partial<UserProfile>) => {
     if (!user) return;
     const updated = { ...user, ...data };
-    setUser(updated);
     localStorage.setItem('claq_user', JSON.stringify(updated));
+    setUser(updated);
     // Also try to update Cognito attributes (best effort)
     import('aws-amplify/auth').then(({ updateUserAttributes }) => {
       const attrs: Record<string, string> = {};

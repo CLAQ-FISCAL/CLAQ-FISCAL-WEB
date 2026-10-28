@@ -15,7 +15,7 @@ export const INITIAL_USER: UserProfile = {
   email: 'carlos.apollo@claq.co.mz',
   phone: '+258 84 123 4567',
   role: 'Contabilista / Administrador',
-  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  avatarUrl: '',
   companyName: 'CLAQ Consultores, Lda',
   companyNuit: '400889900',
   companyAddress: 'Av. 24 de Julho, Edifício Platinum, 5º Andar',

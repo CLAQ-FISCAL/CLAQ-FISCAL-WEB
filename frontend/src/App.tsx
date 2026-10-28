@@ -134,7 +134,16 @@ const AppContent: React.FC = () => {
     if (currentPath.startsWith('/biblioteca-legal')) return <BibliotecaLegal />;
     if (currentPath === '/clientes') return <Clientes onNavigate={navigate} />;
     if (currentPath === '/dados') return <DataUpload />;
-    if (currentPath === '/configuracoes') return <Configuracoes onNavigate={navigate} />;
+    if (currentPath.startsWith('/configuracoes')) {
+      const requestedTab = currentPath.split('/')[2] as 'profile' | 'preferences' | 'alerts' | 'security' | 'plan' | 'integrations' | undefined;
+      const validTabs = ['profile', 'preferences', 'alerts', 'security', 'plan', 'integrations'];
+      return (
+        <Configuracoes
+          onNavigate={navigate}
+          initialTab={requestedTab && validTabs.includes(requestedTab) ? requestedTab : 'preferences'}
+        />
+      );
+    }
     if (currentPath === '/alertas') return <Alertas onNavigate={navigate} />;
     if (currentPath.startsWith('/obrigacoes/')) {
       const obligationId = decodeURIComponent(currentPath.slice('/obrigacoes/'.length));

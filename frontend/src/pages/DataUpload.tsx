@@ -8,20 +8,26 @@ import {
   History,
   Loader2,
   Play,
+  Plus,
   RefreshCw,
   UploadCloud
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAppState } from '../context/AppStateContext';
 import { useCompanies, useUploadBatch, useUploads, useStageUpload, useDecideUploadRows, useApplyUpload } from '../hooks/useUploads';
+import { QUERY_KEYS } from '../hooks/useFiscalQueries';
+import { ApiClient } from '../api/client';
 import { formatDate, formatMZN } from '../utils/formatters';
 import type {
   ApplyResult,
+  BackendCompany,
   MatchStateName,
   RowDecisionName,
   StagedRowView,
   UploadBatchSummary
 } from '../types';
+import './DataUpload.css';
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
@@ -66,6 +72,7 @@ const fmtAmount = (value: string | null | undefined): string =>
 export const DataUpload: React.FC = () => {
   const { t } = useTranslation();
   const { addToast, isAuthenticated, isAuthReady, activeTenantId } = useAppState();
+  const queryClient = useQueryClient();
 
   const companiesQuery = useCompanies(isAuthenticated && isAuthReady && !!activeTenantId, activeTenantId);
   const uploadsQuery = useUploads();
@@ -75,6 +82,9 @@ export const DataUpload: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const [applyResult, setApplyResult] = useState<ApplyResult | null>(null);
+  const [newCompanyName, setNewCompanyName] = useState('');
+  const [newCompanyNuit, setNewCompanyNuit] = useState('');
+  const [creatingCompany, setCreatingCompany] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const batchQuery = useUploadBatch(selectedBatchId);
@@ -87,19 +97,39 @@ export const DataUpload: React.FC = () => {
   const companies = companiesQuery.data ?? [];
   const uploads = uploadsQuery.data ?? [];
 
-  const pendingCount = batch?.exceptionCount ?? 0;
+  // `exceptionCount` is the historical total; `exceptions` only contains rows still awaiting a decision.
+  const pendingCount = batch?.exceptions.length ?? 0;
   const isApplied = batch?.status === 'APPLIED';
 
   const bulkStates = useMemo(() => {
     if (!batch) return [] as { state: MatchStateName; count: number; decisions: RowDecisionName[] }[];
+    const pendingByState = batch.exceptions.reduce<Partial<Record<MatchStateName, number>>>((acc, row) => {
+      acc[row.matchState] = (acc[row.matchState] ?? 0) + 1;
+      return acc;
+    }, {});
     return MATCH_STATE_ORDER.filter(
-      (state) => ALLOWED_DECISIONS[state].length > 0 && (batch.counts[state] ?? 0) > 0
-    ).map((state) => ({ state, count: batch.counts[state] ?? 0, decisions: ALLOWED_DECISIONS[state] }));
+      (state) => ALLOWED_DECISIONS[state].length > 0 && (pendingByState[state] ?? 0) > 0
+    ).map((state) => ({ state, count: pendingByState[state] ?? 0, decisions: ALLOWED_DECISIONS[state] }));
   }, [batch]);
 
-  const clearSelection = () => {
+  const steps = [
+    { label: t('uploads:stepCompany'), done: Boolean(companyId), active: !companyId },
+    { label: t('uploads:stepFile'), done: Boolean(companyId && file), active: Boolean(companyId && !file) },
+    { label: t('uploads:stepReview'), done: Boolean(batch), active: Boolean(batch) }
+  ];
+
+  const resetUploadForm = () => {
     setSelectedBatchId(null);
     setApplyResult(null);
+    setFile(null);
+    setErrorMsg(null);
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  const clearFile = () => {
+    setFile(null);
+    setErrorMsg(null);
+    if (inputRef.current) inputRef.current.value = '';
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,6 +137,40 @@ export const DataUpload: React.FC = () => {
     setFile(picked);
     setErrorMsg(null);
     if (picked && picked.size > MAX_UPLOAD_BYTES) setErrorMsg(t('uploads:fileTooLarge'));
+  };
+
+  const handleCreateCompany = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCompanyName.trim()) {
+      setErrorMsg(t('uploads:companyNameRequired'));
+      return;
+    }
+    if (newCompanyNuit.trim() && !/^\d{9}$/.test(newCompanyNuit.trim())) {
+      setErrorMsg(t('uploads:companyNuitInvalid'));
+      return;
+    }
+    setCreatingCompany(true);
+    setErrorMsg(null);
+    try {
+      const created = await ApiClient.post<BackendCompany>('/companies', {
+        legalName: newCompanyName.trim(),
+        ...(newCompanyNuit.trim() ? { nuit: newCompanyNuit.trim() } : {})
+      });
+      queryClient.setQueryData<BackendCompany[]>(QUERY_KEYS.COMPANIES, (previous) =>
+        [...(previous ?? []), created].sort((a, b) => a.legalName.localeCompare(b.legalName))
+      );
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COMPANIES });
+      setCompanyId(created.id);
+      setNewCompanyName('');
+      setNewCompanyNuit('');
+      addToast('success', t('uploads:toastCompanyCreatedTitle'), t('uploads:toastCompanyCreatedMsg', { name: created.legalName }));
+    } catch (err) {
+      const message = errMessage(err, t('uploads:toastErrorMsg'));
+      setErrorMsg(message);
+      addToast('error', t('uploads:toastErrorTitle'), message);
+    } finally {
+      setCreatingCompany(false);
+    }
   };
 
   const handleAnalyze = async () => {
@@ -141,6 +205,7 @@ export const DataUpload: React.FC = () => {
     if (!selectedBatchId) return;
     try {
       const res = await decideMutation.mutateAsync({ decision, ...scope });
+      await queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.UPLOADS, selectedBatchId] });
       addToast('success', t('uploads:toastDecidedTitle'), t('uploads:toastDecidedMsg', { updated: res.updated }));
     } catch (e) {
       addToast('error', t('uploads:toastErrorTitle'), errMessage(e, t('uploads:toastErrorMsg')));
@@ -152,10 +217,17 @@ export const DataUpload: React.FC = () => {
     try {
       const res = await applyMutation.mutateAsync();
       setApplyResult(res);
+      await queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.UPLOADS, selectedBatchId] });
       addToast('success', t('uploads:toastAppliedTitle'), t('uploads:toastAppliedMsg', { updated: res.obligationsUpdated, created: res.obligationsCreated }));
     } catch (e) {
       addToast('error', t('uploads:toastErrorTitle'), errMessage(e, t('uploads:toastErrorMsg')));
     }
+  };
+
+  const openBatch = (id: string) => {
+    setSelectedBatchId(id);
+    setApplyResult(null);
+    setErrorMsg(null);
   };
 
   const renderStatusBadge = (status: string) => (
@@ -164,16 +236,15 @@ export const DataUpload: React.FC = () => {
 
   const renderDecisionButtons = (row: StagedRowView) => {
     const allowed = ALLOWED_DECISIONS[row.matchState];
-    if (allowed.length === 0) return <span style={{ fontSize: '12px', color: 'var(--slate-400)' }}>—</span>;
+    if (allowed.length === 0) return <span className="upload-muted">—</span>;
     return (
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+      <div className="upload-decision-group">
         {allowed.map((decision) => (
           <button
             key={decision}
             onClick={() => handleDecide(decision, { rowNumbers: [row.rowNumber] })}
             disabled={decideMutation.isPending}
-            className="btn btn-ghost btn-sm"
-            style={{ fontSize: '11.5px', padding: '4px 8px', border: '1px solid var(--slate-200)' }}
+            className="btn btn-ghost btn-sm upload-decision-btn"
           >
             {t(`uploads:decision${decision}`)}
           </button>
@@ -185,7 +256,7 @@ export const DataUpload: React.FC = () => {
   const renderSummaryChips = () => {
     if (!batch) return null;
     return (
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+      <div className="upload-chips">
         {MATCH_STATE_ORDER.filter((state) => (batch.counts[state] ?? 0) > 0).map((state) => (
           <span key={state} className={`badge ${MATCH_STATE_BADGE[state]}`}>
             {t(`uploads:matchState${state}`)}: {batch.counts[state]}
@@ -196,135 +267,261 @@ export const DataUpload: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+    <div className="upload-page">
+      <header className="upload-page-header">
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--slate-900)' }}>{t('uploads:pageTitle')}</h1>
-          <p style={{ fontSize: '13.5px', color: 'var(--slate-500)', marginTop: '2px' }}>{t('uploads:pageSubtitle')}</p>
+          <h1 className="upload-page-title">{t('uploads:pageTitle')}</h1>
+          <p className="upload-page-subtitle">{t('uploads:pageSubtitle')}</p>
         </div>
         {selectedBatchId && (
-          <button onClick={clearSelection} className="btn btn-secondary" style={{ fontSize: '13px' }}>
+          <button onClick={resetUploadForm} className="btn btn-secondary upload-secondary-cta">
             <RefreshCw size={15} />
             <span>{t('uploads:newUploadCta')}</span>
           </button>
         )}
+      </header>
+
+      <div className="upload-steps" aria-label={t('uploads:workflowLabel')}>
+        {steps.map((step, index) => (
+          <div
+            key={step.label}
+            className={`upload-step${step.done ? ' is-complete' : ''}${step.active ? ' is-active' : ''}`}
+          >
+            <span className="upload-step-number">{index + 1}</span>
+            <span>{step.label}</span>
+          </div>
+        ))}
       </div>
 
-      <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <UploadCloud size={18} color="var(--blue-600)" />
+      <section className="card upload-card">
+        <div className="upload-card-head">
+          <div className="upload-card-icon">
+            <UploadCloud size={20} />
+          </div>
           <div>
-            <h3 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--slate-800)' }}>{t('uploads:uploadCardTitle')}</h3>
-            <p style={{ fontSize: '12.5px', color: 'var(--slate-500)' }}>{t('uploads:uploadCardDesc')}</p>
+            <h2 className="upload-card-title">{t('uploads:uploadCardTitle')}</h2>
+            <p className="upload-card-desc">{t('uploads:uploadCardDesc')}</p>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 1fr) minmax(220px, 1fr) auto', gap: '14px', alignItems: 'end' }}>
-          <div className="form-group">
-            <label className="form-label">{t('uploads:companyLabel')}</label>
-            <select className="form-control" value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
-              <option value="">{t('uploads:companyPlaceholder')}</option>
-              {companies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.legalName}
+        <div className="upload-form-grid">
+          <div className="form-group upload-form-group">
+            <label className="form-label upload-label" htmlFor="upload-company">{t('uploads:companyLabel')}</label>
+            <select
+              id="upload-company"
+              className="form-control"
+              value={companyId}
+              onChange={(e) => setCompanyId(e.target.value)}
+              disabled={companiesQuery.isLoading}
+            >
+              <option value="">
+                {companiesQuery.isLoading ? t('uploads:loadingCompanies') : t('uploads:companyPlaceholder')}
+              </option>
+              {companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.legalName}
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">{t('uploads:fileLabel')}</label>
+          <div className="form-group upload-form-group">
+            <label className="form-label upload-label" htmlFor="upload-file">{t('uploads:fileLabel')}</label>
             <input
               ref={inputRef}
+              id="upload-file"
               type="file"
               accept=".csv,text/csv"
-              className="form-control"
-              style={{ padding: '7px 12px', fontSize: '13px' }}
+              className="upload-file-input"
               onChange={handleFileChange}
             />
+            <label htmlFor="upload-file" className="upload-dropzone">
+              <FileSpreadsheet size={17} color="var(--slate-500)" />
+              <span className="upload-dropzone-label">
+                {file ? file.name : t('uploads:chooseFile')}
+              </span>
+              <span className="upload-dropzone-hint">{t('uploads:maxFileSize')}</span>
+            </label>
           </div>
 
           <button
             onClick={handleAnalyze}
-            disabled={stageMutation.isPending}
-            className="btn btn-primary-blue"
-            style={{ fontSize: '13px', height: '40px' }}
+            disabled={stageMutation.isPending || !companyId || !file || (!!file && file.size > MAX_UPLOAD_BYTES)}
+            className="btn btn-primary-blue upload-analyze-btn"
           >
             {stageMutation.isPending ? <Loader2 size={16} className="claq-spin" /> : <Play size={16} />}
             <span>{stageMutation.isPending ? t('uploads:analyzing') : t('uploads:analyzeCta')}</span>
           </button>
         </div>
 
+        {companiesQuery.isError && (
+          <div className="upload-alert is-error" role="alert">
+            <AlertCircle size={15} />
+            <span>{t('uploads:companiesLoadError')}</span>
+            <button
+              type="button"
+              onClick={() => companiesQuery.refetch()}
+              disabled={companiesQuery.isFetching}
+              className="btn btn-secondary btn-sm upload-alert-action"
+            >
+              {companiesQuery.isFetching ? <Loader2 size={13} className="claq-spin" /> : <RefreshCw size={13} />}
+              <span>{t('uploads:retry')}</span>
+            </button>
+          </div>
+        )}
+
+        {file && (
+          <div className={`upload-file-pill${file.size > MAX_UPLOAD_BYTES ? ' is-invalid' : ''}`}>
+            <FileSpreadsheet size={16} />
+            <span className="upload-file-name">{file.name}</span>
+            <span className="upload-file-size">{(file.size / 1024).toFixed(1)} KB</span>
+            <button type="button" onClick={clearFile} className="btn btn-ghost btn-sm upload-clear-file">
+              {t('uploads:clearFile')}
+            </button>
+          </div>
+        )}
+
         {file && file.size > MAX_UPLOAD_BYTES && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--red-500)', fontSize: '12.5px' }}>
+          <div className="upload-alert is-error">
             <AlertTriangle size={15} />
             <span>{t('uploads:fileTooLarge')}</span>
           </div>
         )}
 
         {errorMsg && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--gold-600)', fontSize: '12.5px' }}>
+          <div className="upload-alert is-warning">
             <AlertCircle size={15} />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {companiesQuery.isSuccess && companies.length === 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', backgroundColor: 'var(--slate-50)', borderRadius: '10px' }}>
-            <Building2 size={16} color="var(--slate-400)" />
-            <div>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--slate-700)' }}>{t('uploads:noCompanies')}</span>
-              <span style={{ fontSize: '12.5px', color: 'var(--slate-500)', display: 'block' }}>{t('uploads:noCompaniesHint')}</span>
+          <div className="upload-empty">
+            <div className="upload-empty-head">
+              <div className="upload-empty-icon">
+                <Building2 size={18} />
+              </div>
+              <div>
+                <h3>{t('uploads:noCompanies')}</h3>
+                <p>{t('uploads:noCompaniesHint')}</p>
+              </div>
             </div>
+            <form onSubmit={handleCreateCompany} className="upload-company-form">
+              <input
+                className="form-control"
+                aria-label={t('uploads:companyNameLabel')}
+                placeholder={t('uploads:companyNamePlaceholder')}
+                value={newCompanyName}
+                onChange={(e) => setNewCompanyName(e.target.value)}
+                required
+              />
+              <input
+                className="form-control"
+                aria-label={t('uploads:companyNuitLabel')}
+                placeholder={t('uploads:companyNuitPlaceholder')}
+                value={newCompanyNuit}
+                onChange={(e) => setNewCompanyNuit(e.target.value)}
+                maxLength={9}
+                inputMode="numeric"
+              />
+              <button type="submit" className="btn btn-primary-blue btn-sm" disabled={creatingCompany}>
+                {creatingCompany ? <Loader2 size={14} className="claq-spin" /> : <Plus size={14} />}
+                <span>{creatingCompany ? t('uploads:creatingCompany') : t('uploads:createCompanyCta')}</span>
+              </button>
+            </form>
           </div>
         )}
-      </div>
+      </section>
+
+      {selectedBatchId && !batch && batchQuery.isLoading && (
+        <section className="card upload-card">
+          <div className="upload-empty-state">
+            <Loader2 size={28} className="claq-spin" color="var(--slate-300)" />
+            <p>{t('uploads:loadingBatch')}</p>
+          </div>
+        </section>
+      )}
+
+      {selectedBatchId && !batch && batchQuery.isError && (
+        <section className="card upload-card">
+          <div className="upload-alert is-error" role="alert">
+            <AlertCircle size={15} />
+            <span>{t('uploads:batchLoadError')}</span>
+            <button
+              type="button"
+              onClick={() => batchQuery.refetch()}
+              disabled={batchQuery.isFetching}
+              className="btn btn-secondary btn-sm upload-alert-action"
+            >
+              {batchQuery.isFetching ? <Loader2 size={13} className="claq-spin" /> : <RefreshCw size={13} />}
+              <span>{t('uploads:retry')}</span>
+            </button>
+          </div>
+        </section>
+      )}
 
       {batch && (
-        <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <FileSpreadsheet size={18} color="var(--slate-600)" />
+        <section className="card upload-card">
+          <div className="upload-section-head">
+            <div className="upload-card-head">
+              <div className="upload-card-icon is-slate">
+                <FileSpreadsheet size={19} />
+              </div>
               <div>
-                <h3 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--slate-800)' }}>{batch.fileName}</h3>
-                <span style={{ fontSize: '12px', color: 'var(--slate-400)' }}>{formatDate(batch.createdAt.slice(0, 10))}</span>
+                <h3 className="upload-card-title">{batch.fileName}</h3>
+                <p className="upload-card-desc">{formatDate(batch.createdAt.slice(0, 10))}</p>
               </div>
             </div>
             {renderStatusBadge(batch.status)}
           </div>
 
           {batch.duplicate && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--gold-600)', fontSize: '12.5px' }}>
+            <div className="upload-alert is-warning">
               <AlertCircle size={15} />
               <span>{t('uploads:summaryDuplicate')}</span>
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '12px' }}>
-            <div style={{ padding: '12px 14px', backgroundColor: 'var(--slate-50)', borderRadius: '10px' }}>
-              <div style={{ fontSize: '11.5px', color: 'var(--slate-500)', fontWeight: 600 }}>{t('uploads:summaryRows')}</div>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--slate-900)' }}>{batch.rowCount}</div>
+          <div className="upload-stats">
+            <div className="upload-stat">
+              <div className="upload-stat-icon is-blue">
+                <FileSpreadsheet size={17} />
+              </div>
+              <div>
+                <span className="upload-stat-label">{t('uploads:summaryRows')}</span>
+                <strong className="upload-stat-value">{batch.rowCount}</strong>
+              </div>
             </div>
-            <div style={{ padding: '12px 14px', backgroundColor: 'var(--slate-50)', borderRadius: '10px' }}>
-              <div style={{ fontSize: '11.5px', color: 'var(--slate-500)', fontWeight: 600 }}>{t('uploads:summaryValid')}</div>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--emerald-600)' }}>{batch.validCount}</div>
+            <div className="upload-stat">
+              <div className="upload-stat-icon is-green">
+                <CheckCircle2 size={17} />
+              </div>
+              <div>
+                <span className="upload-stat-label">{t('uploads:summaryValid')}</span>
+                <strong className="upload-stat-value is-green">{batch.validCount}</strong>
+              </div>
             </div>
-            <div style={{ padding: '12px 14px', backgroundColor: 'var(--slate-50)', borderRadius: '10px' }}>
-              <div style={{ fontSize: '11.5px', color: 'var(--slate-500)', fontWeight: 600 }}>{t('uploads:summaryExceptions')}</div>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: pendingCount > 0 ? 'var(--gold-600)' : 'var(--slate-900)' }}>{batch.exceptionCount}</div>
+            <div className="upload-stat">
+              <div className="upload-stat-icon is-amber">
+                <AlertTriangle size={17} />
+              </div>
+              <div>
+                <span className="upload-stat-label">{t('uploads:summaryExceptions')}</span>
+                <strong className={`upload-stat-value${pendingCount > 0 ? ' is-amber' : ''}`}>{batch.exceptionCount}</strong>
+              </div>
             </div>
           </div>
 
           {renderSummaryChips()}
-        </div>
+        </section>
       )}
 
       {batch && (
-        <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <section className="card upload-card">
+          <div className="upload-section-head">
             <div>
-              <h3 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--slate-800)' }}>{t('uploads:reviewTitle')}</h3>
-              <p style={{ fontSize: '12.5px', color: 'var(--slate-500)' }}>{t('uploads:reviewDesc')}</p>
+              <h3 className="upload-card-title">{t('uploads:reviewTitle')}</h3>
+              <p className="upload-card-desc">{t('uploads:reviewDesc')}</p>
             </div>
             {pendingCount > 0 && (
               <span className="badge badge-amber">{t('uploads:pendingCount', { count: pendingCount })}</span>
@@ -332,21 +529,31 @@ export const DataUpload: React.FC = () => {
           </div>
 
           {batch.exceptions.length === 0 ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px', backgroundColor: 'var(--emerald-50)', borderRadius: '10px' }}>
-              <CheckCircle2 size={18} color="var(--emerald-600)" />
+            <div className="upload-success-panel">
+              <div className="upload-success-icon">
+                <CheckCircle2 size={19} />
+              </div>
               <div>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--slate-800)' }}>
-                  {isApplied ? t('uploads:statusAPPLIED') : t('uploads:noExceptions')}
-                </span>
-                <span style={{ fontSize: '12.5px', color: 'var(--slate-500)', display: 'block' }}>
-                  {isApplied ? t('uploads:applyAlreadyApplied') : t('uploads:noExceptionsDesc')}
-                </span>
+                <strong>
+                  {isApplied
+                    ? t('uploads:statusAPPLIED')
+                    : batch.exceptionCount > 0
+                      ? t('uploads:allResolved')
+                      : t('uploads:noExceptions')}
+                </strong>
+                <p>
+                  {isApplied
+                    ? t('uploads:applyAlreadyApplied')
+                    : batch.exceptionCount > 0
+                      ? t('uploads:allResolvedDesc')
+                      : t('uploads:noExceptionsDesc')}
+                </p>
               </div>
             </div>
           ) : (
             <>
-              <div className="table-responsive">
-                <table className="data-table">
+              <div className="table-responsive upload-table-wrap">
+                <table className="data-table upload-table">
                   <thead>
                     <tr>
                       <th>#</th>
@@ -361,23 +568,16 @@ export const DataUpload: React.FC = () => {
                   <tbody>
                     {batch.exceptions.map((row) => (
                       <tr key={row.id}>
-                        <td style={{ color: 'var(--slate-400)', fontWeight: 600 }}>{row.rowNumber}</td>
+                        <td className="upload-row-number">{row.rowNumber}</td>
                         <td>
-                          <span style={{ fontWeight: 600, color: 'var(--slate-800)' }}>{row.title || '—'}</span>
-                          {row.claimedStatus && (
-                            <span style={{ display: 'block', fontSize: '11.5px', color: 'var(--slate-400)' }}>
-                              {t('uploads:colClaimedStatus')}: {row.claimedStatus}
-                            </span>
-                          )}
+                          <span className="upload-row-title">{row.title || '—'}</span>
                           {row.errors.length > 0 && (
-                            <span style={{ display: 'block', fontSize: '11.5px', color: 'var(--red-500)' }}>
-                              {row.errors.map((err) => err.message).join('; ')}
-                            </span>
+                            <span className="upload-row-error">{row.errors.map((err) => err.message).join('; ')}</span>
                           )}
                         </td>
-                        <td style={{ color: 'var(--slate-700)' }}>{row.dueAt ? formatDate(row.dueAt.slice(0, 10)) : '—'}</td>
-                        <td style={{ fontWeight: 600, color: 'var(--slate-800)' }}>{fmtAmount(row.amount)}</td>
-                        <td style={{ color: 'var(--slate-600)' }}>{fmtAmount(row.expectedAmount)}</td>
+                        <td>{row.dueAt ? formatDate(row.dueAt.slice(0, 10)) : '—'}</td>
+                        <td className="upload-row-amount">{fmtAmount(row.amount)}</td>
+                        <td className="upload-row-expected">{fmtAmount(row.expectedAmount)}</td>
                         <td>
                           <span className={`badge ${MATCH_STATE_BADGE[row.matchState]}`}>
                             {t(`uploads:matchState${row.matchState}`)}
@@ -391,14 +591,14 @@ export const DataUpload: React.FC = () => {
               </div>
 
               {bulkStates.length > 0 && (
-                <div style={{ borderTop: '1px solid var(--slate-100)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div className="upload-bulk">
                   <div>
-                    <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--slate-700)' }}>{t('uploads:bulkTitle')}</span>
-                    <span style={{ fontSize: '12px', color: 'var(--slate-500)', display: 'block' }}>{t('uploads:bulkHint')}</span>
+                    <strong className="upload-bulk-title">{t('uploads:bulkTitle')}</strong>
+                    <p className="upload-bulk-hint">{t('uploads:bulkHint')}</p>
                   </div>
                   {bulkStates.map(({ state, count, decisions }) => (
-                    <div key={state} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                      <span className={`badge ${MATCH_STATE_BADGE[state]}`} style={{ minWidth: '150px', justifyContent: 'center' }}>
+                    <div key={state} className="upload-bulk-row">
+                      <span className={`badge ${MATCH_STATE_BADGE[state]} upload-bulk-badge`}>
                         {t(`uploads:matchState${state}`)}: {count}
                       </span>
                       {decisions.map((decision) => (
@@ -407,7 +607,6 @@ export const DataUpload: React.FC = () => {
                           onClick={() => handleDecide(decision, { matchStates: [state] })}
                           disabled={decideMutation.isPending}
                           className="btn btn-secondary btn-sm"
-                          style={{ fontSize: '11.5px' }}
                         >
                           {t(`uploads:decision${decision}`)}
                         </button>
@@ -419,15 +618,14 @@ export const DataUpload: React.FC = () => {
             </>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid var(--slate-100)', paddingTop: '14px' }}>
+          <div className="upload-apply-bar">
             {!isApplied && pendingCount > 0 && (
-              <span style={{ fontSize: '12.5px', color: 'var(--slate-500)' }}>{t('uploads:applyBlocked')}</span>
+              <span className="upload-apply-blocked">{t('uploads:applyBlocked')}</span>
             )}
             <button
               onClick={handleApply}
               disabled={applyMutation.isPending || isApplied || pendingCount > 0}
-              className="btn btn-primary-gold"
-              style={{ fontSize: '13px', opacity: isApplied || pendingCount > 0 ? 0.55 : 1 }}
+              className="btn btn-primary-gold upload-apply-btn"
             >
               {applyMutation.isPending ? <Loader2 size={16} className="claq-spin" /> : <CheckCircle2 size={16} />}
               <span>{applyMutation.isPending ? t('uploads:applying') : t('uploads:applyCta')}</span>
@@ -435,11 +633,9 @@ export const DataUpload: React.FC = () => {
           </div>
 
           {applyResult && (
-            <div style={{ backgroundColor: 'var(--slate-50)', borderRadius: '10px', padding: '14px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--slate-800)', display: 'block', marginBottom: '8px' }}>
-                {t('uploads:resultTitle')}
-              </span>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', fontSize: '12.5px', color: 'var(--slate-600)' }}>
+            <div className="upload-result">
+              <strong className="upload-result-title">{t('uploads:resultTitle')}</strong>
+              <div className="upload-result-grid">
                 <span>{t('uploads:resultUpdated')}: <strong>{applyResult.obligationsUpdated}</strong></span>
                 <span>{t('uploads:resultCreated')}: <strong>{applyResult.obligationsCreated}</strong></span>
                 <span>{t('uploads:resultTemplates')}: <strong>{applyResult.templatesCreated}</strong></span>
@@ -447,55 +643,90 @@ export const DataUpload: React.FC = () => {
               </div>
             </div>
           )}
-        </div>
+        </section>
       )}
 
-      <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <History size={18} color="var(--slate-600)" />
-          <h3 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--slate-800)' }}>{t('uploads:historyTitle')}</h3>
+      <section className="card upload-card">
+        <div className="upload-section-head">
+          <div className="upload-card-head">
+            <div className="upload-card-icon is-slate">
+              <History size={19} />
+            </div>
+            <div>
+              <h3 className="upload-card-title">{t('uploads:historyTitle')}</h3>
+              {uploads.length > 0 && (
+                <p className="upload-card-desc">{t('uploads:historyCount', { count: uploads.length })}</p>
+              )}
+            </div>
+          </div>
         </div>
 
-        {uploads.length === 0 ? (
-          <div style={{ padding: '28px 16px', textAlign: 'center' }}>
-            <FileSpreadsheet size={34} color="var(--slate-300)" style={{ margin: '0 auto 10px' }} />
-            <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--slate-700)' }}>{t('uploads:historyEmpty')}</h4>
-            <p style={{ fontSize: '12.5px', color: 'var(--slate-500)', marginTop: '4px' }}>{t('uploads:historyEmptyDesc')}</p>
+        {uploadsQuery.isLoading ? (
+          <div className="upload-empty-state">
+            <Loader2 size={28} className="claq-spin" color="var(--slate-300)" />
+            <p>{t('uploads:loadingUploads')}</p>
+          </div>
+        ) : uploadsQuery.isError ? (
+          <div className="upload-empty-state">
+            <AlertCircle size={34} color="var(--red-500)" />
+            <h4>{t('uploads:uploadsLoadError')}</h4>
+            <button
+              type="button"
+              onClick={() => uploadsQuery.refetch()}
+              disabled={uploadsQuery.isFetching}
+              className="btn btn-secondary btn-sm"
+            >
+              {uploadsQuery.isFetching ? <Loader2 size={13} className="claq-spin" /> : <RefreshCw size={13} />}
+              <span>{t('uploads:retry')}</span>
+            </button>
+          </div>
+        ) : uploads.length === 0 ? (
+          <div className="upload-empty-state">
+            <FileSpreadsheet size={34} color="var(--slate-300)" />
+            <h4>{t('uploads:historyEmpty')}</h4>
+            <p>{t('uploads:historyEmptyDesc')}</p>
           </div>
         ) : (
-          <div className="table-responsive">
-            <table className="data-table">
+          <div className="table-responsive upload-table-wrap">
+            <table className="data-table upload-table">
               <thead>
                 <tr>
                   <th>{t('uploads:colFileName')}</th>
                   <th>{t('uploads:colRows')}</th>
                   <th>{t('uploads:colValid')}</th>
                   <th>{t('uploads:colExceptions')}</th>
-                  <th style={{ textAlign: 'right' }}>{t('uploads:colCreated')}</th>
+                  <th>{t('uploads:colStatus')}</th>
+                  <th className="upload-align-right">{t('uploads:colCreated')}</th>
                 </tr>
               </thead>
               <tbody>
                 {uploads.map((item: UploadBatchSummary) => (
                   <tr
                     key={item.id}
-                    onClick={() => {
-                      setSelectedBatchId(item.id);
-                      setApplyResult(null);
+                    onClick={() => openBatch(item.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openBatch(item.id);
+                      }
                     }}
-                    style={{ cursor: 'pointer', backgroundColor: item.id === selectedBatchId ? 'var(--slate-50)' : undefined }}
+                    tabIndex={0}
+                    aria-label={item.fileName}
+                    className={`upload-history-row${item.id === selectedBatchId ? ' is-selected' : ''}`}
                   >
-                    <td style={{ fontWeight: 600, color: 'var(--slate-800)' }}>{item.fileName}</td>
+                    <td className="upload-row-title">{item.fileName}</td>
                     <td>{item.rowCount}</td>
-                    <td style={{ color: 'var(--emerald-600)', fontWeight: 600 }}>{item.validCount}</td>
-                    <td style={{ color: item.exceptionCount > 0 ? 'var(--gold-600)' : 'var(--slate-500)', fontWeight: 600 }}>{item.exceptionCount}</td>
-                    <td style={{ textAlign: 'right', color: 'var(--slate-500)' }}>{formatDate(item.createdAt.slice(0, 10))}</td>
+                    <td className="upload-row-valid">{item.validCount}</td>
+                    <td className={item.exceptionCount > 0 ? 'upload-row-warning' : ''}>{item.exceptionCount}</td>
+                    <td>{renderStatusBadge(item.status)}</td>
+                    <td className="upload-align-right upload-row-date">{formatDate(item.createdAt.slice(0, 10))}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 };

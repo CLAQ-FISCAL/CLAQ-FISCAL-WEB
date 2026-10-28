@@ -217,7 +217,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {t('sidebar:bePremiumDesc')}
             </p>
             <button
-              onClick={() => onNavigate('/configuracoes')}
+              onClick={() => onNavigate(isCompany ? '/comecar/upgrade-company' : '/comecar/upgrade')}
               className="btn btn-primary-gold"
               style={{ width: '100%', padding: '8px 12px', fontSize: '12.5px', borderRadius: '8px' }}
             >
