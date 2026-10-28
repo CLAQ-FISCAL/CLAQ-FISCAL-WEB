@@ -180,19 +180,6 @@ const publicRoutes: PublicRoute[] = [
 const routes: Route[] = [
   {
     method: 'GET',
-    pattern: /^\/v1\/me$/,
-    handler: async (ctx) => {
-      const memberships = await ctx.db.membership.findMany({
-        where: { userId: ctx.userId },
-        include: { tenant: { select: { id: true, name: true, plan: true } } },
-        orderBy: { tenant: { name: 'asc' } },
-      });
-      const user = await ctx.db.user.findUnique({ where: { id: ctx.userId }, select: { id: true, email: true, displayName: true } });
-      return { user, tenants: memberships.map((m) => ({ ...m.tenant, plan: canonicalPlanCode(m.tenant.plan), role: m.role })) };
-    },
-  },
-  {
-    method: 'GET',
     pattern: /^\/v1\/subscription$/,
     handler: async (ctx) => {
       const tenant = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { plan: true, type: true } });
@@ -934,6 +921,28 @@ export function createHandler(db: PrismaClient, crypto: CryptoDeps): (event: API
         return jsonResponse(200, { tenantId: result.id, tenantName: result.name, plan: result.plan, demo: true }, requestId);
       }
       const user = await ensureUser(db, claims);
+
+      // Tenant discovery must work before a user has a tenant and when the
+      // browser has a stale tenant selector. `/me` only returns memberships
+      // belonging to the verified Cognito subject, so it does not need a
+      // tenant-scoped context or RLS transaction.
+      if (method === 'GET' && path === '/v1/me') {
+        const memberships = await db.membership.findMany({
+          where: { userId: user.id },
+          include: { tenant: { select: { id: true, name: true, plan: true } } },
+          orderBy: { tenant: { name: 'asc' } },
+        });
+        const currentUser = await db.user.findUnique({ where: { id: user.id }, select: { id: true, email: true, displayName: true } });
+        return jsonResponse(200, {
+          user: currentUser,
+          tenants: memberships.map((membership) => ({
+            ...membership.tenant,
+            plan: canonicalPlanCode(membership.tenant.plan),
+            role: membership.role,
+          })),
+        }, requestId);
+      }
+
       const tenant = await resolveTenant(db, user.id, header(event, 'x-tenant-id'));
 
       const ctx: RequestContext = {
