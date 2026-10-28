@@ -1,0 +1,1932 @@
+{
+  "/claq-demo": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    },
+    {
+      "type": "aws:cdk:stack-tags",
+      "data": [
+        {
+          "key": "Environment",
+          "value": "demo"
+        },
+        {
+          "key": "System",
+          "value": "CLAQ"
+        }
+      ]
+    }
+  ],
+  "/claq-demo/Custom::S3AutoDeleteObjectsCustomResourceProvider": [
+    {
+      "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+      "data": true
+    }
+  ],
+  "/claq-demo/ApiWaf": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiWaf"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:251:22)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/ApiWafArn": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiWafArn"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:279:7)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/GuardDuty": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "GuardDuty"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:298:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/SecurityHub": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SecurityHub"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:304:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/ApiUrl": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiUrl"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:309:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/UserPoolId": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UserPoolId"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:310:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/UserPoolClientId": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UserPoolClientId"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:311:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DocumentBucket": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DocumentBucket"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:312:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DatabaseSecretArn": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DatabaseSecretArn"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:313:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DemoBanner": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DemoBanner"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:314:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/claq-demo/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Vpc8378EB38"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:27:16)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/IGW": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcIGWD7BA715C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:27:16)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/VPCGW": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcVPCGWBF912B6E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:27:16)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/AppSg/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppSg898BCA4E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new SecurityGroup2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:39:18)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DbSg/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DbSg495F8305"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new SecurityGroup2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:40:18)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DbSg/from claqdemoAppSgE06E1CBC:5432": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DbSgfromclaqdemoAppSgE06E1CBC5432CDBF56DC"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:41:10)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DataKey/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DataKey17AFBB84"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Key2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:43:20)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/Documents/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Documents7E5B2978"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Bucket2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:49:22)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    },
+    {
+      "type": "aws:cdk:analytics:mixin",
+      "data": {
+        "mixin": "aws-cdk-lib.aws_s3.mixins.BucketAutoDeleteObjects"
+      }
+    }
+  ],
+  "/claq-demo/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/claq-demo/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/claq-demo/TrailLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TrailLogs3B05809D"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Bucket2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:58:22)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    },
+    {
+      "type": "aws:cdk:analytics:mixin",
+      "data": {
+        "mixin": "aws-cdk-lib.aws_s3.mixins.BucketAutoDeleteObjects"
+      }
+    }
+  ],
+  "/claq-demo/NotificationsDlq/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "NotificationsDlq12302AF4"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Queue2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:68:16)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/Notifications/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Notifications87298708"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Queue2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:69:18)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/Database/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DatabaseB269D8BB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new DatabaseInstance2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:71:21)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/Users/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Users0A0EEA89"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new UserPool2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:45:18)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/MigrationsRunner/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "MigrationsRunnerB085CAC2"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:121:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:121:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)"
+      ]
+    }
+  ],
+  "/claq-demo/DatabaseMigrations/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DatabaseMigrations"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new CustomResource2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:131:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/ApiFunction/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiFunctionCE271BD4"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:144:19)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DemoSeeder/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DemoSeederC088AC5A"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:167:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DemoSeed/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DemoSeed"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new CustomResource2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:174:7)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiF5A9A8A7"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new HttpApi2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:187:17)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/RemindersFunction/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "RemindersFunctionBA3883B0"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:208:25)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DailyReminderRule/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DailyReminderRule8FE15EA7"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Rule2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:215:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DailyReminderRule/AllowEventRuleclaqdemoRemindersFunction9C0A9C00": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DailyReminderRuleAllowEventRuleclaqdemoRemindersFunction9C0A9C0072585077"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Rule2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:215:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)"
+      ]
+    }
+  ],
+  "/claq-demo/NotifierFunction/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "NotifierFunctionEB33F81B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:221:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/NotifierSource/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "NotifierSourceDE648599"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new EventSourceMapping2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:239:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/ManagementTrail/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ManagementTrail879F59F2"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Trail2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:289:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/publicSubnet1/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcpublicSubnet1Subnet2BB74ED7"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/publicSubnet1/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcpublicSubnet1RouteTable15C15F8E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/publicSubnet1/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcpublicSubnet1RouteTableAssociation4E83B6E4"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/publicSubnet1/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcpublicSubnet1DefaultRouteB88F9E93"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:208 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...new Vpc2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:27:16)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)"
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/publicSubnet1/EIP": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcpublicSubnet1EIP411541E6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:27:16)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)"
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/publicSubnet1/NATGateway": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcpublicSubnet1NATGatewayA036E8A6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:27:16)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)"
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/publicSubnet2/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcpublicSubnet2SubnetE34B022A"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/publicSubnet2/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcpublicSubnet2RouteTableC5A6DF77"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/publicSubnet2/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcpublicSubnet2RouteTableAssociationCCE257FF"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/publicSubnet2/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcpublicSubnet2DefaultRoute732F0BEB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:208 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...new Vpc2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:27:16)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)"
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/appSubnet1/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcappSubnet1SubnetAE489B2F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:270 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/appSubnet1/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcappSubnet1RouteTable072E8E09"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:270 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/appSubnet1/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcappSubnet1RouteTableAssociation168BF781"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:270 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/appSubnet1/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcappSubnet1DefaultRoute64294A8F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:27:16)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)"
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/appSubnet2/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcappSubnet2Subnet2449FB56"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:270 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/appSubnet2/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcappSubnet2RouteTableB76BFC59"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:270 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/appSubnet2/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcappSubnet2RouteTableAssociation81E96A75"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:270 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/appSubnet2/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcappSubnet2DefaultRouteEBCCC1EA"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:27:16)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)"
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/dbSubnet1/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcdbSubnet1Subnet1B82B149"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:272 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/dbSubnet1/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcdbSubnet1RouteTable04184FDD"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:272 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/dbSubnet1/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcdbSubnet1RouteTableAssociation3FF66701"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:272 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/dbSubnet2/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcdbSubnet2Subnet01192A3B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:272 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/dbSubnet2/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcdbSubnet2RouteTable7BBEF14D"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:272 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/Vpc/dbSubnet2/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcdbSubnet2RouteTableAssociation3D000840"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:272 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/claq-demo/DataKey/Alias/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DataKeyAliasF989EB84"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Key2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:43:20)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/claq-demo/Documents/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DocumentsPolicy2E972B69"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Bucket2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:49:22)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)"
+      ]
+    },
+    {
+      "type": "aws:cdk:analytics:mixin",
+      "data": {
+        "mixin": "aws-cdk-lib.aws_s3.mixins.BucketPolicyStatements"
+      }
+    }
+  ],
+  "/claq-demo/Documents/AutoDeleteObjectsCustomResource/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DocumentsAutoDeleteObjectsCustomResourceF4151FB2"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/claq-demo/TrailLogs/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TrailLogsPolicy3022A450"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Bucket2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:58:22)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)"
+      ]
+    },
+    {
+      "type": "aws:cdk:analytics:mixin",
+      "data": {
+        "mixin": "aws-cdk-lib.aws_s3.mixins.BucketPolicyStatements"
+      }
+    }
+  ],
+  "/claq-demo/TrailLogs/AutoDeleteObjectsCustomResource/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TrailLogsAutoDeleteObjectsCustomResourceD541C9B9"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/claq-demo/Database/SubnetGroup/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DatabaseSubnetGroup7D60F180"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new DatabaseInstance2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:71:21)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)"
+      ]
+    }
+  ],
+  "/claq-demo/Database/Secret/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "claqdemoDatabaseSecretF1CC47893fdaad7efa858a3daf9490cf0a702aeb"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new DatabaseInstance2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:71:21)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)"
+      ]
+    }
+  ],
+  "/claq-demo/Users/Domain/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UsersDomainC6632324"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addDomain in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:53:10)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/Users/WebAndMobileClient/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UsersWebAndMobileClient5A0F71C8"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addClient in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:55:25)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/MigrationsRunner/ServiceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "MigrationsRunnerServiceRoleC0634FD3"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:121:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/MigrationsRunner/LogRetention/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "MigrationsRunnerLogRetention9B9A24A4"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:121:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:121:24)"
+      ]
+    }
+  ],
+  "/claq-demo/MigrationsProvider/framework-onEvent/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "MigrationsProviderframeworkonEvent33437111"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Provider2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:127:31)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/ApiFunction/ServiceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiFunctionServiceRole52B9747B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:144:19)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/ApiFunction/LogRetention/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiFunctionLogRetentionDCC3A405"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:144:19)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DemoSeeder/ServiceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DemoSeederServiceRole6C25E338"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:167:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DemoSeeder/LogRetention/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DemoSeederLogRetention2BCFAF8D"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:167:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/DemoSeedProvider/framework-onEvent/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DemoSeedProviderframeworkonEvent2C7A3818"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Provider2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:171:28)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/DefaultStage/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiDefaultStage3EEB07D6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new HttpApi2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:187:17)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/GET--v1--health/HealthIntegration-Permission": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiGETv1healthHealthIntegrationPermissionA3794449"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:197:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/GET--v1--health/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiGETv1healthF2DB36DE"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:197:9)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/POST--v1--payments--webhook--mpesa/MpesaWebhookIntegration-Permission": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiPOSTv1paymentswebhookmpesaMpesaWebhookIntegrationPermission1159AABB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:198:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/POST--v1--payments--webhook--mpesa/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiPOSTv1paymentswebhookmpesa45CB333D"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:198:9)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/GET--v1--plans/PlansIntegration-Permission": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiGETv1plansPlansIntegrationPermission644C50B6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:201:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/GET--v1--plans/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiGETv1plans35EEBF77"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:201:9)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/GET--v1--plans--suggest/PlansSuggestIntegration-Permission": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiGETv1planssuggestPlansSuggestIntegrationPermission45F7CBB6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:202:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/GET--v1--plans--suggest/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiGETv1planssuggestC489AF36"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:202:9)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/POST--v1--billing--webhook/StripeWebhookIntegration-Permission": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiPOSTv1billingwebhookStripeWebhookIntegrationPermissionAE019C9B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:204:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/POST--v1--billing--webhook/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiPOSTv1billingwebhook6CE603E9"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:204:9)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/ANY--v1--{proxy+}/Integration-Permission": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiANYv1proxyIntegrationPermission267D973D"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:205:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/ANY--v1--{proxy+}/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiANYv1proxy39FCBC18"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:205:9)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/CognitoJwt/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiCognitoJwt4B02D8E4"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:205:9)"
+      ]
+    }
+  ],
+  "/claq-demo/RemindersFunction/ServiceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "RemindersFunctionServiceRole93009686"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:208:25)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/RemindersFunction/LogRetention/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "RemindersFunctionLogRetention2E96E9E8"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:208:25)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/NotifierFunction/ServiceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "NotifierFunctionServiceRole124F1226"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:221:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/NotifierFunction/LogRetention/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "NotifierFunctionLogRetention59326E3F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:221:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/ManagementTrail/LogGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ManagementTrailLogGroup1A466190"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Trail2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:289:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/ManagementTrail/LogsRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ManagementTrailLogsRole45AA223C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Trail2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:289:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals, tsx..."
+      ]
+    }
+  ],
+  "/claq-demo/Database/Secret/Attachment/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DatabaseSecretAttachmentE5D1B020"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new DatabaseInstance2 in aws-cdk-lib...",
+        "new FoundationResources (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\foundation.ts:71:21)",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:42:24)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/claq-demo/MigrationsRunner/ServiceRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "MigrationsRunnerServiceRoleDefaultPolicy28040126"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)"
+      ]
+    }
+  ],
+  "/claq-demo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/claq-demo/MigrationsProvider/framework-onEvent/ServiceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "MigrationsProviderframeworkonEventServiceRoleEC5DE9CC"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Provider2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:127:31)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)"
+      ]
+    }
+  ],
+  "/claq-demo/MigrationsProvider/framework-onEvent/LogRetention/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "MigrationsProviderframeworkonEventLogRetention064FE301"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Provider2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:127:31)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)"
+      ]
+    }
+  ],
+  "/claq-demo/ApiFunction/ServiceRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiFunctionServiceRoleDefaultPolicy20A32B8D"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)"
+      ]
+    }
+  ],
+  "/claq-demo/DemoSeeder/ServiceRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DemoSeederServiceRoleDefaultPolicy76F1F997"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)"
+      ]
+    }
+  ],
+  "/claq-demo/DemoSeedProvider/framework-onEvent/ServiceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DemoSeedProviderframeworkonEventServiceRole809994C3"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Provider2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:171:28)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/GET--v1--health/HealthIntegration/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiGETv1healthHealthIntegrationC6FCA7E0"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:197:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/POST--v1--payments--webhook--mpesa/MpesaWebhookIntegration/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiPOSTv1paymentswebhookmpesaMpesaWebhookIntegration1AC36B12"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:198:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/GET--v1--plans/PlansIntegration/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiGETv1plansPlansIntegrationF9918761"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:201:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/GET--v1--plans--suggest/PlansSuggestIntegration/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiGETv1planssuggestPlansSuggestIntegration371D8094"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:202:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/POST--v1--billing--webhook/StripeWebhookIntegration/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiPOSTv1billingwebhookStripeWebhookIntegration5B396671"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:204:9)"
+      ]
+    }
+  ],
+  "/claq-demo/HttpApi/ANY--v1--{proxy+}/Integration/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApiANYv1proxyIntegration18FBFE30"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\node_modules\\aws-cdk-lib\\aws-apigatewayv2\\lib\\http\\api.js:1:96 in aws-cdk-lib...",
+        "Array.map (:)",
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:205:9)"
+      ]
+    }
+  ],
+  "/claq-demo/RemindersFunction/ServiceRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "RemindersFunctionServiceRoleDefaultPolicy2EBCF8E0"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)"
+      ]
+    }
+  ],
+  "/claq-demo/NotifierFunction/ServiceRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "NotifierFunctionServiceRoleDefaultPolicyDFAFB18E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "baseFn (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:108:7)"
+      ]
+    }
+  ],
+  "/claq-demo/ManagementTrail/LogsRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ManagementTrailLogsRoleDefaultPolicy4BA19DE2"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Trail2 in aws-cdk-lib...",
+        "new ClaqStack (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\stack.ts:289:5)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:1)",
+        "<anonymous> (D:\\Projects\\CLAQ FISCAL ALERT\\CLAQ-FISCAL-WEB\\backend\\infra\\app.ts:6:140)"
+      ]
+    }
+  ],
+  "/claq-demo/MigrationsProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "MigrationsProviderframeworkonEventServiceRoleDefaultPolicyE6A419A5"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/claq-demo/DemoSeedProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DemoSeedProviderframeworkonEventServiceRoleDefaultPolicy4BE19AA5"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ]
+}

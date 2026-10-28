@@ -16,6 +16,10 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Keep CDK templates/manifests versioned, but leave generated Lambda bundles and caches local.
+/backend/cdk.out/.cache/
+/backend/cdk.out/asset.*/
+
 # Terraform
 .terraform/
 *.tfstate

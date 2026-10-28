@@ -1,0 +1,4109 @@
+{
+ "Resources": {
+  "Vpc8378EB38": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/Resource"
+   }
+  },
+  "VpcpublicSubnet1Subnet2BB74ED7": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "af-south-1a",
+    "CidrBlock": "10.0.0.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/publicSubnet1"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/publicSubnet1/Subnet"
+   }
+  },
+  "VpcpublicSubnet1RouteTable15C15F8E": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/publicSubnet1"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/publicSubnet1/RouteTable"
+   }
+  },
+  "VpcpublicSubnet1RouteTableAssociation4E83B6E4": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VpcpublicSubnet1RouteTable15C15F8E"
+    },
+    "SubnetId": {
+     "Ref": "VpcpublicSubnet1Subnet2BB74ED7"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/publicSubnet1/RouteTableAssociation"
+   }
+  },
+  "VpcpublicSubnet1DefaultRouteB88F9E93": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "VpcIGWD7BA715C"
+    },
+    "RouteTableId": {
+     "Ref": "VpcpublicSubnet1RouteTable15C15F8E"
+    }
+   },
+   "DependsOn": [
+    "VpcVPCGWBF912B6E"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/publicSubnet1/DefaultRoute"
+   }
+  },
+  "VpcpublicSubnet1EIP411541E6": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/publicSubnet1"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/publicSubnet1/EIP"
+   }
+  },
+  "VpcpublicSubnet1NATGatewayA036E8A6": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "VpcpublicSubnet1EIP411541E6",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "VpcpublicSubnet1Subnet2BB74ED7"
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/publicSubnet1"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcpublicSubnet1DefaultRouteB88F9E93",
+    "VpcpublicSubnet1RouteTableAssociation4E83B6E4"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/publicSubnet1/NATGateway"
+   }
+  },
+  "VpcpublicSubnet2SubnetE34B022A": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "af-south-1b",
+    "CidrBlock": "10.0.1.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/publicSubnet2"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/publicSubnet2/Subnet"
+   }
+  },
+  "VpcpublicSubnet2RouteTableC5A6DF77": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/publicSubnet2"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/publicSubnet2/RouteTable"
+   }
+  },
+  "VpcpublicSubnet2RouteTableAssociationCCE257FF": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VpcpublicSubnet2RouteTableC5A6DF77"
+    },
+    "SubnetId": {
+     "Ref": "VpcpublicSubnet2SubnetE34B022A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/publicSubnet2/RouteTableAssociation"
+   }
+  },
+  "VpcpublicSubnet2DefaultRoute732F0BEB": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "VpcIGWD7BA715C"
+    },
+    "RouteTableId": {
+     "Ref": "VpcpublicSubnet2RouteTableC5A6DF77"
+    }
+   },
+   "DependsOn": [
+    "VpcVPCGWBF912B6E"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/publicSubnet2/DefaultRoute"
+   }
+  },
+  "VpcappSubnet1SubnetAE489B2F": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "af-south-1a",
+    "CidrBlock": "10.0.2.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "app"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/appSubnet1"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/appSubnet1/Subnet"
+   }
+  },
+  "VpcappSubnet1RouteTable072E8E09": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/appSubnet1"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/appSubnet1/RouteTable"
+   }
+  },
+  "VpcappSubnet1RouteTableAssociation168BF781": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VpcappSubnet1RouteTable072E8E09"
+    },
+    "SubnetId": {
+     "Ref": "VpcappSubnet1SubnetAE489B2F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/appSubnet1/RouteTableAssociation"
+   }
+  },
+  "VpcappSubnet1DefaultRoute64294A8F": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "VpcpublicSubnet1NATGatewayA036E8A6"
+    },
+    "RouteTableId": {
+     "Ref": "VpcappSubnet1RouteTable072E8E09"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/appSubnet1/DefaultRoute"
+   }
+  },
+  "VpcappSubnet2Subnet2449FB56": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "af-south-1b",
+    "CidrBlock": "10.0.3.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "app"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/appSubnet2"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/appSubnet2/Subnet"
+   }
+  },
+  "VpcappSubnet2RouteTableB76BFC59": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/appSubnet2"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/appSubnet2/RouteTable"
+   }
+  },
+  "VpcappSubnet2RouteTableAssociation81E96A75": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VpcappSubnet2RouteTableB76BFC59"
+    },
+    "SubnetId": {
+     "Ref": "VpcappSubnet2Subnet2449FB56"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/appSubnet2/RouteTableAssociation"
+   }
+  },
+  "VpcappSubnet2DefaultRouteEBCCC1EA": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "VpcpublicSubnet1NATGatewayA036E8A6"
+    },
+    "RouteTableId": {
+     "Ref": "VpcappSubnet2RouteTableB76BFC59"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/appSubnet2/DefaultRoute"
+   }
+  },
+  "VpcdbSubnet1Subnet1B82B149": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "af-south-1a",
+    "CidrBlock": "10.0.4.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "db"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/dbSubnet1"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/dbSubnet1/Subnet"
+   }
+  },
+  "VpcdbSubnet1RouteTable04184FDD": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/dbSubnet1"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/dbSubnet1/RouteTable"
+   }
+  },
+  "VpcdbSubnet1RouteTableAssociation3FF66701": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VpcdbSubnet1RouteTable04184FDD"
+    },
+    "SubnetId": {
+     "Ref": "VpcdbSubnet1Subnet1B82B149"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/dbSubnet1/RouteTableAssociation"
+   }
+  },
+  "VpcdbSubnet2Subnet01192A3B": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "af-south-1b",
+    "CidrBlock": "10.0.5.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "db"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/dbSubnet2"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/dbSubnet2/Subnet"
+   }
+  },
+  "VpcdbSubnet2RouteTable7BBEF14D": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc/dbSubnet2"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/dbSubnet2/RouteTable"
+   }
+  },
+  "VpcdbSubnet2RouteTableAssociation3D000840": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VpcdbSubnet2RouteTable7BBEF14D"
+    },
+    "SubnetId": {
+     "Ref": "VpcdbSubnet2Subnet01192A3B"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/dbSubnet2/RouteTableAssociation"
+   }
+  },
+  "VpcIGWD7BA715C": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "Name",
+      "Value": "claq-demo/Vpc"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/IGW"
+   }
+  },
+  "VpcVPCGWBF912B6E": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "VpcIGWD7BA715C"
+    },
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Vpc/VPCGW"
+   }
+  },
+  "AppSg898BCA4E": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "CLAQ Lambda functions",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/AppSg/Resource"
+   }
+  },
+  "DbSg495F8305": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "CLAQ PostgreSQL",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "255.255.255.255/32",
+      "Description": "Disallow all traffic",
+      "FromPort": 252,
+      "IpProtocol": "icmp",
+      "ToPort": 86
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DbSg/Resource"
+   }
+  },
+  "DbSgfromclaqdemoAppSgE06E1CBC5432CDBF56DC": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Lambda to PostgreSQL",
+    "FromPort": 5432,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "DbSg495F8305",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "AppSg898BCA4E",
+      "GroupId"
+     ]
+    },
+    "ToPort": 5432
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DbSg/from claqdemoAppSgE06E1CBC:5432"
+   }
+  },
+  "DataKey17AFBB84": {
+   "Type": "AWS::KMS::Key",
+   "Properties": {
+    "EnableKeyRotation": true,
+    "KeyPolicy": {
+     "Statement": [
+      {
+       "Action": "kms:*",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":iam::794813216328:root"
+          ]
+         ]
+        }
+       },
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DataKey/Resource"
+   }
+  },
+  "DataKeyAliasF989EB84": {
+   "Type": "AWS::KMS::Alias",
+   "Properties": {
+    "AliasName": "alias/claq-demo-data",
+    "TargetKeyId": {
+     "Fn::GetAtt": [
+      "DataKey17AFBB84",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DataKey/Alias/Resource"
+   }
+  },
+  "Documents7E5B2978": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     },
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VersioningConfiguration": {
+     "Status": "Enabled"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Documents/Resource"
+   }
+  },
+  "DocumentsPolicy2E972B69": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "Documents7E5B2978"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "Documents7E5B2978",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "Documents7E5B2978",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "Documents7E5B2978",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "Documents7E5B2978",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Documents/Policy/Resource"
+   }
+  },
+  "DocumentsAutoDeleteObjectsCustomResourceF4151FB2": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "Documents7E5B2978"
+    }
+   },
+   "DependsOn": [
+    "DocumentsPolicy2E972B69"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Documents/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-794813216328-af-south-1",
+     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs24.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "Documents7E5B2978"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+    "aws:asset:property": "Code"
+   }
+  },
+  "TrailLogs3B05809D": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "ExpirationInDays": 30,
+       "Status": "Enabled"
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     },
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VersioningConfiguration": {
+     "Status": "Enabled"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/TrailLogs/Resource"
+   }
+  },
+  "TrailLogsPolicy3022A450": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "TrailLogs3B05809D"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TrailLogs3B05809D",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TrailLogs3B05809D",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TrailLogs3B05809D",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TrailLogs3B05809D",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "s3:GetBucketAcl",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "cloudtrail.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "TrailLogs3B05809D",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "s3:PutObject",
+       "Condition": {
+        "StringEquals": {
+         "s3:x-amz-acl": "bucket-owner-full-control"
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "cloudtrail.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "TrailLogs3B05809D",
+            "Arn"
+           ]
+          },
+          "/AWSLogs/794813216328/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/TrailLogs/Policy/Resource"
+   }
+  },
+  "TrailLogsAutoDeleteObjectsCustomResourceD541C9B9": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "TrailLogs3B05809D"
+    }
+   },
+   "DependsOn": [
+    "TrailLogsPolicy3022A450"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/TrailLogs/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "NotificationsDlq12302AF4": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "MessageRetentionPeriod": 1209600,
+    "SqsManagedSseEnabled": true,
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/NotificationsDlq/Resource"
+   }
+  },
+  "Notifications87298708": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "RedrivePolicy": {
+     "deadLetterTargetArn": {
+      "Fn::GetAtt": [
+       "NotificationsDlq12302AF4",
+       "Arn"
+      ]
+     },
+     "maxReceiveCount": 3
+    },
+    "SqsManagedSseEnabled": true,
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VisibilityTimeout": 70
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Notifications/Resource"
+   }
+  },
+  "DatabaseSubnetGroup7D60F180": {
+   "Type": "AWS::RDS::DBSubnetGroup",
+   "Properties": {
+    "DBSubnetGroupDescription": "Subnet group for Database database",
+    "SubnetIds": [
+     {
+      "Ref": "VpcdbSubnet1Subnet1B82B149"
+     },
+     {
+      "Ref": "VpcdbSubnet2Subnet01192A3B"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Database/SubnetGroup/Default"
+   }
+  },
+  "claqdemoDatabaseSecretF1CC47893fdaad7efa858a3daf9490cf0a702aeb": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Generated by the CDK for stack: ",
+       {
+        "Ref": "AWS::StackName"
+       }
+      ]
+     ]
+    },
+    "GenerateSecretString": {
+     "ExcludeCharacters": " %+~`#$&*()|[]{}:;<>?!'/@\"\\",
+     "GenerateStringKey": "password",
+     "PasswordLength": 30,
+     "SecretStringTemplate": "{\"username\":\"claq_admin\"}"
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Database/Secret/Resource"
+   }
+  },
+  "DatabaseSecretAttachmentE5D1B020": {
+   "Type": "AWS::SecretsManager::SecretTargetAttachment",
+   "Properties": {
+    "SecretId": {
+     "Ref": "claqdemoDatabaseSecretF1CC47893fdaad7efa858a3daf9490cf0a702aeb"
+    },
+    "TargetId": {
+     "Ref": "DatabaseB269D8BB"
+    },
+    "TargetType": "AWS::RDS::DBInstance"
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Database/Secret/Attachment/Resource"
+   }
+  },
+  "DatabaseB269D8BB": {
+   "Type": "AWS::RDS::DBInstance",
+   "Properties": {
+    "AllocatedStorage": "100",
+    "AutoMinorVersionUpgrade": true,
+    "BackupRetentionPeriod": 7,
+    "CopyTagsToSnapshot": true,
+    "DBInstanceClass": "db.t4g.micro",
+    "DBName": "claq",
+    "DBSubnetGroupName": {
+     "Ref": "DatabaseSubnetGroup7D60F180"
+    },
+    "DeletionProtection": false,
+    "Engine": "postgres",
+    "EngineVersion": "16",
+    "KmsKeyId": {
+     "Fn::GetAtt": [
+      "DataKey17AFBB84",
+      "Arn"
+     ]
+    },
+    "MasterUserPassword": {
+     "Fn::Join": [
+      "",
+      [
+       "{{resolve:secretsmanager:",
+       {
+        "Ref": "claqdemoDatabaseSecretF1CC47893fdaad7efa858a3daf9490cf0a702aeb"
+       },
+       ":SecretString:password::}}"
+      ]
+     ]
+    },
+    "MasterUsername": "claq_admin",
+    "MultiAZ": false,
+    "PubliclyAccessible": false,
+    "StorageEncrypted": true,
+    "StorageType": "gp2",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VPCSecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "DbSg495F8305",
+       "GroupId"
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Database/Resource"
+   }
+  },
+  "Users0A0EEA89": {
+   "Type": "AWS::Cognito::UserPool",
+   "Properties": {
+    "AccountRecoverySetting": {
+     "RecoveryMechanisms": [
+      {
+       "Name": "verified_phone_number",
+       "Priority": 1
+      },
+      {
+       "Name": "verified_email",
+       "Priority": 2
+      }
+     ]
+    },
+    "AdminCreateUserConfig": {
+     "AllowAdminCreateUserOnly": false
+    },
+    "AutoVerifiedAttributes": [
+     "email"
+    ],
+    "EmailVerificationMessage": "The verification code to your new account is {####}",
+    "EmailVerificationSubject": "Verify your new account",
+    "MfaConfiguration": "OFF",
+    "Policies": {
+     "PasswordPolicy": {
+      "MinimumLength": 12,
+      "RequireLowercase": true,
+      "RequireNumbers": true,
+      "RequireSymbols": true,
+      "RequireUppercase": true
+     }
+    },
+    "SmsVerificationMessage": "The verification code to your new account is {####}",
+    "UserPoolTags": {
+     "Environment": "demo",
+     "System": "CLAQ"
+    },
+    "UsernameAttributes": [
+     "email"
+    ],
+    "VerificationMessageTemplate": {
+     "DefaultEmailOption": "CONFIRM_WITH_CODE",
+     "EmailMessage": "The verification code to your new account is {####}",
+     "EmailSubject": "Verify your new account",
+     "SmsMessage": "The verification code to your new account is {####}"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Users/Resource"
+   }
+  },
+  "UsersDomainC6632324": {
+   "Type": "AWS::Cognito::UserPoolDomain",
+   "Properties": {
+    "Domain": "demo-auth",
+    "UserPoolId": {
+     "Ref": "Users0A0EEA89"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Users/Domain/Resource"
+   }
+  },
+  "UsersWebAndMobileClient5A0F71C8": {
+   "Type": "AWS::Cognito::UserPoolClient",
+   "Properties": {
+    "AllowedOAuthFlows": [
+     "code"
+    ],
+    "AllowedOAuthFlowsUserPoolClient": true,
+    "AllowedOAuthScopes": [
+     "openid",
+     "profile",
+     "email"
+    ],
+    "CallbackURLs": [
+     "http://localhost:3000/callback"
+    ],
+    "ExplicitAuthFlows": [
+     "ALLOW_USER_PASSWORD_AUTH",
+     "ALLOW_USER_SRP_AUTH",
+     "ALLOW_REFRESH_TOKEN_AUTH"
+    ],
+    "GenerateSecret": false,
+    "LogoutURLs": [
+     "http://localhost:3000/logout"
+    ],
+    "PreventUserExistenceErrors": "ENABLED",
+    "SupportedIdentityProviders": [
+     "COGNITO"
+    ],
+    "UserPoolId": {
+     "Ref": "Users0A0EEA89"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/Users/WebAndMobileClient/Resource"
+   }
+  },
+  "MigrationsRunnerServiceRoleC0634FD3": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/MigrationsRunner/ServiceRole/Resource"
+   }
+  },
+  "MigrationsRunnerServiceRoleDefaultPolicy28040126": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "DatabaseSecretAttachmentE5D1B020"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "MigrationsRunnerServiceRoleDefaultPolicy28040126",
+    "Roles": [
+     {
+      "Ref": "MigrationsRunnerServiceRoleC0634FD3"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/MigrationsRunner/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "MigrationsRunnerB085CAC2": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-794813216328-af-south-1",
+     "S3Key": "03b930913dd07e527d19459891c8a7abf2dd9764e6117139fa19feba7381b977.zip"
+    },
+    "Description": "Applies prisma/migrations SQL on deploy (CloudFormation custom resource)",
+    "Handler": "index.handler",
+    "MemorySize": 256,
+    "Role": {
+     "Fn::GetAtt": [
+      "MigrationsRunnerServiceRoleC0634FD3",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "Timeout": 300,
+    "TracingConfig": {
+     "Mode": "Active"
+    },
+    "VpcConfig": {
+     "SecurityGroupIds": [
+      {
+       "Fn::GetAtt": [
+        "AppSg898BCA4E",
+        "GroupId"
+       ]
+      }
+     ],
+     "SubnetIds": [
+      {
+       "Ref": "VpcappSubnet1SubnetAE489B2F"
+      },
+      {
+       "Ref": "VpcappSubnet2Subnet2449FB56"
+      }
+     ]
+    }
+   },
+   "DependsOn": [
+    "MigrationsRunnerServiceRoleDefaultPolicy28040126",
+    "MigrationsRunnerServiceRoleC0634FD3",
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/MigrationsRunner/Resource",
+    "aws:asset:path": "asset.03b930913dd07e527d19459891c8a7abf2dd9764e6117139fa19feba7381b977",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "MigrationsRunnerLogRetention9B9A24A4": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "MigrationsRunnerB085CAC2"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 30
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/MigrationsRunner/LogRetention/Resource"
+   }
+  },
+  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource"
+   }
+  },
+  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:PutRetentionPolicy",
+        "logs:DeleteRetentionPolicy"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+    "Roles": [
+     {
+      "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Handler": "index.handler",
+    "Runtime": "nodejs24.x",
+    "Timeout": 900,
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-794813216328-af-south-1",
+     "S3Key": "2819175352ad1ce0dae768e83fc328fb70fb5f10b4a8ff0ccbcb791f02b0716d.zip"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+      "Arn"
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "DependsOn": [
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource",
+    "aws:asset:path": "asset.2819175352ad1ce0dae768e83fc328fb70fb5f10b4a8ff0ccbcb791f02b0716d",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "MigrationsProviderframeworkonEventServiceRoleEC5DE9CC": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/MigrationsProvider/framework-onEvent/ServiceRole/Resource"
+   }
+  },
+  "MigrationsProviderframeworkonEventServiceRoleDefaultPolicyE6A419A5": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "MigrationsRunnerB085CAC2",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "MigrationsRunnerB085CAC2",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:GetFunction",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "MigrationsRunnerB085CAC2",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "MigrationsProviderframeworkonEventServiceRoleDefaultPolicyE6A419A5",
+    "Roles": [
+     {
+      "Ref": "MigrationsProviderframeworkonEventServiceRoleEC5DE9CC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/MigrationsProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "MigrationsProviderframeworkonEvent33437111": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-794813216328-af-south-1",
+     "S3Key": "e16ffb3b34af185b8b30c88fdb19faa13b6c42bb38580485c4e84b384ee48b63.zip"
+    },
+    "Description": "AWS CDK resource provider framework - onEvent (claq-demo/MigrationsProvider)",
+    "Environment": {
+     "Variables": {
+      "USER_ON_EVENT_FUNCTION_ARN": {
+       "Fn::GetAtt": [
+        "MigrationsRunnerB085CAC2",
+        "Arn"
+       ]
+      }
+     }
+    },
+    "Handler": "framework.onEvent",
+    "LoggingConfig": {
+     "ApplicationLogLevel": "FATAL",
+     "LogFormat": "JSON"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "MigrationsProviderframeworkonEventServiceRoleEC5DE9CC",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs24.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "MigrationsProviderframeworkonEventServiceRoleDefaultPolicyE6A419A5",
+    "MigrationsProviderframeworkonEventServiceRoleEC5DE9CC"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/MigrationsProvider/framework-onEvent/Resource",
+    "aws:asset:path": "asset.e16ffb3b34af185b8b30c88fdb19faa13b6c42bb38580485c4e84b384ee48b63",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "MigrationsProviderframeworkonEventLogRetention064FE301": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "MigrationsProviderframeworkonEvent33437111"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 30
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/MigrationsProvider/framework-onEvent/LogRetention/Resource"
+   }
+  },
+  "DatabaseMigrations": {
+   "Type": "Custom::ClaqDatabaseMigration",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "MigrationsProviderframeworkonEvent33437111",
+      "Arn"
+     ]
+    },
+    "SecretArn": {
+     "Ref": "DatabaseSecretAttachmentE5D1B020"
+    },
+    "MigrationHash": "5a1399001197669f"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DatabaseMigrations/Default"
+   }
+  },
+  "ApiFunctionServiceRole52B9747B": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/ApiFunction/ServiceRole/Resource"
+   }
+  },
+  "ApiFunctionServiceRoleDefaultPolicy20A32B8D": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "Documents7E5B2978",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "Documents7E5B2978",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "sqs:SendMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "Notifications87298708",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "kms:Decrypt",
+        "kms:Encrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "DataKey17AFBB84",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ApiFunctionServiceRoleDefaultPolicy20A32B8D",
+    "Roles": [
+     {
+      "Ref": "ApiFunctionServiceRole52B9747B"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/ApiFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ApiFunctionCE271BD4": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-794813216328-af-south-1",
+     "S3Key": "8f15544b0c5ac76bd4df3df07beb9fc4d9af8b523dd8c04b65703d07f5b50dcc.zip"
+    },
+    "Description": "CLAQ HTTP API (Prisma + RLS tenant guard)",
+    "Environment": {
+     "Variables": {
+      "APP_ENV": "demo",
+      "DATABASE_URL": {
+       "Fn::Join": [
+        "",
+        [
+         "postgresql://claq_admin:{{resolve:secretsmanager:",
+         {
+          "Ref": "DatabaseSecretAttachmentE5D1B020"
+         },
+         ":SecretString:password}}@",
+         {
+          "Fn::GetAtt": [
+           "DatabaseB269D8BB",
+           "Endpoint.Address"
+          ]
+         },
+         ":",
+         {
+          "Fn::GetAtt": [
+           "DatabaseB269D8BB",
+           "Endpoint.Port"
+          ]
+         },
+         "/claq?schema=public&sslmode=require&connection_limit=1"
+        ]
+       ]
+      },
+      "DOCUMENT_BUCKET": {
+       "Ref": "Documents7E5B2978"
+      },
+      "NOTIFICATION_QUEUE": {
+       "Ref": "Notifications87298708"
+      },
+      "KMS_KEY_ID": {
+       "Ref": "DataKey17AFBB84"
+      }
+     }
+    },
+    "Handler": "index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "ApiFunctionServiceRole52B9747B",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "Timeout": 28,
+    "TracingConfig": {
+     "Mode": "Active"
+    },
+    "VpcConfig": {
+     "SecurityGroupIds": [
+      {
+       "Fn::GetAtt": [
+        "AppSg898BCA4E",
+        "GroupId"
+       ]
+      }
+     ],
+     "SubnetIds": [
+      {
+       "Ref": "VpcappSubnet1SubnetAE489B2F"
+      },
+      {
+       "Ref": "VpcappSubnet2Subnet2449FB56"
+      }
+     ]
+    }
+   },
+   "DependsOn": [
+    "ApiFunctionServiceRoleDefaultPolicy20A32B8D",
+    "ApiFunctionServiceRole52B9747B",
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/ApiFunction/Resource",
+    "aws:asset:path": "asset.8f15544b0c5ac76bd4df3df07beb9fc4d9af8b523dd8c04b65703d07f5b50dcc",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "ApiFunctionLogRetentionDCC3A405": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "ApiFunctionCE271BD4"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 30
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/ApiFunction/LogRetention/Resource"
+   }
+  },
+  "DemoSeederServiceRole6C25E338": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DemoSeeder/ServiceRole/Resource"
+   }
+  },
+  "DemoSeederServiceRoleDefaultPolicy76F1F997": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "DatabaseSecretAttachmentE5D1B020"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "DemoSeederServiceRoleDefaultPolicy76F1F997",
+    "Roles": [
+     {
+      "Ref": "DemoSeederServiceRole6C25E338"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DemoSeeder/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "DemoSeederC088AC5A": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-794813216328-af-south-1",
+     "S3Key": "033a511de71f73585a5ea5505ef0afaa3a2ea301b99f79ecdb3bd4d5cd2270ea.zip"
+    },
+    "Description": "Idempotent demo bootstrap: tenant, memberships, synthetic companies, notification settings",
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "DemoSeederServiceRole6C25E338",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "TracingConfig": {
+     "Mode": "Active"
+    },
+    "VpcConfig": {
+     "SecurityGroupIds": [
+      {
+       "Fn::GetAtt": [
+        "AppSg898BCA4E",
+        "GroupId"
+       ]
+      }
+     ],
+     "SubnetIds": [
+      {
+       "Ref": "VpcappSubnet1SubnetAE489B2F"
+      },
+      {
+       "Ref": "VpcappSubnet2Subnet2449FB56"
+      }
+     ]
+    }
+   },
+   "DependsOn": [
+    "DemoSeederServiceRoleDefaultPolicy76F1F997",
+    "DemoSeederServiceRole6C25E338",
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DemoSeeder/Resource",
+    "aws:asset:path": "asset.033a511de71f73585a5ea5505ef0afaa3a2ea301b99f79ecdb3bd4d5cd2270ea",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "DemoSeederLogRetention2BCFAF8D": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "DemoSeederC088AC5A"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 30
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DemoSeeder/LogRetention/Resource"
+   }
+  },
+  "DemoSeedProviderframeworkonEventServiceRole809994C3": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DemoSeedProvider/framework-onEvent/ServiceRole/Resource"
+   }
+  },
+  "DemoSeedProviderframeworkonEventServiceRoleDefaultPolicy4BE19AA5": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "DemoSeederC088AC5A",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "DemoSeederC088AC5A",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:GetFunction",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "DemoSeederC088AC5A",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "DemoSeedProviderframeworkonEventServiceRoleDefaultPolicy4BE19AA5",
+    "Roles": [
+     {
+      "Ref": "DemoSeedProviderframeworkonEventServiceRole809994C3"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DemoSeedProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "DemoSeedProviderframeworkonEvent2C7A3818": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-794813216328-af-south-1",
+     "S3Key": "e16ffb3b34af185b8b30c88fdb19faa13b6c42bb38580485c4e84b384ee48b63.zip"
+    },
+    "Description": "AWS CDK resource provider framework - onEvent (claq-demo/DemoSeedProvider)",
+    "Environment": {
+     "Variables": {
+      "USER_ON_EVENT_FUNCTION_ARN": {
+       "Fn::GetAtt": [
+        "DemoSeederC088AC5A",
+        "Arn"
+       ]
+      }
+     }
+    },
+    "Handler": "framework.onEvent",
+    "LoggingConfig": {
+     "ApplicationLogLevel": "FATAL",
+     "LogFormat": "JSON"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "DemoSeedProviderframeworkonEventServiceRole809994C3",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs24.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "DemoSeedProviderframeworkonEventServiceRoleDefaultPolicy4BE19AA5",
+    "DemoSeedProviderframeworkonEventServiceRole809994C3"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DemoSeedProvider/framework-onEvent/Resource",
+    "aws:asset:path": "asset.e16ffb3b34af185b8b30c88fdb19faa13b6c42bb38580485c4e84b384ee48b63",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "DemoSeed": {
+   "Type": "Custom::ClaqDemoSeed",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "DemoSeedProviderframeworkonEvent2C7A3818",
+      "Arn"
+     ]
+    },
+    "SecretArn": {
+     "Ref": "DatabaseSecretAttachmentE5D1B020"
+    },
+    "SeedKey": "v1",
+    "DemoSub": "a1bc6288-4041-70e3-a3dd-246eab3b5c16",
+    "DemoEmail": "demo@claq.co.mz",
+    "DemoDisplayName": "Demo User (accountant)"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DemoSeed/Default"
+   }
+  },
+  "HttpApiF5A9A8A7": {
+   "Type": "AWS::ApiGatewayV2::Api",
+   "Properties": {
+    "CorsConfiguration": {
+     "AllowCredentials": false,
+     "AllowHeaders": [
+      "*"
+     ],
+     "AllowMethods": [
+      "*"
+     ],
+     "AllowOrigins": [
+      "*"
+     ]
+    },
+    "Name": "HttpApi",
+    "ProtocolType": "HTTP",
+    "Tags": {
+     "Environment": "demo",
+     "System": "CLAQ"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/Resource"
+   }
+  },
+  "HttpApiDefaultStage3EEB07D6": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AutoDeploy": true,
+    "StageName": "$default",
+    "Tags": {
+     "Environment": "demo",
+     "System": "CLAQ"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/DefaultStage/Resource"
+   }
+  },
+  "HttpApiGETv1healthHealthIntegrationC6FCA7E0": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/GET--v1--health/HealthIntegration/Resource"
+   }
+  },
+  "HttpApiGETv1healthHealthIntegrationPermissionA3794449": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:af-south-1:794813216328:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/v1/health"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/GET--v1--health/HealthIntegration-Permission"
+   }
+  },
+  "HttpApiGETv1healthF2DB36DE": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "GET /v1/health",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "HttpApiGETv1healthHealthIntegrationC6FCA7E0"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/GET--v1--health/Resource"
+   }
+  },
+  "HttpApiPOSTv1paymentswebhookmpesaMpesaWebhookIntegration1AC36B12": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/POST--v1--payments--webhook--mpesa/MpesaWebhookIntegration/Resource"
+   }
+  },
+  "HttpApiPOSTv1paymentswebhookmpesaMpesaWebhookIntegrationPermission1159AABB": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:af-south-1:794813216328:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/v1/payments/webhook/mpesa"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/POST--v1--payments--webhook--mpesa/MpesaWebhookIntegration-Permission"
+   }
+  },
+  "HttpApiPOSTv1paymentswebhookmpesa45CB333D": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "POST /v1/payments/webhook/mpesa",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "HttpApiPOSTv1paymentswebhookmpesaMpesaWebhookIntegration1AC36B12"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/POST--v1--payments--webhook--mpesa/Resource"
+   }
+  },
+  "HttpApiGETv1plansPlansIntegrationF9918761": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/GET--v1--plans/PlansIntegration/Resource"
+   }
+  },
+  "HttpApiGETv1plansPlansIntegrationPermission644C50B6": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:af-south-1:794813216328:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/v1/plans"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/GET--v1--plans/PlansIntegration-Permission"
+   }
+  },
+  "HttpApiGETv1plans35EEBF77": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "GET /v1/plans",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "HttpApiGETv1plansPlansIntegrationF9918761"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/GET--v1--plans/Resource"
+   }
+  },
+  "HttpApiGETv1planssuggestPlansSuggestIntegration371D8094": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/GET--v1--plans--suggest/PlansSuggestIntegration/Resource"
+   }
+  },
+  "HttpApiGETv1planssuggestPlansSuggestIntegrationPermission45F7CBB6": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:af-south-1:794813216328:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/v1/plans/suggest"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/GET--v1--plans--suggest/PlansSuggestIntegration-Permission"
+   }
+  },
+  "HttpApiGETv1planssuggestC489AF36": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "GET /v1/plans/suggest",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "HttpApiGETv1planssuggestPlansSuggestIntegration371D8094"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/GET--v1--plans--suggest/Resource"
+   }
+  },
+  "HttpApiPOSTv1billingwebhookStripeWebhookIntegration5B396671": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/POST--v1--billing--webhook/StripeWebhookIntegration/Resource"
+   }
+  },
+  "HttpApiPOSTv1billingwebhookStripeWebhookIntegrationPermissionAE019C9B": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:af-south-1:794813216328:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/v1/billing/webhook"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/POST--v1--billing--webhook/StripeWebhookIntegration-Permission"
+   }
+  },
+  "HttpApiPOSTv1billingwebhook6CE603E9": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "POST /v1/billing/webhook",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "HttpApiPOSTv1billingwebhookStripeWebhookIntegration5B396671"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/POST--v1--billing--webhook/Resource"
+   }
+  },
+  "HttpApiANYv1proxyIntegration18FBFE30": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/ANY--v1--{proxy+}/Integration/Resource"
+   }
+  },
+  "HttpApiANYv1proxyIntegrationPermission267D973D": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ApiFunctionCE271BD4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:af-south-1:794813216328:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/v1/{proxy+}"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/ANY--v1--{proxy+}/Integration-Permission"
+   }
+  },
+  "HttpApiANYv1proxy39FCBC18": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "HttpApiCognitoJwt4B02D8E4"
+    },
+    "RouteKey": "ANY /v1/{proxy+}",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "HttpApiANYv1proxyIntegration18FBFE30"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/ANY--v1--{proxy+}/Resource"
+   }
+  },
+  "HttpApiCognitoJwt4B02D8E4": {
+   "Type": "AWS::ApiGatewayV2::Authorizer",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizerType": "JWT",
+    "IdentitySource": [
+     "$request.header.Authorization"
+    ],
+    "JwtConfiguration": {
+     "Audience": [
+      {
+       "Ref": "UsersWebAndMobileClient5A0F71C8"
+      }
+     ],
+     "Issuer": {
+      "Fn::Join": [
+       "",
+       [
+        "https://cognito-idp.af-south-1.amazonaws.com/",
+        {
+         "Ref": "Users0A0EEA89"
+        }
+       ]
+      ]
+     }
+    },
+    "Name": "CognitoJwt"
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/HttpApi/CognitoJwt/Resource"
+   }
+  },
+  "RemindersFunctionServiceRole93009686": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/RemindersFunction/ServiceRole/Resource"
+   }
+  },
+  "RemindersFunctionServiceRoleDefaultPolicy2EBCF8E0": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "sqs:SendMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "Notifications87298708",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "RemindersFunctionServiceRoleDefaultPolicy2EBCF8E0",
+    "Roles": [
+     {
+      "Ref": "RemindersFunctionServiceRole93009686"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/RemindersFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "RemindersFunctionBA3883B0": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-794813216328-af-south-1",
+     "S3Key": "280085aa0148550eac4c4c728e284619bacee0e67d69f970279f2dfc6e00429c.zip"
+    },
+    "Description": "Daily reminder planner: statuses, dedup, enqueue",
+    "Environment": {
+     "Variables": {
+      "APP_ENV": "demo",
+      "DATABASE_URL": {
+       "Fn::Join": [
+        "",
+        [
+         "postgresql://claq_admin:{{resolve:secretsmanager:",
+         {
+          "Ref": "DatabaseSecretAttachmentE5D1B020"
+         },
+         ":SecretString:password}}@",
+         {
+          "Fn::GetAtt": [
+           "DatabaseB269D8BB",
+           "Endpoint.Address"
+          ]
+         },
+         ":",
+         {
+          "Fn::GetAtt": [
+           "DatabaseB269D8BB",
+           "Endpoint.Port"
+          ]
+         },
+         "/claq?schema=public&sslmode=require&connection_limit=1"
+        ]
+       ]
+      },
+      "NOTIFICATION_QUEUE": {
+       "Ref": "Notifications87298708"
+      }
+     }
+    },
+    "Handler": "index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "RemindersFunctionServiceRole93009686",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "Timeout": 300,
+    "TracingConfig": {
+     "Mode": "Active"
+    },
+    "VpcConfig": {
+     "SecurityGroupIds": [
+      {
+       "Fn::GetAtt": [
+        "AppSg898BCA4E",
+        "GroupId"
+       ]
+      }
+     ],
+     "SubnetIds": [
+      {
+       "Ref": "VpcappSubnet1SubnetAE489B2F"
+      },
+      {
+       "Ref": "VpcappSubnet2Subnet2449FB56"
+      }
+     ]
+    }
+   },
+   "DependsOn": [
+    "RemindersFunctionServiceRoleDefaultPolicy2EBCF8E0",
+    "RemindersFunctionServiceRole93009686",
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/RemindersFunction/Resource",
+    "aws:asset:path": "asset.280085aa0148550eac4c4c728e284619bacee0e67d69f970279f2dfc6e00429c",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "RemindersFunctionLogRetention2E96E9E8": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "RemindersFunctionBA3883B0"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 30
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/RemindersFunction/LogRetention/Resource"
+   }
+  },
+  "DailyReminderRule8FE15EA7": {
+   "Type": "AWS::Events::Rule",
+   "Properties": {
+    "Description": "Daily obligation reminder planning (06:00 UTC)",
+    "ScheduleExpression": "cron(0 6 * * ? *)",
+    "State": "ENABLED",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "Targets": [
+     {
+      "Arn": {
+       "Fn::GetAtt": [
+        "RemindersFunctionBA3883B0",
+        "Arn"
+       ]
+      },
+      "Id": "Target0",
+      "RetryPolicy": {
+       "MaximumRetryAttempts": 2
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DailyReminderRule/Resource"
+   }
+  },
+  "DailyReminderRuleAllowEventRuleclaqdemoRemindersFunction9C0A9C0072585077": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "RemindersFunctionBA3883B0",
+      "Arn"
+     ]
+    },
+    "Principal": "events.amazonaws.com",
+    "SourceArn": {
+     "Fn::GetAtt": [
+      "DailyReminderRule8FE15EA7",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/DailyReminderRule/AllowEventRuleclaqdemoRemindersFunction9C0A9C00"
+   }
+  },
+  "NotifierFunctionServiceRole124F1226": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/NotifierFunction/ServiceRole/Resource"
+   }
+  },
+  "NotifierFunctionServiceRoleDefaultPolicyDFAFB18E": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "sqs:ReceiveMessage",
+        "sqs:ChangeMessageVisibility",
+        "sqs:GetQueueUrl",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "Notifications87298708",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "ses:SendEmail",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "NotifierFunctionServiceRoleDefaultPolicyDFAFB18E",
+    "Roles": [
+     {
+      "Ref": "NotifierFunctionServiceRole124F1226"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/NotifierFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "NotifierFunctionEB33F81B": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-794813216328-af-south-1",
+     "S3Key": "14eea34a4904b25d6436f48e6307154ab6cb325833c565e5e54c9fb8498605ba.zip"
+    },
+    "Description": "Sends obligation reminders via email (SES) and WhatsApp",
+    "Environment": {
+     "Variables": {
+      "APP_ENV": "demo",
+      "DATABASE_URL": {
+       "Fn::Join": [
+        "",
+        [
+         "postgresql://claq_admin:{{resolve:secretsmanager:",
+         {
+          "Ref": "DatabaseSecretAttachmentE5D1B020"
+         },
+         ":SecretString:password}}@",
+         {
+          "Fn::GetAtt": [
+           "DatabaseB269D8BB",
+           "Endpoint.Address"
+          ]
+         },
+         ":",
+         {
+          "Fn::GetAtt": [
+           "DatabaseB269D8BB",
+           "Endpoint.Port"
+          ]
+         },
+         "/claq?schema=public&sslmode=require&connection_limit=1"
+        ]
+       ]
+      },
+      "ALERTS_FROM_EMAIL": "alerts@demo.claq.co.mz"
+     }
+    },
+    "Handler": "index.handler",
+    "MemorySize": 256,
+    "Role": {
+     "Fn::GetAtt": [
+      "NotifierFunctionServiceRole124F1226",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "Timeout": 60,
+    "TracingConfig": {
+     "Mode": "Active"
+    },
+    "VpcConfig": {
+     "SecurityGroupIds": [
+      {
+       "Fn::GetAtt": [
+        "AppSg898BCA4E",
+        "GroupId"
+       ]
+      }
+     ],
+     "SubnetIds": [
+      {
+       "Ref": "VpcappSubnet1SubnetAE489B2F"
+      },
+      {
+       "Ref": "VpcappSubnet2Subnet2449FB56"
+      }
+     ]
+    }
+   },
+   "DependsOn": [
+    "NotifierFunctionServiceRoleDefaultPolicyDFAFB18E",
+    "NotifierFunctionServiceRole124F1226",
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/NotifierFunction/Resource",
+    "aws:asset:path": "asset.14eea34a4904b25d6436f48e6307154ab6cb325833c565e5e54c9fb8498605ba",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "NotifierFunctionLogRetention59326E3F": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "NotifierFunctionEB33F81B"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 30
+   },
+   "DependsOn": [
+    "VpcappSubnet1DefaultRoute64294A8F",
+    "VpcappSubnet1RouteTableAssociation168BF781",
+    "VpcappSubnet2DefaultRouteEBCCC1EA",
+    "VpcappSubnet2RouteTableAssociation81E96A75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/NotifierFunction/LogRetention/Resource"
+   }
+  },
+  "NotifierSourceDE648599": {
+   "Type": "AWS::Lambda::EventSourceMapping",
+   "Properties": {
+    "BatchSize": 10,
+    "EventSourceArn": {
+     "Fn::GetAtt": [
+      "Notifications87298708",
+      "Arn"
+     ]
+    },
+    "FunctionName": {
+     "Ref": "NotifierFunctionEB33F81B"
+    },
+    "FunctionResponseTypes": [
+     "ReportBatchItemFailures"
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/NotifierSource/Resource"
+   }
+  },
+  "ApiWaf": {
+   "Type": "AWS::WAFv2::WebACL",
+   "Properties": {
+    "DefaultAction": {
+     "Allow": {}
+    },
+    "Rules": [
+     {
+      "Action": {
+       "Block": {}
+      },
+      "Name": "RateLimit2k",
+      "Priority": 1,
+      "Statement": {
+       "RateBasedStatement": {
+        "AggregateKeyType": "IP",
+        "Limit": 2000
+       }
+      },
+      "VisibilityConfig": {
+       "CloudWatchMetricsEnabled": true,
+       "MetricName": "RateLimit",
+       "SampledRequestsEnabled": true
+      }
+     },
+     {
+      "Name": "AWSManagedRulesCommonRuleSet",
+      "OverrideAction": {
+       "None": {}
+      },
+      "Priority": 2,
+      "Statement": {
+       "ManagedRuleGroupStatement": {
+        "Name": "AWSManagedRulesCommonRuleSet",
+        "VendorName": "AWS"
+       }
+      },
+      "VisibilityConfig": {
+       "CloudWatchMetricsEnabled": true,
+       "MetricName": "CommonRuleSet",
+       "SampledRequestsEnabled": true
+      }
+     },
+     {
+      "Name": "AWSManagedRulesSQLiRuleSet",
+      "OverrideAction": {
+       "None": {}
+      },
+      "Priority": 3,
+      "Statement": {
+       "ManagedRuleGroupStatement": {
+        "Name": "AWSManagedRulesSQLiRuleSet",
+        "VendorName": "AWS"
+       }
+      },
+      "VisibilityConfig": {
+       "CloudWatchMetricsEnabled": true,
+       "MetricName": "SqlInjection",
+       "SampledRequestsEnabled": true
+      }
+     }
+    ],
+    "Scope": "REGIONAL",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ],
+    "VisibilityConfig": {
+     "CloudWatchMetricsEnabled": true,
+     "MetricName": "ClaqApiWaf",
+     "SampledRequestsEnabled": true
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/ApiWaf"
+   }
+  },
+  "ManagementTrailLogGroup1A466190": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "RetentionInDays": 30,
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/ManagementTrail/LogGroup/Resource"
+   }
+  },
+  "ManagementTrailLogsRole45AA223C": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "cloudtrail.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/ManagementTrail/LogsRole/Resource"
+   }
+  },
+  "ManagementTrailLogsRoleDefaultPolicy4BA19DE2": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:PutLogEvents",
+        "logs:CreateLogStream"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "ManagementTrailLogGroup1A466190",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ManagementTrailLogsRoleDefaultPolicy4BA19DE2",
+    "Roles": [
+     {
+      "Ref": "ManagementTrailLogsRole45AA223C"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/ManagementTrail/LogsRole/DefaultPolicy/Resource"
+   }
+  },
+  "ManagementTrail879F59F2": {
+   "Type": "AWS::CloudTrail::Trail",
+   "Properties": {
+    "CloudWatchLogsLogGroupArn": {
+     "Fn::GetAtt": [
+      "ManagementTrailLogGroup1A466190",
+      "Arn"
+     ]
+    },
+    "CloudWatchLogsRoleArn": {
+     "Fn::GetAtt": [
+      "ManagementTrailLogsRole45AA223C",
+      "Arn"
+     ]
+    },
+    "EnableLogFileValidation": true,
+    "EventSelectors": [],
+    "IncludeGlobalServiceEvents": true,
+    "IsLogging": true,
+    "IsMultiRegionTrail": true,
+    "S3BucketName": {
+     "Ref": "TrailLogs3B05809D"
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "DependsOn": [
+    "ManagementTrailLogsRoleDefaultPolicy4BA19DE2",
+    "ManagementTrailLogsRole45AA223C",
+    "TrailLogsPolicy3022A450"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/ManagementTrail/Resource"
+   }
+  },
+  "GuardDuty": {
+   "Type": "AWS::GuardDuty::Detector",
+   "Properties": {
+    "Enable": true,
+    "FindingPublishingFrequency": "FIFTEEN_MINUTES",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "demo"
+     },
+     {
+      "Key": "System",
+      "Value": "CLAQ"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/GuardDuty"
+   }
+  },
+  "SecurityHub": {
+   "Type": "AWS::SecurityHub::Hub",
+   "Properties": {
+    "AutoEnableControls": true,
+    "Tags": {
+     "Environment": "demo",
+     "System": "CLAQ"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/SecurityHub"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/6VU32/TMBD+W9Znz4wOgeAtbcdWMVhpx3hAaHKca+Y1sYPv3FGs/O/IdpOUTSBNPN133322L/cjYz5+/YafHIkHPJbF5rhSOfcrEnLDxAPeepBj7m8ayaZrfbOYsoXLKyVXLtdAgRvQ0jiCa5FXMPADlyEaqQQpo3txAGfzRTCfBJ0LggexYwurtoJguHiuCayGXpAy2XsZkZB3NWhiK5DOKtqdW+OamMM/ibkuLSC2bFMj9x8gXhxMVimBwYmgZXjK/cTJTcomoW9+VKufSo/ejQ4rF0qGpzyGkCdp5sjMoAKCq/weJOGoZf91+jtLoYWplNwNOSX/GZmlAysSBKGAz0vs6eEur4lAaBn+QO4/O3CxzRG0zBbI/UyQyAXCXCMJLYGlVvddmk0OiU69AmlTB2aT7mTLMLJYCy1KsNynJgdhMtfClkAHQ9ILHkdaJk2pFRnuvyDYhTFVEPe4AzNTC6UPQ3umc6eV2j/0J9OyStR5Ibh/77TsFuEQL8DWCjF4Z1vQtDLOSvgomkbpMi7LE7ZlStTcL03aumiHuUgoTPCtQARCngXDKlMi95emXAKBjs9fmrJvQIdbJhpVpj3bjrm/IGqyRsXVaBQL7opEmfY9gkCl1Q4oLG5p+51/5A66zNGdseoX2Hh177UMwgcj90u3/z5XQcsexHo75tO1/gp5Nr1ksjKuICtUxf11MEEaQctKJ2xRONoF/QwIJBkbxib+CO5cHvgLl7dsCRgry6YOydSDu9Z/CS2s2aoCbBh4FisbqhB6JaPu1u6FyDtpuO3KUeOoZdoUwO/xxXb8ir98y0+O7lGpY+s0qRr4MtnftH6CiaAFAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "claq-demo/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "ApiWafArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ApiWaf",
+     "Arn"
+    ]
+   }
+  },
+  "ApiUrl": {
+   "Value": {
+    "Fn::GetAtt": [
+     "HttpApiF5A9A8A7",
+     "ApiEndpoint"
+    ]
+   }
+  },
+  "UserPoolId": {
+   "Value": {
+    "Ref": "Users0A0EEA89"
+   }
+  },
+  "UserPoolClientId": {
+   "Value": {
+    "Ref": "UsersWebAndMobileClient5A0F71C8"
+   }
+  },
+  "DocumentBucket": {
+   "Value": {
+    "Ref": "Documents7E5B2978"
+   }
+  },
+  "DatabaseSecretArn": {
+   "Value": {
+    "Ref": "DatabaseSecretAttachmentE5D1B020"
+   }
+  },
+  "DemoBanner": {
+   "Value": "true"
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
