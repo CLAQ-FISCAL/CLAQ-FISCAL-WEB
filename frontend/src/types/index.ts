@@ -208,6 +208,7 @@ export interface RevenueThreshold {
 }
 
 export interface PlanCatalog {
+  demoMode?: boolean;
   families: {
     ACCOUNTANT: PlanDto[];
     COMPANY: PlanDto[];

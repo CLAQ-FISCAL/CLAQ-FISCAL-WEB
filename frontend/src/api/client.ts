@@ -77,11 +77,12 @@ async function handleResponse<T>(res: Response, endpoint: string): Promise<T> {
       // ignore
     }
     const message = body?.error || body?.message || res.statusText;
+    const code = typeof body?.code === 'string' ? body.code : '';
     // For 401, clear stale token so next login is clean — but don't logout here (AppStateContext decides)
     if (res.status === 401) {
       console.warn(`API ${endpoint} 401 — token may be expired. Will attempt refresh on next call.`);
     }
-    throw new Error(`HTTP ${res.status}: ${message}`);
+    throw new Error(`HTTP ${res.status}:${code ? ` ${code}:` : ''} ${message}`);
   }
   return (await res.json()) as T;
 }
@@ -165,6 +166,10 @@ export class ApiClient {
 
   public static getPlans(): Promise<PlanCatalog> {
     return this.getPublic<PlanCatalog>('/plans');
+  }
+
+  public static activateDemoPlan(input: { planCode: string; tenantName?: string }): Promise<{ tenantId: string; tenantName: string; plan: string; demo: true }> {
+    return this.post('/demo/subscribe', input);
   }
 
   public static suggestPlan(annualRevenueMzn: number): Promise<{ annualRevenueMzn: number; suggested: PlanDto }> {

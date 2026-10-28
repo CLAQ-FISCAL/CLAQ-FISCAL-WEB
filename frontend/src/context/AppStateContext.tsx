@@ -13,6 +13,7 @@ import { NonResidentServiceResult } from '../data/taxEngine';
 import { CalendarEngine } from '../utils/calendarEngine';
 import { ApiClient } from '../api/client';
 import i18n, { AppLanguage, isSupportedLanguage } from '../i18n';
+import { readPendingDemoPlanFor } from '../lib/audience';
 import '../config/cognito';
 import { signIn, signUp, confirmSignUp as cognitoConfirmSignUp, resendSignUpCode, signOut, fetchAuthSession, getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 
@@ -508,7 +509,23 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Phase 1: Try Cognito SRP
     try {
       if (password && password.length >= 8) {
-        const result = await signIn({ username: email, password });
+        let result: Awaited<ReturnType<typeof signIn>>;
+        const activeCognitoUser = await getCurrentUser().catch(() => null);
+        if (activeCognitoUser) {
+          const attributes = await fetchUserAttributes().catch(() => ({} as Record<string, string>));
+          const activeEmail = (attributes.email || activeCognitoUser.username || '').trim().toLowerCase();
+          if (activeEmail === email) {
+            // The same account already has a valid Cognito session; continue the
+            // normal post-sign-in flow instead of calling signIn a second time.
+            result = { isSignedIn: true, nextStep: { signInStep: 'DONE' } } as Awaited<ReturnType<typeof signIn>>;
+          } else {
+            // The login form is being used to switch accounts on this browser.
+            await signOut().catch(() => undefined);
+            result = await signIn({ username: email, password });
+          }
+        } else {
+          result = await signIn({ username: email, password });
+        }
         // Handle next steps (e.g., NEW_PASSWORD_REQUIRED, CONFIRM_SIGN_UP)
         if (result.nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
           addToast('warning', i18n.t('state:authConfirmTitle'), i18n.t('state:authConfirmMsg'));
@@ -525,12 +542,30 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           // Build user profile from Cognito
           const cognitoUser = await buildUserFromCognito();
           if (cognitoUser) {
-            localStorage.removeItem('claq_pending_user');
+            // Read any legacy plan choice before replacing the previously saved
+            // profile, so a global plan can never be reassigned to another login.
+            const pendingDemoPlan = readPendingDemoPlanFor(cognitoUser.email);
             setUser(cognitoUser);
             setIsAuthenticated(true);
             localStorage.setItem('claq_user', JSON.stringify(cognitoUser));
             localStorage.setItem('claq_is_auth', 'true');
             addToast('success', i18n.t('state:sessionStartedTitle'), i18n.t('state:sessionStartedMsg', { name: cognitoUser.name }));
+            if (pendingDemoPlan) {
+              try {
+                const catalog = await ApiClient.getPlans();
+                if (catalog.demoMode && pendingDemoPlan.planCode.startsWith('ACCOUNTANT_')) {
+                  await ApiClient.activateDemoPlan({ planCode: pendingDemoPlan.planCode, tenantName: pendingDemoPlan.tenantName });
+                  localStorage.removeItem('claq_pending_demo_plan');
+                  addToast('success', i18n.t('state:demoPlanActivatedTitle'), i18n.t('state:demoPlanActivatedMessage'));
+                } else if (!catalog.demoMode) {
+                  localStorage.removeItem('claq_pending_demo_plan');
+                }
+              } catch (activationError) {
+                console.error('Demo plan activation failed:', activationError);
+                addToast('error', i18n.t('state:demoPlanActivationFailedTitle'), i18n.t('state:demoPlanActivationFailedMessage'));
+              }
+            }
+            localStorage.removeItem('claq_pending_user');
             await syncFromBackend();
             return true;
           }
@@ -560,18 +595,26 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (e: any) {
       const name = e?.name || e?.__type || '';
       const message = e?.message || '';
-      // If Cognito error indicates user not found or not confirmed, try legacy backend
-      const isCognitoNotFound = name.includes('UserNotFound') || name.includes('NotAuthorized') || message.includes('User does not exist');
-      if (!isCognitoNotFound) {
-        // For other Cognito errors (invalid password, etc.), show directly and don't fallback to avoid masking
-        if (name.includes('NotAuthorizedException') || name.includes('UserNotConfirmed')) {
-          addToast('error', i18n.t('state:authFailTitle'), i18n.t('state:authFailInvalidMsg'));
-          return false;
-        }
-        // For network or other, fall through to legacy attempt
-        console.warn('Cognito signIn failed, trying legacy backend:', e);
+      // Only fall back when Cognito confirms the account is absent. A NotAuthorized
+      // response usually means the submitted password is incorrect; treating it as
+      // "user not found" would hide Cognito's result behind a legacy API 401.
+      const isCognitoNotFound = name.includes('UserNotFound') || message.includes('User does not exist');
+      if (name.includes('NotAuthorizedException') || name.includes('UserNotConfirmed')) {
+        addToast('error', i18n.t('state:authFailTitle'), i18n.t('state:authFailInvalidMsg'));
+        return false;
+      }
+      if (isCognitoNotFound) {
+        console.warn('Cognito user not found; trying legacy backend:', e);
       } else {
-        console.warn('Cognito user not found, trying legacy backend:', e);
+        // Do not send Cognito failures to the legacy API. In local development that
+        // endpoint may not exist, which turns a useful Cognito error into a vague 404.
+        console.error('Cognito signIn failed:', { name, message });
+        if (name === 'TypeError' || name.includes('Network')) {
+          addToast('error', i18n.t('state:authFailTitle'), i18n.t('state:authFailServerMsg'));
+        } else {
+          addToast('error', i18n.t('state:authFailTitle'), i18n.t('state:authFailCognitoMsg', { code: name || 'unknown' }));
+        }
+        return false;
       }
     }
 
@@ -617,6 +660,15 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const signInAfterRegister = options.signInAfterRegister ?? true;
     const email = (userData.email || '').trim().toLowerCase();
     const password = userData.password || '';
+    const savePendingDemoPlan = () => {
+      if (userData.selectedPlanCode?.startsWith('ACCOUNTANT_')) {
+        localStorage.setItem('claq_pending_demo_plan', JSON.stringify({
+          email,
+          planCode: userData.selectedPlanCode,
+          tenantName: userData.companyName || userData.name || '',
+        }));
+      }
+    };
     // Phase 1: Try Cognito signUp
     try {
       if (email && password.length >= 8) {
@@ -635,7 +687,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // If autoConfirm or CONFIRM_SIGN_UP step
         if (signUpResult.nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
           addToast('info', i18n.t('state:confirmEmailTitle'), i18n.t('state:confirmEmailMsg', { email }));
-          // Retain the profile locally until the user confirms their email and completes payment.
+          // Retain the profile and selected demo plan until the user confirms and signs in.
           const pendingUser: UserProfile = {
             id: `usr_${Date.now()}`,
             name: userData.name || i18n.t('state:adminFiscalDefault'),
@@ -653,9 +705,11 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             renewalDate: '31/12/2026'
           };
           localStorage.setItem('claq_pending_user', JSON.stringify(pendingUser));
+          savePendingDemoPlan();
           return 'confirmation-required';
         }
         if (signUpResult.nextStep?.signUpStep === 'DONE') {
+          savePendingDemoPlan();
           // Auto-confirmed — sign in immediately
           if (signInAfterRegister) return (await login(email, password)) === true;
           addToast('success', i18n.t('state:accountCreatedTitle'), i18n.t('state:accountCreatedMsg', { companyName: userData.companyName || i18n.t('state:companyNewFallback') }));

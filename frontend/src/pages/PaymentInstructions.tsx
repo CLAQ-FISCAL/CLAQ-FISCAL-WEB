@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Building2, Check, Copy, FileText, Phone, Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ClaqLogo } from '../components/common/ClaqLogo';
@@ -6,6 +7,8 @@ import { LanguageToggle } from '../i18n/LanguageToggle';
 import { usePlans } from '../hooks/useFiscalQueries';
 import { getPlanDisplayName } from '../lib/planDisplay';
 import { readAudience, readIntentPlan } from '../lib/audience';
+import { useAppState } from '../context/AppStateContext';
+import { ApiClient } from '../api/client';
 
 interface PaymentInstructionsProps {
   onBack: () => void;
@@ -39,6 +42,8 @@ const bankAccounts = [
 export const PaymentInstructions: React.FC<PaymentInstructionsProps> = ({ onBack, onContinue }) => {
   const { t } = useTranslation();
   const plansQuery = usePlans();
+  const queryClient = useQueryClient();
+  const { isAuthenticated, user, addToast } = useAppState();
   const planCode = readIntentPlan();
   const audience = readAudience();
   const [billingInterval, setBillingInterval] = useState<'month' | 'year'>(() =>
@@ -57,6 +62,9 @@ export const PaymentInstructions: React.FC<PaymentInstructionsProps> = ({ onBack
     : plan?.priceMznMonthly ?? plan?.priceMzn ?? null;
   const planName = getPlanDisplayName(plan?.code, plan?.label, key => t(key));
   const flow = localStorage.getItem('claq_payment_flow') ?? 'signup';
+  const demoAccountantPlan = plansQuery.data?.demoMode === true && audience === 'contabilidade' && !!planCode?.startsWith('ACCOUNTANT_');
+  const companyLimit = plan?.limits.maxCompanies;
+  const companyLimitLabel = companyLimit === undefined ? '' : companyLimit >= 999999 ? t('payment:unlimitedClients') : String(companyLimit);
 
   const copyValue = async (value: string) => {
     try {
@@ -89,6 +97,25 @@ export const PaymentInstructions: React.FC<PaymentInstructionsProps> = ({ onBack
     setReceipt(file);
   };
 
+  const continueFromPayment = async () => {
+    if (demoAccountantPlan && flow === 'upgrade' && isAuthenticated && planCode) {
+      try {
+        await ApiClient.activateDemoPlan({ planCode, tenantName: user?.companyName });
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['subscription'] }),
+          queryClient.invalidateQueries({ queryKey: ['me'] }),
+          queryClient.invalidateQueries({ queryKey: ['companies'] }),
+        ]);
+        addToast('success', t('payment:demoActivatedTitle'), t('payment:demoActivatedMessage'));
+      } catch (error) {
+        console.error('Demo plan change failed:', error);
+        addToast('error', t('payment:demoActivationFailedTitle'), t('payment:demoActivationFailedMessage'));
+        return;
+      }
+    }
+    onContinue();
+  };
+
   return (
     <main style={{ minHeight: '100vh', background: '#070E1E', padding: '28px 20px 48px', fontFamily: 'var(--font-sans)' }}>
       <div style={{ position: 'absolute', top: 20, right: 24 }}><LanguageToggle variant="dark" /></div>
@@ -99,7 +126,7 @@ export const PaymentInstructions: React.FC<PaymentInstructionsProps> = ({ onBack
             <ArrowLeft size={15} />{t('common:back')}
           </button>
           <h1 style={{ margin: 0, color: '#0F172A', fontSize: 25, fontWeight: 800 }}>{t('payment:title')}</h1>
-          <p style={{ margin: '7px 0 22px', color: '#64748B', fontSize: 14 }}>{t('payment:subtitle')}</p>
+          <p style={{ margin: '7px 0 22px', color: '#64748B', fontSize: 14 }}>{demoAccountantPlan ? t('payment:demoSubtitle') : t('payment:subtitle')}</p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginBottom: 22 }}>
             <div style={{ border: '1px solid #E2E8F0', borderRadius: 14, padding: 18, background: '#F8FAFC' }}>
@@ -119,7 +146,7 @@ export const PaymentInstructions: React.FC<PaymentInstructionsProps> = ({ onBack
               </div>
             </div>
 
-            {bankAccounts.map(account => (
+            {!demoAccountantPlan && bankAccounts.map(account => (
               <div key={account.bank} style={{ border: '1px solid #E2E8F0', borderRadius: 14, padding: 18 }}>
                 <h2 style={{ margin: '0 0 5px', fontSize: 17, color: '#0F172A' }}>{account.bank}</h2>
                 <p style={{ margin: '0 0 13px', fontSize: 12, color: '#64748B' }}>{t('payment:accountHolder')}: <strong style={{ color: '#334155' }}>{account.holder}</strong></p>
@@ -144,32 +171,36 @@ export const PaymentInstructions: React.FC<PaymentInstructionsProps> = ({ onBack
             ))}
           </div>
 
-          <div style={{ border: '1px solid #FCD34D', background: '#FFFBEB', borderRadius: 12, padding: 14, marginBottom: 18, color: '#78350F', fontSize: 13, lineHeight: 1.55 }}>
-            {t('payment:verificationNotice')}
+          <div style={{ border: `1px solid ${demoAccountantPlan ? '#86EFAC' : '#FCD34D'}`, background: demoAccountantPlan ? '#F0FDF4' : '#FFFBEB', borderRadius: 12, padding: 14, marginBottom: 18, color: demoAccountantPlan ? '#166534' : '#78350F', fontSize: 13, lineHeight: 1.55 }}>
+            {demoAccountantPlan
+              ? t('payment:demoPlanNotice', { limit: companyLimitLabel })
+              : t('payment:verificationNotice')}
           </div>
 
-          <label style={{ display: 'grid', gap: 8, marginBottom: 8, color: '#334155', fontSize: 13, fontWeight: 700 }}>
+          {!demoAccountantPlan && <label style={{ display: 'grid', gap: 8, marginBottom: 8, color: '#334155', fontSize: 13, fontWeight: 700 }}>
             {t('payment:receiptLabel')}
             <span style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px dashed #CBD5E1', borderRadius: 10, padding: 12, color: '#64748B', fontWeight: 500 }}>
               <Upload size={17} />
               <input type="file" accept="application/pdf,.pdf" onChange={handleReceiptChange} style={{ maxWidth: '100%' }} />
             </span>
-          </label>
-          {receipt && <p style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#047857', fontSize: 12, margin: '8px 0' }}><FileText size={15} />{receipt.name}{t('payment:attachInWhatsApp')}</p>}
-          {receiptError && <p role="alert" style={{ color: '#B91C1C', fontSize: 12 }}>{receiptError}</p>}
+          </label>}
+          {!demoAccountantPlan && receipt && <p style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#047857', fontSize: 12, margin: '8px 0' }}><FileText size={15} />{receipt.name}{t('payment:attachInWhatsApp')}</p>}
+          {!demoAccountantPlan && receiptError && <p role="alert" style={{ color: '#B91C1C', fontSize: 12 }}>{receiptError}</p>}
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 18 }}>
-            <button type="button" onClick={startWhatsAppPayment} disabled={!receipt} className="btn btn-primary-gold">
+            {!demoAccountantPlan && <button type="button" onClick={startWhatsAppPayment} disabled={!receipt} className="btn btn-primary-gold">
               {t('payment:sendProofWhatsApp')}
-            </button>
-            <a href={`tel:+${SUPPORT_PHONE}`} className="btn btn-secondary" style={{ textDecoration: 'none' }}>
+            </button>}
+            {!demoAccountantPlan && <a href={`tel:+${SUPPORT_PHONE}`} className="btn btn-secondary" style={{ textDecoration: 'none' }}>
               <Phone size={15} />{t('payment:callAgent')}
-            </a>
-            <button type="button" onClick={onContinue} className="btn btn-secondary" style={{ marginLeft: 'auto' }}>
-              {flow === 'upgrade' ? t('payment:returnToAccount') : t('payment:continueToLogin')}
+            </a>}
+            <button type="button" onClick={() => void continueFromPayment()} className={demoAccountantPlan ? 'btn btn-primary-gold' : 'btn btn-secondary'} style={{ marginLeft: demoAccountantPlan ? 0 : 'auto' }}>
+              {demoAccountantPlan
+                ? flow === 'upgrade' ? t('payment:activateDemoPlan') : t('payment:continueToLoginDemo')
+                : flow === 'upgrade' ? t('payment:returnToAccount') : t('payment:continueToLogin')}
             </button>
           </div>
-          <p style={{ margin: '12px 0 0', color: '#64748B', fontSize: 12, lineHeight: 1.5 }}>{t(audience === 'contabilidade' ? 'payment:accountantNotice' : 'payment:manualReviewNotice')}</p>
+          {!demoAccountantPlan && <p style={{ margin: '12px 0 0', color: '#64748B', fontSize: 12, lineHeight: 1.5 }}>{t(audience === 'contabilidade' ? 'payment:accountantNotice' : 'payment:manualReviewNotice')}</p>}
         </section>
       </div>
     </main>

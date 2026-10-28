@@ -30,5 +30,14 @@
   "billingFrequency": "Periodicidade",
   "noPaymentRecorded": "Ainda não há método de pagamento registado",
   "noDueDate": "Data de renovação indisponível",
-  "notSet": "Ainda não disponível"
+  "notSet": "Ainda não disponível",
+  "demoSubtitle": "Escolha um plano de contabilista para esta demonstração. Não é necessário pagar.",
+  "demoPlanNotice": "Modo de demonstração: este plano será activado ao iniciar sessão, com limite de {{limit}} clientes e sem pagamento.",
+  "unlimitedClients": "ilimitados",
+  "continueToLoginDemo": "Continuar para o login e activar o plano",
+  "activateDemoPlan": "Activar este plano de demonstração",
+  "demoActivatedTitle": "Plano de demonstração actualizado",
+  "demoActivatedMessage": "O plano de contabilista escolhido e o respectivo limite de clientes estão activos.",
+  "demoActivationFailedTitle": "Não foi possível activar o plano de demonstração",
+  "demoActivationFailedMessage": "Tente novamente. O seu plano actual não foi alterado."
 }

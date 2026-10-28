@@ -168,8 +168,26 @@ const PLAN_LIMITS: Record<PlanCode, PlanLimits> = {
   }),
 };
 
+// Older/demo accounts stored the audience label in Tenant.plan instead of a
+// priced plan code. Treat those records as the entry accountant tier so they
+// receive a real limit instead of silently inheriting unlimited demo access.
+const LEGACY_PLAN_CODES: Record<string, PlanCode> = {
+  contabilidade: 'ACCOUNTANT_FREE',
+  accounting: 'ACCOUNTANT_FREE',
+  pme: 'COMPANY_MICRO',
+  sme: 'COMPANY_MICRO',
+  'básico': 'COMPANY_MICRO',
+  basic: 'COMPANY_MICRO',
+  enterprise: 'COMPANY_GRANDE',
+};
+
+export function canonicalPlanCode(planCode: string): PlanCode {
+  if (planCode in PLAN_LIMITS) return planCode as PlanCode;
+  return LEGACY_PLAN_CODES[planCode.trim().toLowerCase()] ?? 'DEMO';
+}
+
 export function getPlanLimits(planCode: string): PlanLimits {
-  return PLAN_LIMITS[planCode as PlanCode] ?? PLAN_LIMITS.DEMO;
+  return PLAN_LIMITS[canonicalPlanCode(planCode)];
 }
 
 export function isValidPlan(planCode: string): planCode is PlanCode {

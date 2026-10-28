@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { confirmResetPassword, resetPassword } from 'aws-amplify/auth';
 import {
   Lock,
   Mail,
@@ -43,6 +44,15 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onCreate
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAudience, setSelectedAudience] = useState<Audience>(audience ?? 'empresa');
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [resetCodeSent, setResetCodeSent] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetCode, setResetCode] = useState('');
+  const [resetNewPassword, setResetNewPassword] = useState('');
+  const [resetConfirmPassword, setResetConfirmPassword] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState('');
+  const [resetSuccess, setResetSuccess] = useState('');
 
   React.useEffect(() => {
     if (audience) setSelectedAudience(audience);
@@ -76,6 +86,62 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onCreate
   const handleSocialLogin = (provider: string) => {
     void provider;
     alert(t('login:socialLoginAlert'));
+  };
+
+  const startPasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const username = resetEmail.trim().toLowerCase();
+    if (!username.includes('@')) {
+      setResetError(t('login:resetEmailRequired'));
+      return;
+    }
+    setResetLoading(true);
+    setResetError('');
+    setResetSuccess('');
+    try {
+      const result = await resetPassword({ username });
+      if (result.nextStep.resetPasswordStep === 'CONFIRM_RESET_PASSWORD_WITH_CODE') {
+        setResetCodeSent(true);
+        setResetSuccess(t('login:resetCodeSent'));
+      } else if (result.nextStep.resetPasswordStep === 'DONE') {
+        setShowPasswordReset(false);
+        setResetSuccess(t('login:resetComplete'));
+      }
+    } catch (error) {
+      console.error('Password reset request failed:', error);
+      setResetError(t('login:resetRequestError'));
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const completePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (resetNewPassword !== resetConfirmPassword) {
+      setResetError(t('login:resetPasswordsMismatch'));
+      return;
+    }
+    setResetLoading(true);
+    setResetError('');
+    try {
+      await confirmResetPassword({
+        username: resetEmail.trim().toLowerCase(),
+        confirmationCode: resetCode.trim(),
+        newPassword: resetNewPassword
+      });
+      setShowPasswordReset(false);
+      setResetCodeSent(false);
+      setResetCode('');
+      setResetNewPassword('');
+      setResetConfirmPassword('');
+      setPassword('');
+      setResetSuccess(t('login:resetComplete'));
+    } catch (error) {
+      console.error('Password reset confirmation failed:', error);
+      setResetError(t('login:resetConfirmError'));
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
@@ -823,7 +889,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onCreate
                 href="#forgot"
                 onClick={e => {
                   e.preventDefault();
-                  alert(t('login:forgotAlert'));
+                  setResetEmail(emailOrNuit.includes('@') ? emailOrNuit.trim() : '');
+                  setResetCodeSent(false);
+                  setResetError('');
+                  setResetSuccess('');
+                  setShowPasswordReset(true);
                 }}
                 style={{
                   fontSize: '13px',
@@ -835,6 +905,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onCreate
                 {t('login:forgotPassword')}
               </a>
             </div>
+            {resetSuccess && !showPasswordReset && (
+              <div role="status" style={{ color: '#047857', fontSize: '13px', marginTop: '-12px', marginBottom: '16px' }}>
+                {resetSuccess}
+              </div>
+            )}
 
             {/* Submit Action Button */}
             <button
@@ -1147,6 +1222,39 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, audience, onCreate
       </div>
 
       {/* REGISTRATION MODAL (Preserves full registration functionality while keeping the clean UI) */}
+      {showPasswordReset && (
+        <div role="presentation" onClick={() => !resetLoading && setShowPasswordReset(false)} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(7,14,30,.62)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <section role="dialog" aria-modal="true" aria-labelledby="password-reset-title" onClick={e => e.stopPropagation()} style={{ width: 'min(100%, 460px)', background: '#fff', borderRadius: 20, padding: 28, boxShadow: '0 24px 80px rgba(0,0,0,.28)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+              <h2 id="password-reset-title" style={{ margin: 0, color: '#0F172A', fontSize: 22 }}>{t('login:resetTitle')}</h2>
+              <button type="button" aria-label={t('login:resetClose')} onClick={() => setShowPasswordReset(false)} style={{ border: 0, background: 'transparent', color: '#64748B', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+            <p style={{ margin: '0 0 20px', color: '#64748B', fontSize: 14, lineHeight: 1.5 }}>{t('login:resetSubtitle')}</p>
+            {resetError && <div role="alert" style={{ background: '#FEF2F2', color: '#B91C1C', padding: '10px 12px', borderRadius: 10, marginBottom: 16, fontSize: 13 }}>{resetError}</div>}
+            {resetSuccess && <div role="status" style={{ background: '#ECFDF5', color: '#047857', padding: '10px 12px', borderRadius: 10, marginBottom: 16, fontSize: 13 }}>{resetSuccess}</div>}
+            {!resetCodeSent ? (
+              <form onSubmit={startPasswordReset}>
+                <label htmlFor="reset-email" style={{ display: 'block', color: '#334155', fontWeight: 600, fontSize: 13, marginBottom: 7 }}>{t('login:corporateEmail')}</label>
+                <input id="reset-email" type="email" autoComplete="email" required value={resetEmail} onChange={e => setResetEmail(e.target.value)} placeholder={t('login:emailPlaceholder')} style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', border: '1px solid #CBD5E1', borderRadius: 10, marginBottom: 16 }} />
+                <button type="submit" disabled={resetLoading} style={{ width: '100%', padding: 13, border: 0, borderRadius: 10, background: '#EA8A00', color: '#fff', fontWeight: 700, cursor: resetLoading ? 'wait' : 'pointer' }}>{resetLoading ? t('login:resetSending') : t('login:resetSendCode')}</button>
+              </form>
+            ) : (
+              <form onSubmit={completePasswordReset}>
+                <label htmlFor="reset-code" style={{ display: 'block', color: '#334155', fontWeight: 600, fontSize: 13, marginBottom: 7 }}>{t('login:resetCodeLabel')}</label>
+                <input id="reset-code" inputMode="numeric" autoComplete="one-time-code" required value={resetCode} onChange={e => setResetCode(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', border: '1px solid #CBD5E1', borderRadius: 10, marginBottom: 14 }} />
+                <label htmlFor="reset-new-password" style={{ display: 'block', color: '#334155', fontWeight: 600, fontSize: 13, marginBottom: 7 }}>{t('login:resetNewPassword')}</label>
+                <input id="reset-new-password" type="password" autoComplete="new-password" required minLength={12} value={resetNewPassword} onChange={e => setResetNewPassword(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', border: '1px solid #CBD5E1', borderRadius: 10, marginBottom: 14 }} />
+                <label htmlFor="reset-confirm-password" style={{ display: 'block', color: '#334155', fontWeight: 600, fontSize: 13, marginBottom: 7 }}>{t('login:resetConfirmPassword')}</label>
+                <input id="reset-confirm-password" type="password" autoComplete="new-password" required minLength={12} value={resetConfirmPassword} onChange={e => setResetConfirmPassword(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', border: '1px solid #CBD5E1', borderRadius: 10, marginBottom: 16 }} />
+                <button type="submit" disabled={resetLoading} style={{ width: '100%', padding: 13, border: 0, borderRadius: 10, background: '#EA8A00', color: '#fff', fontWeight: 700, cursor: resetLoading ? 'wait' : 'pointer' }}>{resetLoading ? t('login:resetSaving') : t('login:resetSubmit')}</button>
+                <button type="button" disabled={resetLoading} onClick={() => { setResetCodeSent(false); setResetSuccess(''); setResetError(''); }} style={{ width: '100%', padding: 12, marginTop: 8, border: 0, background: 'transparent', color: '#2563EB', fontWeight: 600, cursor: 'pointer' }}>{t('login:resetResend')}</button>
+              </form>
+            )}
+            <button type="button" onClick={() => setShowPasswordReset(false)} style={{ width: '100%', padding: 10, marginTop: 8, border: 0, background: 'transparent', color: '#475569', fontWeight: 600, cursor: 'pointer' }}>{t('login:resetBack')}</button>
+          </section>
+        </div>
+      )}
+
       {showRegisterModal && (
         <div
           style={{

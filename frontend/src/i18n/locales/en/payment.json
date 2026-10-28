@@ -30,5 +30,14 @@
   "billingFrequency": "Billing frequency",
   "noPaymentRecorded": "No payment method recorded yet",
   "noDueDate": "No renewal date available",
-  "notSet": "Not available yet"
+  "notSet": "Not available yet",
+  "demoSubtitle": "Choose an accountant plan for this demo. No payment is needed.",
+  "demoPlanNotice": "Demo mode: this plan activates when you sign in, with a limit of {{limit}} clients and no payment.",
+  "unlimitedClients": "unlimited",
+  "continueToLoginDemo": "Continue to login and activate plan",
+  "activateDemoPlan": "Activate this demo plan",
+  "demoActivatedTitle": "Demo plan updated",
+  "demoActivatedMessage": "Your selected accountant plan and client limit are now active.",
+  "demoActivationFailedTitle": "Could not activate demo plan",
+  "demoActivationFailedMessage": "Please try again. Your current plan has not changed."
 }

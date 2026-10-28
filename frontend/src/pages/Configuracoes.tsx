@@ -21,6 +21,7 @@ import { useAppState } from '../context/AppStateContext';
 import { useAudience } from '../hooks/useAudience';
 import { usePaymentHistory, usePlans } from '../hooks/useFiscalQueries';
 import { getPlanDisplayName } from '../lib/planDisplay';
+import { readIntentPlan } from '../lib/audience';
 
 interface ConfiguracoesProps {
   onNavigate: (path: string) => void;
@@ -44,6 +45,7 @@ export const Configuracoes: React.FC<ConfiguracoesProps> = ({ onNavigate }) => {
 
   const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'alerts' | 'security' | 'plan' | 'integrations'>('preferences');
   const [showPlanDetails, setShowPlanDetails] = useState(false);
+  const displayedPlanCode = subscription?.plan ?? readIntentPlan();
 
   // Profile fields state
   const [name, setName] = useState(user?.name || '');
@@ -54,12 +56,12 @@ export const Configuracoes: React.FC<ConfiguracoesProps> = ({ onNavigate }) => {
   const [companyNuit, setCompanyNuit] = useState(user?.companyNuit || '');
   const [companyAddress, setCompanyAddress] = useState(user?.companyAddress || '');
   const currentPlanName = getPlanDisplayName(
-    subscription?.plan,
+    displayedPlanCode,
     subscription?.label || user?.plan,
     key => t(key)
   );
   const currentPlan = [...(plansQuery.data?.families.ACCOUNTANT ?? []), ...(plansQuery.data?.families.COMPANY ?? [])]
-    .find(plan => plan.code === subscription?.plan);
+    .find(plan => plan.code === displayedPlanCode);
   const latestPayment = paymentsQuery.data?.items?.[0];
   const paymentMethodKey: Record<string, string> = {
     MPESA: 'M-Pesa', EMOLA: 'e-Mola', SIMO: 'SIMO card', BANK_TRANSFER: 'Bank transfer'
@@ -443,10 +445,10 @@ export const Configuracoes: React.FC<ConfiguracoesProps> = ({ onNavigate }) => {
                 ))}
                 {(subscription?.limits.features ?? currentPlan?.limits.features ?? []).length === 0 && <span style={{ color: 'var(--slate-500)', fontSize: 13 }}>{t('common:notAvailable')}</span>}
               </div>
-              {subscription && (
+              {(subscription || currentPlan) && (
                 <p style={{ marginTop: 12, color: 'var(--slate-500)', fontSize: 12 }}>
-                  {t('onboarding:maxCompaniesLabel')}: {subscription.limits.maxCompanies >= 999999 ? t('onboarding:noLimit') : subscription.limits.maxCompanies}
-                  {' · '}{t('onboarding:maxUsersLabel')}: {subscription.limits.maxUsers >= 999999 ? t('onboarding:noLimit') : subscription.limits.maxUsers}
+                  {t('onboarding:maxCompaniesLabel')}: {(subscription?.limits.maxCompanies ?? currentPlan!.limits.maxCompanies) >= 999999 ? t('onboarding:noLimit') : subscription?.limits.maxCompanies ?? currentPlan!.limits.maxCompanies}
+                  {' · '}{t('onboarding:maxUsersLabel')}: {(subscription?.limits.maxUsers ?? currentPlan!.limits.maxUsers) >= 999999 ? t('onboarding:noLimit') : subscription?.limits.maxUsers ?? currentPlan!.limits.maxUsers}
                 </p>
               )}
             </div>

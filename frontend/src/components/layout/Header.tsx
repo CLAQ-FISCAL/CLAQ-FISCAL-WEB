@@ -17,7 +17,10 @@ import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../context/AppStateContext';
 import { useAudience } from '../../hooks/useAudience';
 import { getPlanDisplayName } from '../../lib/planDisplay';
+import { readIntentPlan } from '../../lib/audience';
 import { LanguageToggle } from '../../i18n/LanguageToggle';
+import { useCompanies } from '../../hooks/useUploads';
+import type { Client } from '../../types';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -47,6 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
     markAlertAsRead,
     settings,
     setIsWhatsAppModalOpen,
+    isAuthenticated,
     clients,
     activeClient,
     setActiveClient,
@@ -56,8 +60,24 @@ export const Header: React.FC<HeaderProps> = ({
   } = useAppState();
 
   const { isAccountant, subscription } = useAudience();
-  const canSwitchCompany = isAccountant || clients.length > 0;
-  const planLabel = getPlanDisplayName(subscription?.plan, subscription?.label || user?.plan, key => t(key));
+  const companiesQuery = useCompanies(isAuthenticated);
+  const switchableClients: Client[] = isAuthenticated
+    ? (companiesQuery.data ?? []).map(company => ({
+      id: company.id,
+      name: company.legalName,
+      nuit: company.hasNuit ? '•••••••••' : '—',
+      plan: 'PME',
+      status: 'regular',
+      nextObligation: '—',
+      nextObligationDate: '',
+      contactEmail: '',
+      contactPhone: '',
+      activitySector: company.taxRegime || '',
+      city: company.municipality || '',
+    }))
+    : clients;
+  const canSwitchCompany = isAccountant || switchableClients.length > 0;
+  const planLabel = getPlanDisplayName(subscription?.plan ?? readIntentPlan(), subscription?.label || user?.plan, key => t(key));
   const activeTenant = tenants.find(t => t.id === activeTenantId) ?? null;
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -201,7 +221,7 @@ export const Header: React.FC<HeaderProps> = ({
 
               <div style={{ height: '1px', backgroundColor: 'var(--slate-100)', margin: '6px 0' }} />
 
-              {clients.map(cli => (
+              {switchableClients.map(cli => (
                 <button
                   key={cli.id}
                   onClick={() => {

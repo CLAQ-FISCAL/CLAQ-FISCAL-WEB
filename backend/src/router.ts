@@ -9,6 +9,7 @@ import { ensureUser, resolveTenant, withTenant } from './lib/tenant';
 import {
   ACCOUNTANT_PLAN_CODES,
   COMPANY_PLAN_CODES,
+  canonicalPlanCode,
   REVENUE_THRESHOLDS,
   UNLIMITED,
   assertNotificationChannel,
@@ -160,6 +161,7 @@ const publicRoutes: PublicRoute[] = [
         COMPANY: COMPANY_PLAN_CODES.map(planDto),
       },
       revenueThresholds: revenueThresholdsDto(),
+      demoMode: process.env.APP_ENV === 'demo',
     }),
   },
   {
@@ -186,7 +188,7 @@ const routes: Route[] = [
         orderBy: { tenant: { name: 'asc' } },
       });
       const user = await ctx.db.user.findUnique({ where: { id: ctx.userId }, select: { id: true, email: true, displayName: true } });
-      return { user, tenants: memberships.map((m) => ({ ...m.tenant, role: m.role })) };
+      return { user, tenants: memberships.map((m) => ({ ...m.tenant, plan: canonicalPlanCode(m.tenant.plan), role: m.role })) };
     },
   },
   {
@@ -206,7 +208,7 @@ const routes: Route[] = [
         ctx.db.membership.count({ where: { tenantId: ctx.tenantId } }),
       ]);
       return {
-        plan: tenant.plan,
+        plan: limits.code,
         label: limits.label,
         family: getPlanFamily(tenant.plan),
         tenantType: tenant.type,
@@ -377,6 +379,42 @@ const routes: Route[] = [
           requestId: ctx.requestId,
         });
         return { id: company.id, legalName: company.legalName, nuit, hasNuit: true, municipality: company.municipality, taxRegime: company.taxRegime };
+      });
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/v1\/companies\/(?<id>[\w-]+)$/,
+    handler: async (ctx, params) => {
+      if (!['OWNER', 'ADMIN', 'ACCOUNTANT'].includes(ctx.role)) {
+        throw new AppError(403, 'FORBIDDEN', 'Only an owner, admin or accountant can delete a client company.');
+      }
+      return ctx.run(async (tx) => {
+        const company = await tx.company.findFirst({ where: { id: params.id, tenantId: ctx.tenantId } });
+        if (!company) throw new AppError(404, 'NOT_FOUND', 'Company not found.');
+
+        const obligations = await tx.obligation.findMany({
+          where: { tenantId: ctx.tenantId, companyId: company.id },
+          select: { id: true },
+        });
+        const obligationIds = obligations.map((item) => item.id);
+        if (obligationIds.length > 0) {
+          await tx.notificationAttempt.deleteMany({ where: { tenantId: ctx.tenantId, obligationId: { in: obligationIds } } });
+          await tx.obligation.deleteMany({ where: { tenantId: ctx.tenantId, companyId: company.id } });
+        }
+        await tx.uploadBatch.deleteMany({ where: { tenantId: ctx.tenantId, companyId: company.id } });
+        await tx.simulation.deleteMany({ where: { tenantId: ctx.tenantId, companyId: company.id } });
+        await audit(tx, {
+          tenantId: ctx.tenantId,
+          actorId: ctx.userId,
+          action: 'COMPANY_DELETED',
+          entityType: 'Company',
+          entityId: company.id,
+          requestId: ctx.requestId,
+          before: { legalName: company.legalName },
+        });
+        await tx.company.delete({ where: { id: company.id } });
+        return { deleted: true, id: company.id };
       });
     },
   },
@@ -853,6 +891,48 @@ export function createHandler(db: PrismaClient, crypto: CryptoDeps): (event: API
       }
 
       const claims = (event.requestContext.authorizer?.jwt.claims ?? {}) as Record<string, unknown>;
+      if (method === 'POST' && path === '/v1/demo/subscribe') {
+        if (process.env.APP_ENV !== 'demo') throw new AppError(404, 'NOT_FOUND', 'No route for POST /v1/demo/subscribe.');
+        const user = await ensureUser(db, claims);
+        const body = parseJsonBody(event.body);
+        const requestedPlan = requireString(body, 'planCode', 40);
+        if (!(ACCOUNTANT_PLAN_CODES as readonly string[]).includes(requestedPlan)) {
+          throw new AppError(422, 'INPUT_INVALID', 'Demo subscriptions are available for accountant plans only.');
+        }
+        const planCode = requestedPlan as (typeof ACCOUNTANT_PLAN_CODES)[number];
+        const tenantName = optionalString(body, 'tenantName', 200) || user.displayName || user.email.split('@')[0] || 'Demo Accounting Firm';
+        const tenantIdHeader = header(event, 'x-tenant-id');
+        const result = await db.$transaction(async (tx) => {
+          // Serialize first-time activations for this user so repeated clicks stay idempotent.
+          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${user.id}))::text`;
+          const memberships = await tx.membership.findMany({
+            where: { userId: user.id },
+            include: { tenant: { select: { id: true, name: true, type: true } } },
+          });
+          if (memberships.length === 0) {
+            const tenant = await tx.tenant.create({ data: { name: tenantName, plan: planCode, type: 'ACCOUNTANT' } });
+            await tx.membership.create({ data: { tenantId: tenant.id, userId: user.id, role: 'OWNER' } });
+            return tenant;
+          }
+          let membership = memberships[0];
+          if (tenantIdHeader) {
+            const selected = memberships.find((entry) => entry.tenantId === tenantIdHeader);
+            if (selected) membership = selected;
+            else if (memberships.length > 1) throw new AppError(403, 'TENANT_ACCESS_DENIED', 'You are not a member of the requested tenant.');
+          } else if (memberships.length > 1) {
+            throw new AppError(400, 'TENANT_REQUIRED', 'Select a tenant before changing its demo plan.');
+          }
+          if (membership.tenant.type !== 'ACCOUNTANT') {
+            throw new AppError(403, 'PLAN_FAMILY_MISMATCH', 'This demo plan is for accountant tenants.');
+          }
+          const role = await tx.membership.findUnique({ where: { tenantId_userId: { tenantId: membership.tenantId, userId: user.id } }, select: { role: true } });
+          if (!role || !['OWNER', 'ADMIN'].includes(role.role)) {
+            throw new AppError(403, 'FORBIDDEN', 'Only a tenant owner or admin can change the demo plan.');
+          }
+          return tx.tenant.update({ where: { id: membership.tenantId }, data: { plan: planCode } });
+        });
+        return jsonResponse(200, { tenantId: result.id, tenantName: result.name, plan: result.plan, demo: true }, requestId);
+      }
       const user = await ensureUser(db, claims);
       const tenant = await resolveTenant(db, user.id, header(event, 'x-tenant-id'));
 
