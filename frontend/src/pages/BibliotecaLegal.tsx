@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   BookOpen,
   Search,
-  Download,
   Eye,
   FileText,
   Copy,
@@ -12,20 +11,21 @@ import {
   CheckCircle2,
   Bookmark
 } from 'lucide-react';
-import { STATUTORY_LEGISLATION } from '../data/statutoryLegislation';
+import { OFFICIAL_TAX_LEGISLATION } from '../data/officialTaxLegislation';
 import { LegalDoc } from '../types';
 import { useTranslation } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
 
 export const BibliotecaLegal: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { addToast } = useAppState();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('todos');
   const [selectedDoc, setSelectedDoc] = useState<LegalDoc | null>(null);
 
-  const docs = STATUTORY_LEGISLATION(t);
+  const docs = OFFICIAL_TAX_LEGISLATION(i18n.resolvedLanguage || i18n.language);
+  const selectedDocHasPdf = Boolean(selectedDoc?.pdfUrl && decodeURIComponent(selectedDoc.pdfUrl).toLowerCase().includes('.pdf'));
 
   const categoryCounts = {
     todos: docs.length,
@@ -291,12 +291,14 @@ export const BibliotecaLegal: React.FC = () => {
 
               <button
                 onClick={() => {
-                  addToast('success', t('biblioteca:toastDownloadTitle'), t('biblioteca:toastDownloadMessage', { number: selectedDoc.number }));
+                  if (!selectedDoc.pdfUrl) return;
+                  window.open(selectedDoc.pdfUrl, '_blank', 'noopener,noreferrer');
                 }}
                 className="btn btn-primary-blue btn-sm"
+                disabled={!selectedDoc.pdfUrl}
               >
-                <Download size={15} />
-                <span>{t('biblioteca:downloadDiploma')}</span>
+                <ExternalLink size={15} />
+                <span>{t(selectedDocHasPdf ? 'biblioteca:downloadOfficialPdf' : 'biblioteca:openOfficialSource')}</span>
               </button>
             </div>
           </div>

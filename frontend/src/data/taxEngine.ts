@@ -73,7 +73,7 @@ export function calculateNonResidentService(input: NonResidentServiceInput): Non
   const mznAmount = amount * rate;
   const factor = 1.25; // Standard factor for Gross-Up / Contra-valor under Mozambican tax legislation
   const taxBase = mznAmount * factor;
-  const ivaRate = 0.16; // 16% IVA Mozambique (Lei n.º 1/2018)
+  const ivaRate = 0.16; // 16% IVA Mozambique (Lei n.º 32/2007)
   const ivaAmount = taxBase * ivaRate;
   const irpcRate = 0.20; // 20% IRPC Retenção na fonte (Artigo 66 CIRPC)
   const irpcAmount = taxBase * irpcRate;

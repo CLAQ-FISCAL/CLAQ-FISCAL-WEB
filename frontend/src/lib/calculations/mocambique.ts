@@ -32,7 +32,7 @@ const pct = (rate: number): string =>
   (rate * 100).toLocaleString('pt-MZ', { maximumFractionDigits: 2 });
 
 // ─── A) Pagamento de Serviços a Não Residentes ──────────────────────────────
-// Ref: Lei n.º 1/2018 (IVA) e Lei n.º 34/2014 (IRPC)
+// Ref: Lei n.º 32/2007 (IVA) e Lei n.º 34/2007 (IRPC)
 
 export interface PagamentoNaoResidentesInput {
   prestador: string;
@@ -333,7 +333,7 @@ export function calculateInssContribuicoes(
 }
 
 // ─── F) Juros e Multas ───────────────────────────────────────────────────────
-// Ref: Art. 101 Lei Geral Tributária (Lei n.º 15/2002)
+// Ref: Lei Geral Tributária (Lei n.º 2/2006)
 
 export interface JurosMultasInput {
   impostoAtraso: number;

@@ -25,6 +25,8 @@
   "articlesTitle": "Key Articles for Quick Reference",
   "copyOfficialCitation": "Copy Official Citation",
   "downloadDiploma": "Download Diploma (PDF)",
+  "openOfficialSource": "Open official source",
+  "downloadOfficialPdf": "Download official PDF",
   "toastCitationTitle": "Citation Copied",
   "toastCitationMessage": "Legal reference copied to the clipboard.",
   "toastDownloadTitle": "Download Started",
