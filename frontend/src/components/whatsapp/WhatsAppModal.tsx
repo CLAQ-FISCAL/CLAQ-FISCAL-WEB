@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   X,
-  MessageSquare,
   CheckCircle2,
   Send,
   Smartphone,
@@ -11,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../context/AppStateContext';
+import { WhatsAppMark } from '../layout/Header';
 
 export const WhatsAppModal: React.FC = () => {
   const { t } = useTranslation();
@@ -24,6 +24,7 @@ export const WhatsAppModal: React.FC = () => {
   } = useAppState();
 
   const [phone, setPhone] = useState(settings.whatsappNumber || '+258 84 123 4567');
+  const whatsappConnected = settings.isWhatsAppConnected;
   const [activeTab, setActiveTab] = useState<'connect' | 'test' | 'templates'>('connect');
   const [selectedTemplate, setSelectedTemplate] = useState('iva_alert');
 
@@ -56,7 +57,7 @@ export const WhatsAppModal: React.FC = () => {
                 justifyContent: 'center'
               }}
             >
-              <MessageSquare size={20} color="#10B981" />
+              <WhatsAppMark size={24} />
             </div>
             <div>
               <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#FFFFFF' }}>
@@ -136,15 +137,17 @@ export const WhatsAppModal: React.FC = () => {
         <div style={{ padding: '24px', overflowY: 'auto' }}>
           {activeTab === 'connect' && (
             <div>
+              <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-900)', marginBottom: '4px' }}>{t('whatsapp:setupHeading')}</h4>
+              <p style={{ fontSize: '12.5px', color: 'var(--slate-600)', marginBottom: '16px' }}>{t('whatsapp:setupDescription')}</p>
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '16px',
                   padding: '16px',
-                  backgroundColor: '#ECFDF5',
+                  backgroundColor: whatsappConnected ? '#ECFDF5' : '#FFFBEB',
                   borderRadius: '12px',
-                  border: '1px solid rgba(16, 185, 129, 0.25)',
+                  border: `1px solid ${whatsappConnected ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.3)'}`,
                   marginBottom: '20px'
                 }}
               >
@@ -153,7 +156,7 @@ export const WhatsAppModal: React.FC = () => {
                     width: '44px',
                     height: '44px',
                     borderRadius: '50%',
-                    backgroundColor: '#10B981',
+                    backgroundColor: whatsappConnected ? '#10B981' : '#F59E0B',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -161,18 +164,19 @@ export const WhatsAppModal: React.FC = () => {
                     flexShrink: 0
                   }}
                 >
-                  <CheckCircle2 size={24} />
+                  {whatsappConnected ? <CheckCircle2 size={24} /> : <Smartphone size={22} />}
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#065F46' }}>
-                    {t('whatsapp:channelActive')}
+                  <h4 style={{ fontSize: '14px', fontWeight: 700, color: whatsappConnected ? '#065F46' : '#92400E' }}>
+                    {t(whatsappConnected ? 'whatsapp:channelActive' : 'whatsapp:channelNotConnected')}
                   </h4>
-                  <p style={{ fontSize: '12.5px', color: '#047857', marginTop: '2px' }}>
-                    {t('whatsapp:channelActiveDescription')}
+                  <p style={{ fontSize: '12.5px', color: whatsappConnected ? '#047857' : '#B45309', marginTop: '2px' }}>
+                    {t(whatsappConnected ? 'whatsapp:channelActiveDescription' : 'whatsapp:channelNotConnectedDescription')}
                   </p>
                 </div>
               </div>
 
+              <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--slate-800)', margin: '18px 0 8px' }}>{t('whatsapp:numberSectionHeading')}</h4>
               <div className="form-group">
                 <label className="form-label">{t('whatsapp:numberLabel')}</label>
                 <div style={{ position: 'relative' }}>
@@ -209,18 +213,20 @@ export const WhatsAppModal: React.FC = () => {
                 }}
               >
                 <ShieldCheck size={16} color="var(--emerald-600)" />
-                <span>{t('whatsapp:privacyNote')}</span>
+                <span><strong>{t('whatsapp:privacyHeading')}:</strong> {t('whatsapp:privacyNote')}</span>
               </div>
+              <p style={{ fontSize: '11.5px', color: 'var(--slate-500)', marginTop: '12px' }}>{t('whatsapp:connectNextStep')}</p>
             </div>
           )}
 
           {activeTab === 'test' && (
             <div>
+              <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-900)', marginBottom: '4px' }}>{t('whatsapp:testHeading')}</h4>
               <p style={{ fontSize: '13.5px', color: 'var(--slate-600)', marginBottom: '16px' }}>
                 {t('whatsapp:testInstructions')}
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '20px' }}>
                 <button
                   onClick={() => dispatchTestAlert('whatsapp')}
                   className="btn"
@@ -235,7 +241,7 @@ export const WhatsAppModal: React.FC = () => {
                     gap: '6px'
                   }}
                 >
-                  <MessageSquare size={22} color="#10B981" />
+                  <WhatsAppMark size={24} />
                   <span style={{ fontWeight: 700 }}>{t('whatsapp:alertWhatsApp')}</span>
                   <span style={{ fontSize: '11px', color: '#047857' }}>+258 84 123 4567</span>
                 </button>
@@ -270,7 +276,7 @@ export const WhatsAppModal: React.FC = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981' }} />
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981' }} />
                   <span style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
                     {t('whatsapp:previewLabel')}
                   </span>
@@ -301,6 +307,10 @@ export const WhatsAppModal: React.FC = () => {
 
           {activeTab === 'templates' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ marginBottom: '2px' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--slate-900)', marginBottom: '4px' }}>{t('whatsapp:templatesHeading')}</h4>
+                <p style={{ fontSize: '12.5px', color: 'var(--slate-600)' }}>{t('whatsapp:templatesDescription')}</p>
+              </div>
               <div
                 onClick={() => setSelectedTemplate('iva_alert')}
                 style={{
