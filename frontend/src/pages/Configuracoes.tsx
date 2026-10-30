@@ -175,6 +175,16 @@ export const Configuracoes: React.FC<ConfiguracoesProps> = ({ onNavigate, initia
     reader.readAsDataURL(file);
   };
 
+  const handleRemovePhoto = () => {
+    if (photoInputRef.current) photoInputRef.current.value = '';
+    try {
+      updateUser({ avatarUrl: '' });
+      addToast('success', t('config:toastPhotoRemovedTitle'), t('config:toastPhotoRemovedMessage'));
+    } catch {
+      addToast('error', t('config:toastPhotoTitle'), t('config:photoSaveError'));
+    }
+  };
+
   const preferenceChannels: {
     key: keyof typeof settings.notifications;
     title: string;
@@ -434,6 +444,17 @@ export const Configuracoes: React.FC<ConfiguracoesProps> = ({ onNavigate, initia
                   <Camera size={15} aria-hidden="true" />
                   <span>{t('config:changePhoto')}</span>
                 </button>
+                {user?.avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="btn btn-secondary btn-sm"
+                    aria-label={t('config:removePhoto')}
+                  >
+                    <X size={15} aria-hidden="true" />
+                    <span>{t('config:removePhoto')}</span>
+                  </button>
+                )}
                 <p className="settings-avatar-note">{t('config:photoFormats')}</p>
               </div>
             </div>

@@ -135,7 +135,9 @@ const AppContent: React.FC = () => {
     if (currentPath === '/clientes') return <Clientes onNavigate={navigate} />;
     if (currentPath === '/dados') return <DataUpload />;
     if (currentPath.startsWith('/configuracoes')) {
-      const requestedTab = currentPath.split('/')[2] as 'profile' | 'preferences' | 'alerts' | 'security' | 'plan' | 'integrations' | undefined;
+      const rawTab = currentPath.split('/')[2];
+      const tabAliases: Record<string, string> = { perfil: 'profile', preferencias: 'preferences', alertas: 'alerts', seguranca: 'security', plano: 'plan', integracoes: 'integrations' };
+      const requestedTab = (tabAliases[rawTab ?? ''] ?? rawTab) as 'profile' | 'preferences' | 'alerts' | 'security' | 'plan' | 'integrations' | undefined;
       const validTabs = ['profile', 'preferences', 'alerts', 'security', 'plan', 'integrations'];
       return (
         <Configuracoes

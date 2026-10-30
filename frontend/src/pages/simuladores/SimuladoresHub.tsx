@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Star } from 'lucide-react';
 import { simulatorCatalog } from '../../components/simulators/simulatorCatalog';
@@ -16,23 +16,65 @@ const CATEGORY_TABS: { code: string; key: string }[] = [
   { code: 'Financeiro', key: 'categoryFinanceiro' },
 ];
 
+const PREFERENCES_KEY = 'claq_simulator_hub_preferences_v1';
+const DEFAULT_FAVORITES = ['non-resident', 'iva-ops', 'salario'];
+
+interface SimulatorHubPreferences {
+  categoryFilter: string;
+  searchQuery: string;
+  favoritesOnly: boolean;
+  favorites: string[];
+}
+
+const readPreferences = (simulatorIds: Set<string>): SimulatorHubPreferences => {
+  try {
+    const saved = localStorage.getItem(PREFERENCES_KEY);
+    if (!saved) {
+      return { categoryFilter: 'Todos', searchQuery: '', favoritesOnly: false, favorites: DEFAULT_FAVORITES };
+    }
+
+    const parsed = JSON.parse(saved) as Partial<SimulatorHubPreferences>;
+    const categoryFilter = CATEGORY_TABS.some(category => category.code === parsed.categoryFilter)
+      ? parsed.categoryFilter!
+      : 'Todos';
+    const favorites = Array.isArray(parsed.favorites)
+      ? [...new Set(parsed.favorites.filter((id): id is string => typeof id === 'string' && simulatorIds.has(id)))]
+      : DEFAULT_FAVORITES.filter(id => simulatorIds.has(id));
+
+    return {
+      categoryFilter,
+      searchQuery: typeof parsed.searchQuery === 'string' ? parsed.searchQuery : '',
+      favoritesOnly: typeof parsed.favoritesOnly === 'boolean' ? parsed.favoritesOnly : false,
+      favorites
+    };
+  } catch {
+    return { categoryFilter: 'Todos', searchQuery: '', favoritesOnly: false, favorites: DEFAULT_FAVORITES.filter(id => simulatorIds.has(id)) };
+  }
+};
+
 export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) => {
   const { t } = useTranslation();
   const catalog = simulatorCatalog(t);
-  const [categoryFilter, setCategoryFilter] = useState<string>('Todos');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [favorites, setFavorites] = useState<string[]>([
-    'non-resident',
-    'iva-ops',
-    'salario',
-  ]);
+  const catalogIds = new Set(catalog.map(simulator => simulator.id));
+  const [preferences, setPreferences] = useState<SimulatorHubPreferences>(() => readPreferences(catalogIds));
+  const { categoryFilter, searchQuery, favoritesOnly, favorites } = preferences;
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
+    } catch {
+      // Keep the simulator hub usable when browser storage is unavailable.
+    }
+  }, [preferences]);
 
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    );
+    setPreferences(prev => ({
+      ...prev,
+      favorites: prev.favorites.includes(id)
+        ? prev.favorites.filter(favoriteId => favoriteId !== id)
+        : [...prev.favorites, id]
+    }));
   };
 
   const fiscalSimulators = catalog.filter((s) => s.category === 'Fiscal');
@@ -149,7 +191,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
         </div>
 
         <button
-          onClick={() => setFavoritesOnly(!favoritesOnly)}
+          onClick={() => setPreferences(prev => ({ ...prev, favoritesOnly: !prev.favoritesOnly }))}
           className="btn btn-secondary"
           style={{
             color: favoritesOnly ? 'var(--gold-600)' : 'var(--slate-700)',
@@ -181,7 +223,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
           {CATEGORY_TABS.map((cat) => (
             <button
               key={cat.code}
-              onClick={() => setCategoryFilter(cat.code)}
+              onClick={() => setPreferences(prev => ({ ...prev, categoryFilter: cat.code }))}
               style={{
                 padding: '6px 14px',
                 borderRadius: '8px',
@@ -218,7 +260,7 @@ export const SimuladoresHub: React.FC<SimuladoresHubProps> = ({ onNavigate }) =>
             style={{ paddingLeft: '36px', fontSize: '13px' }}
             placeholder={t('simuladores:searchPlaceholder')}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => setPreferences(prev => ({ ...prev, searchQuery: e.target.value }))}
           />
         </div>
       </div>

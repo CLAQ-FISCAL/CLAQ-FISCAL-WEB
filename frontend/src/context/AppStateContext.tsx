@@ -1171,50 +1171,6 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     >
       {children}
 
-      {/* Global Toast Container */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
-          zIndex: 99999,
-          pointerEvents: 'none'
-        }}
-      >
-        {toasts.map(toast => (
-          <div
-            key={toast.id}
-            style={{
-              padding: '14px 18px',
-              borderRadius: '12px',
-              backgroundColor:
-                toast.type === 'success'
-                  ? '#064E3B'
-                  : toast.type === 'error'
-                  ? '#7F1D1D'
-                  : toast.type === 'warning'
-                  ? '#78350F'
-                  : '#0F172A',
-              color: '#FFFFFF',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.25)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '2px',
-              minWidth: '280px',
-              maxWidth: '400px',
-              pointerEvents: 'auto',
-              border: '1px solid rgba(255,255,255,0.12)',
-              animation: 'fadeInUp 0.25s ease forwards'
-            }}
-          >
-            <span style={{ fontSize: '13.5px', fontWeight: 800 }}>{toast.title}</span>
-            <span style={{ fontSize: '12px', opacity: 0.9 }}>{toast.message}</span>
-          </div>
-        ))}
-      </div>
     </AppStateContext.Provider>
   );
 };

@@ -1,4 +1,48 @@
-import React from 'react';
+import React, { useId } from 'react';
+
+interface ClaqLogoMarkProps {
+  size?: number;
+  style?: React.CSSProperties;
+}
+
+export const ClaqLogoMark: React.FC<ClaqLogoMarkProps> = ({ size = 36, style }) => {
+  const gradientId = useId().replace(/:/g, '');
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 44 44"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ flexShrink: 0, display: 'block', ...style }}
+      aria-hidden="true"
+    >
+      <circle cx="22" cy="22" r="22" fill={`url(#${gradientId})`} />
+      <path
+        d="M13 29V22M22 29V15M31 29V18"
+        stroke="#0F172A"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 18L19 13L26 17L32 11"
+        stroke="#0F172A"
+        strokeWidth="2.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FBBF24" />
+          <stop offset="0.5" stopColor="#F59E0B" />
+          <stop offset="1" stopColor="#D97706" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
 
 interface ClaqLogoProps {
   variant?: 'dark' | 'light';
@@ -21,39 +65,7 @@ export const ClaqLogo: React.FC<ClaqLogoProps> = ({
 
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: sizeStyles.gap, userSelect: 'none' }}>
-      {/* Circular Gold Icon with Chart Glyphs */}
-      <svg
-        width={sizeStyles.icon}
-        height={sizeStyles.icon}
-        viewBox="0 0 44 44"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ flexShrink: 0 }}
-      >
-        <circle cx="22" cy="22" r="22" fill="url(#goldGradient)" />
-        {/* Inner chart bars / upward trend */}
-        <path
-          d="M13 29V22M22 29V15M31 29V18"
-          stroke="#0F172A"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M12 18L19 13L26 17L32 11"
-          stroke="#0F172A"
-          strokeWidth="2.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <defs>
-          <linearGradient id="goldGradient" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#FBBF24" />
-            <stop offset="0.5" stopColor="#F59E0B" />
-            <stop offset="1" stopColor="#D97706" />
-          </linearGradient>
-        </defs>
-      </svg>
+      <ClaqLogoMark size={sizeStyles.icon} />
 
       {/* Typography */}
       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
