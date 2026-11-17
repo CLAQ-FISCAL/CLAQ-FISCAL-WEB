@@ -1,5 +1,7 @@
 # CLAQ Fiscal Alert backend
 
+> This workspace's `backend/` directory is the canonical CLAQ Fiscal Alert backend and the only active AWS deployment source. Do not deploy the retired `CLAQ-FISCAL/claq-backend` repository or the nested `claq-backend-foundation` scaffold. Backend deployments run through this repository's GitHub Actions workflow.
+
 Backend for the CLAQ Fiscal Alert product (tax compliance, obligations, simulators and
 alerts for Mozambique). Two completely separate environments:
 

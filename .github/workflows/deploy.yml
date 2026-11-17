@@ -1,8 +1,24 @@
 name: deploy
 on:
-  push: { branches: [main] }
+  push:
+    branches: [main]
+    paths:
+      - 'backend/src/**'
+      - 'backend/infra/**'
+      - 'backend/config/**'
+      - 'backend/prisma/**'
+      - 'backend/scripts/**'
+      - 'backend/package.json'
+      - 'backend/cdk.json'
+      - 'backend/cdk.context.json'
+      - 'backend/tsconfig.json'
+      - 'package.json'
+      - 'package-lock.json'
   workflow_dispatch: { inputs: { environment: { type: choice, required: true, options: [demo, prod] } } }
 permissions: { id-token: write, contents: read }
+concurrency:
+  group: claq-backend-${{ inputs.environment || 'demo' }}
+  cancel-in-progress: false
 jobs:
   deploy:
     environment: ${{ inputs.environment || 'demo' }}
